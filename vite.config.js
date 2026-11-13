@@ -1,2 +1,7 @@
 import { defineConfig } from 'vite';
-export default defineConfig({ base: './', build: { chunkSizeWarningLimit: 650 } });
+import { mochiApiPlugin } from './server/mochi-vite.js';
+export default defineConfig({
+  base: './',
+  plugins: [mochiApiPlugin()],
+  build: { chunkSizeWarningLimit: 650 },
+});

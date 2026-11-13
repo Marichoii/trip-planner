@@ -37,6 +37,8 @@ Os motivos de cada recomendação são visíveis. O modo clássico usa lógica d
 
 A Mochi oferece uma versão personalizada na recomendação, alterações por conversa no editor, chat contextual e revisão do roteiro. Toda proposta é exibida antes de aplicar; a confirmação guarda a versão anterior e permite desfazer. O orçamento salvo é preservado.
 
+Para testar localmente, `npm run dev` também atende `/api/ai` no processo Node. Preencha o ambiente privado, incluindo as duas credenciais Redis, use a origem `http://127.0.0.1:5173` e `MOCHI_LOCAL_HTTP=true`, e reinicie o servidor.
+
 Os recursos usam Gemini somente por ações explícitas e com consentimento. A integração requer Vercel Functions na mesma origem, chave privada, acesso de grupo com sessão segura e limites persistentes no Upstash Redis. Sem essas configurações, a IA fica desabilitada e o planner clássico continua funcionando. O GitHub Pages mantém o modo clássico.
 
 Veja [configuração, endpoints, custos, privacidade e capturas](docs/gemini-integration.md). `.env.example` contém somente nomes e valores públicos de configuração; nunca coloque chaves em variáveis `VITE_`. Testes de IA usam mocks, sem consumir tokens reais.

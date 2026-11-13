@@ -38,9 +38,9 @@ O script recebe um código de 12–128 caracteres sem exibi-lo, gera um salt, um
 
 ### Testar as Functions localmente
 
-`npm run dev` inicia **somente o Vite** em `127.0.0.1:5173`. A IA permanece indisponível nessa configuração; os testes de interface interceptam `/api/ai` e usam mocks.
+`npm run dev` inicia o Vite e os mesmos handlers seguros de `/api/ai` em `http://127.0.0.1:5173`. O plugin local lê `.env` e `.env.local` somente no processo Node; os segredos não são injetados no frontend. Use `MOCHI_ALLOWED_ORIGINS=http://127.0.0.1:5173` e `MOCHI_LOCAL_HTTP=true`. Reinicie o servidor após alterar o ambiente. Todas as proteções, incluindo Redis, continuam obrigatórias. Os testes de interface interceptam `/api/ai` e usam mocks.
 
-Para testar frontend e Functions juntos, use o [Vercel CLI / vercel dev](https://vercel.com/docs/cli/dev), após vincular este checkout ao seu projeto:
+Para conferir também o ambiente de Functions da Vercel, use o [Vercel CLI / vercel dev](https://vercel.com/docs/cli/dev), após vincular este checkout ao seu projeto:
 
 ```bash
 npm ci
@@ -48,6 +48,8 @@ npx vercel dev --listen 3000
 ```
 
 Configure `MOCHI_ALLOWED_ORIGINS=http://localhost:3000` e `MOCHI_LOCAL_HTTP=true` em `.env.local`, e abra exatamente `http://localhost:3000`. Se usar `127.0.0.1`, configure essa origem explicitamente. O Vercel CLI carrega o ambiente local; não crie proxy direto para o Gemini no Vite.
+
+Se a Mochi não abrir o acesso local: confira se `/api/ai/session` retorna JSON, se as duas variáveis `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` estão preenchidas, e se a origem coincide exatamente com a URL aberta. Um `503 disabled` significa que a configuração obrigatória está incompleta ou inválida. Não basta preencher somente a chave Gemini.
 
 Sem credenciais, ainda é possível verificar `503`, usar o site clássico e executar todos os testes. Com credenciais reais, use uma única ação explícita de teste e confira a cota; não execute a suíte contra o provedor real.
 
