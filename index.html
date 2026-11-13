@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Japan Trip Planner 2028/2029</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Japan Trip Planner 2028 / 2029</h1>
+      <p>
+        A shared planning space for our group trip: budget, best month, transport,
+        accommodation, taxes, and travel rules.
+      </p>
+    </header>
+
+    <main class="layout">
+      <section class="card">
+        <h2>Trip Basics</h2>
+        <form id="trip-form" class="grid-form">
+          <label>
+            Target year
+            <select id="trip-year" required>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+          </label>
+          <label>
+            Travelers
+            <input id="travelers" type="number" min="1" value="4" required />
+          </label>
+          <label>
+            Trip length (days)
+            <input id="days" type="number" min="1" value="14" required />
+          </label>
+          <button type="submit">Calculate plan</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Best Month to Visit</h2>
+        <label for="month-select">Choose a month</label>
+        <select id="month-select">
+          <option value="march">March (Sakura season)</option>
+          <option value="april">April (Spring peak)</option>
+          <option value="may">May (Mild weather)</option>
+          <option value="october">October (Autumn colors)</option>
+          <option value="november">November (Cool and clear)</option>
+        </select>
+        <p id="month-summary" class="muted"></p>
+      </section>
+
+      <section class="card">
+        <h2>Budget Estimator (JPY)</h2>
+        <div class="grid-form">
+          <label>
+            Accommodation / night
+            <input id="cost-accommodation" type="number" min="0" value="9500" />
+          </label>
+          <label>
+            Food / day
+            <input id="cost-food" type="number" min="0" value="4500" />
+          </label>
+          <label>
+            Transport / day
+            <input id="cost-transport" type="number" min="0" value="3000" />
+          </label>
+          <label>
+            Activities / day
+            <input id="cost-activities" type="number" min="0" value="3500" />
+          </label>
+        </div>
+        <ul id="budget-results" class="list"></ul>
+      </section>
+
+      <section class="card">
+        <h2>Accommodation Ideas</h2>
+        <ul class="list">
+          <li><strong>Tokyo:</strong> Asakusa / Ueno for affordable hotels and hostels</li>
+          <li><strong>Kyoto:</strong> Gion / Kawaramachi for easy temple access</li>
+          <li><strong>Osaka:</strong> Namba for transport and food spots</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Transport Planning</h2>
+        <ul class="list">
+          <li>Get an IC card for local trains and buses.</li>
+          <li>Compare regional rail passes based on route, not just nationwide pass.</li>
+          <li>Keep airport transfer costs in the budget.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Tourist Laws & Tax Notes</h2>
+        <ul class="list">
+          <li>Always carry your passport as identification.</li>
+          <li>Follow local rules for trash sorting and quiet public transit etiquette.</li>
+          <li>Most prices include tax, but check for tax-free shopping conditions.</li>
+          <li>Keep receipts if claiming tax-free purchases as a visitor.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Shared Notes</h2>
+        <label for="notes">Group checklist / notes</label>
+        <textarea id="notes" rows="6" placeholder="Add visa reminders, booking links, must-see spots..."></textarea>
+        <button id="save-notes" type="button">Save notes locally</button>
+        <p id="notes-status" class="muted"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
