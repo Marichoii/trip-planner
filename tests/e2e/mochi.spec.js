@@ -132,7 +132,7 @@ test('chat exige acesso, limita contexto, limpa conversa e revisão separa certe
   await consent(page);
   await panel(page).getByRole('button', { name: 'Revisar com Mochi', exact: true }).click();
   await expect(panel(page)).toContainText('Verificações do aplicativo');
-  await expect(panel(page)).toContainText('O que está funcionando bem');
+  await expect(panel(page)).toContainText('O que está ótimo');
   await expect(panel(page)).toContainText('Possibilidade a avaliar');
 });
 test('API ausente oferece fallback sem impedir recomendação clássica', async ({ page }) => {

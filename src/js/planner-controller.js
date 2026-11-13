@@ -176,6 +176,10 @@ export function connectPlanner(ctx) {
       ui.plannerAllCities = !ui.plannerAllCities;
       repaint();
     },
+    region(el) {
+      ui.plannerRegion = el.dataset.id || '';
+      repaint();
+    },
     'budget-choice'(el) {
       markDirty();
       const p = get().planner.draft;
@@ -242,6 +246,13 @@ export function connectPlanner(ctx) {
       get().planner.step = 6;
       save();
       location.hash = 'planner';
+    },
+    restart() {
+      // Volta ao início do wizard com as escolhas preservadas para criar outra sugestão.
+      get().planner.step = 1;
+      ui.confirmSuggestion = false;
+      save();
+      location.hash = 'planner/1';
     },
     reject() {
       get().planner.status = 'rejected';

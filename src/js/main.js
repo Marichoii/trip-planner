@@ -1,8 +1,13 @@
-import '../css/style.css';
-import '../css/redesign.css';
-import '../css/mochi.css';
-import { connectMochi } from './mochi-controller.js';
-import { navigationItems, shellMarkup, updateNavigation } from './navigation.js';
+import '../css/index.css';
+import { connectMochiEntry } from './mochi-entry.js';
+import {
+  navigationItems,
+  shellMarkup,
+  updateNavigation,
+  searchHints,
+  DRAWER_QUERY,
+} from './navigation.js';
+import { watchViewport } from './viewport.js';
 import { connectPlanner } from './planner-controller.js';
 import {
   createIcons,
@@ -53,8 +58,6 @@ import {
   Footprints,
   Sparkles,
   PiggyBank,
-  Maximize,
-  Minimize,
   Bus,
   Luggage,
   Car,
@@ -74,6 +77,19 @@ import {
   Sprout,
   ChevronDown,
   History,
+  SendHorizontal,
+  Lock,
+  CircleCheck,
+  TriangleAlert,
+  Lightbulb,
+  CirclePlus,
+  CircleMinus,
+  Expand,
+  Shrink,
+  RefreshCw,
+  ListChecks,
+  WandSparkles,
+  ArrowRightLeft,
 } from 'lucide';
 import {
   views,
@@ -155,8 +171,6 @@ const icons = {
   Footprints,
   Sparkles,
   PiggyBank,
-  Maximize,
-  Minimize,
   Bus,
   Luggage,
   Car,
@@ -176,6 +190,19 @@ const icons = {
   Sprout,
   ChevronDown,
   History,
+  SendHorizontal,
+  Lock,
+  CircleCheck,
+  TriangleAlert,
+  Lightbulb,
+  CirclePlus,
+  CircleMinus,
+  Expand,
+  Shrink,
+  RefreshCw,
+  ListChecks,
+  WandSparkles,
+  ArrowRightLeft,
 };
 const nav = navigationItems;
 let plannerController;
@@ -215,6 +242,19 @@ function persist() {
   refreshIcons();
   return saved;
 }
+function syncTheme() {
+  document.documentElement.dataset.theme = state.theme;
+  const dark = state.theme === 'dark';
+  document.querySelector('meta[name=theme-color]').content = dark ? '#1d1917' : '#faf7f2';
+  document.querySelectorAll('.theme-toggle, .sidebar-theme').forEach((button) => {
+    const label = button.querySelector('span');
+    if (label) label.textContent = dark ? 'Usar tema claro' : 'Usar tema escuro';
+    const glyph = button.querySelector('svg, i');
+    if (glyph) glyph.outerHTML = icon(dark ? 'sun' : 'moon');
+    button.setAttribute('aria-pressed', String(dark));
+  });
+  refreshIcons();
+}
 function shell() {
   document.documentElement.dataset.theme = state.theme;
   document.getElementById('app').innerHTML = shellMarkup(state);
@@ -236,8 +276,6 @@ async function render({ focus = false } = {}) {
   plannerController?.prepare(activeRoute);
   document.body.dataset.page = activeRoute;
   mochiController?.onRender(activeRoute);
-  document.querySelector('meta[name=theme-color]').content =
-    state.theme === 'dark' ? '#252220' : '#faf7f2';
   if (activeRoute === 'seasons' && seasons.some((v) => v.id === parsed.detail))
     ui.season = parsed.detail;
   document.title = `${nav.find((n) => n[0] === activeRoute)[1]} · Japan Diary 2029`;
@@ -249,6 +287,7 @@ async function render({ focus = false } = {}) {
   document.body.classList.remove('menu-open');
   document.querySelector('.mobile-menu').setAttribute('aria-expanded', 'false');
   syncSidebar();
+  syncTheme();
   refreshIcons();
   tick();
   if (focus) {
@@ -350,7 +389,7 @@ function activityForm(id, day) {
   const route = state.routes[state.selectedRoute];
   const activity = route.days.flatMap((d) => d.activities).find((a) => a.id === id);
   showModal(
-    `<h2 id="modal-title">${activity ? 'Editar' : 'Adicionar'} atividade</h2><form id="activity-form" data-id="${esc(id || '')}" data-day="${day || 1}"><div class="form-grid">${field('O que vamos fazer?', 'title', activity?.title, 'required maxlength="300" class="full"')}${field('Estimativa por pessoa · R$', 'cost', activity?.cost || 0, 'type="number" min="0" max="10000000" step="0.01" required')}<label>Dia<select name="day">${Array.from({ length: state.trip.days }, (_, i) => opt(i + 1, `Dia ${i + 1}`, day)).join('')}</select></label><label class="full" style="flex-direction:row;align-items:center"><input type="checkbox" name="free" ${activity?.free ? 'checked' : ''} /> Reservar como período livre / descanso</label></div><div class="button-row"><button class="btn" type="submit">Salvar atividade</button></div></form>`,
+    `<h2 id="modal-title">${activity ? 'Editar' : 'Adicionar'} atividade</h2><form id="activity-form" data-id="${esc(id || '')}" data-day="${day || 1}"><div class="form-grid">${field('O que vamos fazer?', 'title', activity?.title, 'required maxlength="300" class="full"')}${field('Estimativa por pessoa · R$', 'cost', activity?.cost || 0, 'type="number" min="0" max="10000000" step="0.01" required')}<label>Dia<select name="day">${Array.from({ length: state.trip.days }, (_, i) => opt(i + 1, `Dia ${i + 1}`, day)).join('')}</select></label><label class="full checkbox-label"><input type="checkbox" name="free" ${activity?.free ? 'checked' : ''} /> Reservar como período livre / descanso</label></div><div class="button-row"><button class="btn" type="submit">Salvar atividade</button></div></form>`,
   );
 }
 function lodgingForm(id) {
@@ -372,7 +411,7 @@ function lodgingForm(id) {
     ]
       .map(
         ([key, label]) =>
-          `<label style="flex-direction:row;align-items:center"><input type="checkbox" name="${key}" ${l[key] ? 'checked' : ''} /> ${label}</label>`,
+          `<label class="checkbox-label"><input type="checkbox" name="${key}" ${l[key] ? 'checked' : ''} /> ${label}</label>`,
       )
       .join(
         '',
@@ -382,7 +421,7 @@ function lodgingForm(id) {
 function legForm(id) {
   const l = state.legs.find((l) => l.id === id) || { price: 0 };
   showModal(
-    `<h2 id="modal-title">${id ? 'Editar' : 'Adicionar'} trecho</h2><form id="leg-form" data-id="${esc(id || '')}"><div class="form-grid">${field('Origem', 'from', l.from, 'required maxlength="150" placeholder="Osaka"')}${field('Destino', 'to', l.to, 'required maxlength="150" placeholder="Kyoto"')}<label>Meio<select name="mode">${['Shinkansen', 'Trem local', 'Metrô', 'Ônibus', 'Voo doméstico', 'Ferry', 'Táxi', 'Envio de bagagem'].map((v) => opt(v, v, l.mode)).join('')}</select></label>${field('Preço total do trecho / pessoa · R$', 'price', l.price, 'type="number" min="0" max="10000000" step="0.01" required')}${field('Duração informada na fonte', 'duration', l.duration, 'maxlength="150" placeholder="Opcional, não calculada"')}${field('Data da cotação', 'quotedAt', l.quotedAt || localDate(), 'type="date" required')}<label class="full" style="flex-direction:row;align-items:center"><input type="checkbox" name="covered" ${l.covered ? 'checked' : ''} /> Confirmei cobertura pelo passe e validade na data</label></div><div class="button-row"><button class="btn" type="submit">Salvar trecho</button></div></form>`,
+    `<h2 id="modal-title">${id ? 'Editar' : 'Adicionar'} trecho</h2><form id="leg-form" data-id="${esc(id || '')}"><div class="form-grid">${field('Origem', 'from', l.from, 'required maxlength="150" placeholder="Osaka"')}${field('Destino', 'to', l.to, 'required maxlength="150" placeholder="Kyoto"')}<label>Meio<select name="mode">${['Shinkansen', 'Trem local', 'Metrô', 'Ônibus', 'Voo doméstico', 'Ferry', 'Táxi', 'Envio de bagagem'].map((v) => opt(v, v, l.mode)).join('')}</select></label>${field('Preço total do trecho / pessoa · R$', 'price', l.price, 'type="number" min="0" max="10000000" step="0.01" required')}${field('Duração informada na fonte', 'duration', l.duration, 'maxlength="150" placeholder="Opcional, não calculada"')}${field('Data da cotação', 'quotedAt', l.quotedAt || localDate(), 'type="date" required')}<label class="full checkbox-label"><input type="checkbox" name="covered" ${l.covered ? 'checked' : ''} /> Confirmei cobertura pelo passe e validade na data</label></div><div class="button-row"><button class="btn" type="submit">Salvar trecho</button></div></form>`,
   );
 }
 function wishlistForm(id) {
@@ -414,10 +453,19 @@ const actions = {
   },
   theme() {
     state.theme = state.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = state.theme;
+    syncTheme();
     persist();
     render();
   },
+  'search-open'() {
+    const sheet = document.getElementById('search-dialog');
+    if (sheet.open) return;
+    sheet.showModal();
+    const input = document.getElementById('sheet-search');
+    input.focus();
+    if (input.value) search(input.value, input, document.getElementById('sheet-search-results'));
+  },
+  'search-close': closeSearchSheet,
   settings,
   'close-modal': closeModal,
   'favorite-season'(el) {
@@ -451,7 +499,7 @@ const actions = {
     const d = destinations.find((d) => d.id === el.dataset.id);
     if (!d) return;
     showModal(
-      `<h2 id="modal-title">Levar ${d.name} para o roteiro</h2><p class="small muted">Roteiro: ${routeName(state.selectedRoute)}. Nenhuma tarifa ou duração é adicionada automaticamente.</p><form id="destination-form" data-id="${d.id}"><div class="form-grid"><label>Adicionar visita no dia<select name="day">${Array.from({ length: state.trip.days }, (_, i) => opt(i + 1, `Dia ${i + 1}`, 1)).join('')}</select></label>${field('Estimativa por pessoa · R$', 'cost', 0, 'type="number" min="0" max="10000000" step="0.01" required')}<label class="full" style="flex-direction:row;align-items:center"><input type="checkbox" name="asBase" /> Criar também uma base de hospedagem (0 noites para distribuir)</label></div><div class="button-row"><button class="btn" type="submit">Adicionar ao roteiro</button></div></form>`,
+      `<h2 id="modal-title">Levar ${d.name} para o roteiro</h2><p class="small muted">Roteiro: ${routeName(state.selectedRoute)}. Nenhuma tarifa ou duração é adicionada automaticamente.</p><form id="destination-form" data-id="${d.id}"><div class="form-grid"><label>Adicionar visita no dia<select name="day">${Array.from({ length: state.trip.days }, (_, i) => opt(i + 1, `Dia ${i + 1}`, 1)).join('')}</select></label>${field('Estimativa por pessoa · R$', 'cost', 0, 'type="number" min="0" max="10000000" step="0.01" required')}<label class="full checkbox-label"><input type="checkbox" name="asBase" /> Criar também uma base de hospedagem (0 noites para distribuir)</label></div><div class="button-row"><button class="btn" type="submit">Adicionar ao roteiro</button></div></form>`,
     );
   },
   'choose-route'(el) {
@@ -689,13 +737,8 @@ const actions = {
     toast('Planejamento importado neste navegador.');
   },
   'expand-map'(el) {
-    const map = document.getElementById(el.dataset.id);
-    if (!map) return;
-    const isFull = map.classList.toggle('map-full');
-    el.innerHTML = icon(isFull ? 'minimize' : 'maximize') + (isFull ? ' Reduzir' : ' Ampliar');
-    el.setAttribute('aria-expanded', String(isFull));
-    refreshIcons();
-    setTimeout(() => maps?.resizeMaps(), 50);
+    const frame = document.getElementById(el.dataset.id)?.closest('.map-frame');
+    if (frame) setMapFull(frame, !frame.classList.contains('map-full'), el);
   },
 };
 document.addEventListener('click', (event) => {
@@ -706,14 +749,43 @@ document.addEventListener('click', (event) => {
   }
   if (event.target.closest('#search-results a')) hideSearch();
   if (!event.target.closest('.search-wrap')) hideSearch();
+  if (event.target.closest('#sheet-search-results a')) closeSearchSheet();
 });
 function hideSearch() {
   const results = document.getElementById('search-results');
   if (results) results.hidden = true;
-  document.getElementById('global-search')?.setAttribute('aria-expanded', 'false');
 }
-function search(value) {
-  const results = document.getElementById('search-results'),
+function closeSearchSheet() {
+  const sheet = document.getElementById('search-dialog');
+  if (sheet?.open) sheet.close();
+}
+function setMapFull(frame, full, trigger) {
+  frame.classList.toggle('map-full', full);
+  document.body.classList.toggle('map-open', full);
+  frame
+    .querySelectorAll('[data-action="expand-map"]')
+    .forEach((button) => button.setAttribute('aria-expanded', String(full)));
+  document
+    .querySelectorAll(`.map-toolbar [data-action="expand-map"][data-id="${frame.dataset.map}"]`)
+    .forEach((button) => button.setAttribute('aria-expanded', String(full)));
+  const close = frame.querySelector('.map-frame-toggle');
+  if (close) {
+    close.innerHTML =
+      icon(full ? 'shrink' : 'expand') +
+      `<span class="${full ? '' : 'sr-only'}">${full ? 'Fechar mapa ampliado' : 'Ampliar mapa'}</span>`;
+    close.setAttribute('aria-label', full ? 'Fechar mapa ampliado' : 'Ampliar mapa');
+  }
+  refreshIcons();
+  setTimeout(() => maps?.resizeMaps(full), 60);
+  if (full) close?.focus();
+  else if (trigger && !frame.contains(trigger)) trigger.focus();
+}
+function search(
+  value,
+  input = document.getElementById('global-search'),
+  results = document.getElementById('search-results'),
+) {
+  const sheet = results?.id === 'sheet-search-results',
     normalized = (t) =>
       String(t)
         .normalize('NFD')
@@ -721,7 +793,8 @@ function search(value) {
         .toLowerCase(),
     query = normalized(value.trim());
   if (query.length < 2) {
-    hideSearch();
+    if (sheet) results.innerHTML = searchHints();
+    else hideSearch();
     return;
   }
   const found = [
@@ -751,14 +824,24 @@ function search(value) {
     })),
   ]
     .filter((v) => normalized(v.text).includes(query))
+    // Títulos que começam com a busca vêm primeiro; depois títulos que a contêm.
+    .map((v, i) => {
+      const title = normalized(v.title);
+      return { v, i, rank: title.startsWith(query) ? 0 : title.includes(query) ? 1 : 2 };
+    })
+    .sort((a, b) => a.rank - b.rank || a.i - b.i)
+    .map(({ v }) => v)
     .slice(0, 12);
   results.innerHTML = found.length
-    ? found
-        .map((r) => `<a href="${esc(r.url)}">${esc(r.title)}<small>${esc(r.subtitle)}</small></a>`)
+    ? `<p class="sr-only">${found.length} resultados</p>` +
+      found
+        .map(
+          (r) =>
+            `<a href="${esc(r.url)}"><span>${esc(r.title)}</span><small>${esc(r.subtitle)}</small></a>`,
+        )
         .join('')
-    : '<p class="small muted" style="padding:10px">Nenhum resultado. Tente cidade, atração ou seção.</p>';
+    : '<p class="search-empty">Nenhum resultado. Tente uma cidade, atração ou seção.</p>';
   results.hidden = false;
-  document.getElementById('global-search').setAttribute('aria-expanded', 'true');
 }
 function refreshBudget() {
   document.getElementById('budget-summary').innerHTML = budgetSummary(state);
@@ -770,6 +853,10 @@ document.addEventListener('input', (event) => {
   if (el.validity?.customError) el.setCustomValidity('');
   if (el.id === 'global-search') {
     search(el.value);
+    return;
+  }
+  if (el.id === 'sheet-search') {
+    search(el.value, el, document.getElementById('sheet-search-results'));
     return;
   }
   if (el.id === 'notes') {
@@ -1064,9 +1151,15 @@ function syncSidebar() {
   const sidebar = document.querySelector('.sidebar');
   if (sidebar)
     sidebar.inert =
-      matchMedia('(max-width:1024px)').matches && !document.body.classList.contains('menu-open');
+      matchMedia(DRAWER_QUERY).matches && !document.body.classList.contains('menu-open');
 }
-matchMedia('(max-width:1024px)').addEventListener('change', syncSidebar);
+matchMedia(DRAWER_QUERY).addEventListener('change', () => {
+  if (!matchMedia(DRAWER_QUERY).matches) {
+    document.body.classList.remove('menu-open');
+    document.querySelector('.mobile-menu')?.setAttribute('aria-expanded', 'false');
+  }
+  syncSidebar();
+});
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     hideSearch();
@@ -1076,8 +1169,7 @@ document.addEventListener('keydown', (event) => {
       syncSidebar();
       document.querySelector('.mobile-menu').focus();
     }
-    document.querySelectorAll('.map-full').forEach((el) => el.classList.remove('map-full'));
-    maps?.resizeMaps();
+    document.querySelectorAll('.map-frame.map-full').forEach((frame) => setMapFull(frame, false));
   }
   if (event.key === 'Tab' && document.body.classList.contains('menu-open')) {
     const links = [
@@ -1106,8 +1198,13 @@ modal.addEventListener('click', (event) => {
       closeModal();
   }
 });
+document.addEventListener('click', (event) => {
+  const sheet = document.getElementById('search-dialog');
+  if (event.target === sheet) closeSearchSheet();
+});
 window.addEventListener('hashchange', () => {
   closeModal();
+  closeSearchSheet();
   render({ focus: true }).then(syncSidebar);
 });
 window.addEventListener('beforeunload', () => {
@@ -1127,7 +1224,7 @@ plannerController = connectPlanner({
   closeModal,
 });
 shell();
-mochiController = connectMochi({
+mochiController = connectMochiEntry({
   getState: () => state,
   setState: (next) => {
     state = next;
@@ -1135,7 +1232,10 @@ mochiController = connectMochi({
   persist,
   render,
   ui,
+  icons: refreshIcons,
+  toast,
 });
 render().then(syncSidebar);
+watchViewport();
 setInterval(tick, 30000);
 if (loaded.warning) setTimeout(() => toast(loaded.warning), 600);

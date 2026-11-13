@@ -31,7 +31,11 @@ Chart.register(
   Filler,
 );
 const instances = new Map();
-const colors = ['#b5818b', '#9aa98c', '#c98e70', '#7e9eb7', '#a494bd', '#c2ac65'];
+// As cores vêm dos tokens CSS para acompanhar o tema claro/escuro.
+const token = (name) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#8a5260';
+const palette = () => [1, 2, 3, 4, 5, 6].map((i) => token(`--chart-${i}`));
+const font = { family: 'DM Sans', size: 12 };
 export function disposeCharts() {
   instances.forEach((chart) => chart.destroy());
   instances.clear();
@@ -39,7 +43,10 @@ export function disposeCharts() {
 function draw(id, type, data, extra = {}) {
   const el = document.getElementById(id);
   if (!el) return;
-  const dark = document.documentElement.dataset.theme === 'dark';
+  const text = token('--color-text-secondary'),
+    grid = token('--chart-grid');
+  Chart.defaults.font = font;
+  Chart.defaults.color = text;
   const chart = new Chart(el, {
     type,
     data,
@@ -47,29 +54,44 @@ function draw(id, type, data, extra = {}) {
       responsive: true,
       maintainAspectRatio: false,
       animation: matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 300 },
-      color: dark ? '#cfbfb4' : '#786b63',
+      color: text,
+      // Toque ou passagem do mouse em qualquer ponto do mês mostra todos os valores.
+      interaction: type === 'doughnut' ? undefined : { mode: 'index', intersect: false },
       plugins: {
         legend: {
           display: type === 'line',
           position: 'bottom',
           labels: {
             usePointStyle: true,
-            boxWidth: 6,
-            font: { family: 'DM Sans', size: 10 },
-            padding: 16,
+            boxWidth: 8,
+            boxHeight: 8,
+            color: text,
+            font,
+            padding: 14,
           },
         },
-        tooltip: { backgroundColor: '#493c37', padding: 10 },
+        tooltip: {
+          backgroundColor: token('--color-surface-elevated'),
+          titleColor: token('--color-text'),
+          bodyColor: token('--color-text-secondary'),
+          borderColor: token('--color-border-strong'),
+          borderWidth: 1,
+          padding: 12,
+          titleFont: { ...font, weight: '600' },
+          bodyFont: font,
+          boxPadding: 4,
+          usePointStyle: true,
+        },
       },
       scales:
         type === 'doughnut'
           ? {}
           : {
-              x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { color: text, font } },
               y: {
-                grid: { color: dark ? '#51443e' : '#eee7de' },
+                grid: { color: grid },
                 border: { display: false },
-                ticks: { font: { size: 10 } },
+                ticks: { color: text, font },
               },
             },
       ...extra,
@@ -91,6 +113,7 @@ export function weightedScores(s) {
 export function initCharts(s, ui, route) {
   if (route === 'months') {
     const city = climate.cities.find((c) => c.id === ui.city) || climate.cities[0];
+    const colors = palette();
     draw('temperature-chart', 'line', {
       labels: monthShort,
       datasets: climate.cities.map((c, i) => ({
@@ -99,7 +122,8 @@ export function initCharts(s, ui, route) {
         borderColor: colors[i],
         backgroundColor: colors[i],
         borderWidth: 2,
-        pointRadius: 2,
+        pointRadius: 2.5,
+        pointHoverRadius: 5,
         tension: 0.3,
       })),
     });
@@ -110,7 +134,7 @@ export function initCharts(s, ui, route) {
           label: 'Precipitação (mm)',
           data: city.rainfall,
           backgroundColor: monthShort.map((_, i) =>
-            i === Number(ui.month) ? '#9e6572' : '#a9c4d5',
+            i === Number(ui.month) ? colors[0] : token('--chart-muted'),
           ),
           borderRadius: 4,
         },
@@ -125,15 +149,22 @@ export function initCharts(s, ui, route) {
           {
             label: `Chegadas internacionais · ${tourism.year}`,
             data: tourism.arrivals,
-            backgroundColor: '#b5818b',
+            backgroundColor: monthShort.map((_, i) =>
+              i === Number(ui.month) ? colors[0] : token('--chart-muted'),
+            ),
             borderRadius: 4,
           },
         ],
       },
       {
         scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10 } } },
-          y: { beginAtZero: true, ticks: { callback: (v) => `${v / 1e6} mi`, font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { font } },
+          y: {
+            beginAtZero: true,
+            grid: { color: token('--chart-grid') },
+            border: { display: false },
+            ticks: { callback: (v) => `${v / 1e6} mi`, font },
+          },
         },
       },
     );
@@ -149,8 +180,13 @@ export function initCharts(s, ui, route) {
                 ? 'Chuva mm'
                 : 'Umidade %',
           data: city[variable],
-          borderColor: '#b5818b',
-          backgroundColor: variable === 'temperature' ? '#ebcbd244' : '#a9b9a7',
+          borderColor: colors[0],
+          backgroundColor:
+            variable === 'temperature'
+              ? `${colors[0]}33`
+              : variable === 'rainfall'
+                ? colors[3]
+                : colors[1],
           fill: variable === 'temperature',
           tension: 0.3,
           borderRadius: 4,
@@ -174,8 +210,14 @@ export function initCharts(s, ui, route) {
       },
       {
         scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 11 } } },
-          y: { min: 0, max: 5, ticks: { stepSize: 1 } },
+          x: { grid: { display: false }, ticks: { font } },
+          y: {
+            min: 0,
+            max: 5,
+            grid: { color: token('--chart-grid') },
+            border: { display: false },
+            ticks: { stepSize: 1, font },
+          },
         },
       },
     );
@@ -207,8 +249,13 @@ export function initCharts(s, ui, route) {
       },
       {
         scales: {
-          x: { grid: { display: false } },
-          y: { beginAtZero: true, ticks: { callback: (v) => money(v) } },
+          x: { grid: { display: false }, ticks: { font } },
+          y: {
+            beginAtZero: true,
+            grid: { color: token('--chart-grid') },
+            border: { display: false },
+            ticks: { callback: (v) => money(v), font },
+          },
         },
       },
     );
@@ -220,20 +267,9 @@ export function initCharts(s, ui, route) {
         datasets: [
           {
             data: Object.values(b.categories),
-            backgroundColor: [
-              '#b5818b',
-              '#a9b9a7',
-              '#f0dda7',
-              '#a9c4d5',
-              '#c98e70',
-              '#b8adc5',
-              '#d9b5a6',
-              '#d4c8b4',
-            ],
+            backgroundColor: [...palette(), token('--chart-muted'), token('--color-accent-soft')],
             borderWidth: 3,
-            borderColor: getComputedStyle(document.documentElement)
-              .getPropertyValue('--surface')
-              .trim(),
+            borderColor: token('--color-surface'),
           },
         ],
       },
@@ -243,7 +279,7 @@ export function initCharts(s, ui, route) {
           legend: {
             display: true,
             position: 'bottom',
-            labels: { usePointStyle: true, boxWidth: 7, font: { size: 9 }, padding: 12 },
+            labels: { usePointStyle: true, boxWidth: 8, boxHeight: 8, font, padding: 12 },
           },
           tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${money(ctx.raw)}` } },
         },
