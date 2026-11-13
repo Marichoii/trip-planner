@@ -30,7 +30,15 @@ A navegação principal tem cinco destinos: Início, Criar viagem, Meu roteiro, 
 
 O wizard edita um rascunho separado da viagem ativa. Gerar ou rejeitar uma sugestão não altera o roteiro atual. Aceitar uma nova sugestão mantém os cinco modelos e pede confirmação quando há planejamento anterior; a versão ativa fica acessível em **Meu roteiro → Versões anteriores**. O ano começa em 2029 e pode ser ajustado entre 2027 e 2040, sem alterar as séries históricas ou prometer regras para esses anos.
 
-Os motivos de cada recomendação são visíveis. A lógica é determinística, com conteúdo do próprio projeto: não há chamada a modelo de IA, nem cálculo de preço ou trajeto real.
+Os motivos de cada recomendação são visíveis. O modo clássico usa lógica determinística e conteúdo do próprio projeto, sem chamada a IA nem cálculo de preço ou trajeto real.
+
+## Mochi AI ♡
+
+A Mochi oferece uma versão personalizada na recomendação, alterações por conversa no editor, chat contextual e revisão do roteiro. Toda proposta é exibida antes de aplicar; a confirmação guarda a versão anterior e permite desfazer. O orçamento salvo é preservado.
+
+Os recursos usam Gemini somente por ações explícitas e com consentimento. A integração requer Vercel Functions na mesma origem, chave privada, acesso de grupo com sessão segura e limites persistentes no Upstash Redis. Sem essas configurações, a IA fica desabilitada e o planner clássico continua funcionando. O GitHub Pages mantém o modo clássico.
+
+Veja [configuração, endpoints, custos, privacidade e capturas](docs/gemini-integration.md). `.env.example` contém somente nomes e valores públicos de configuração; nunca coloque chaves em variáveis `VITE_`. Testes de IA usam mocks, sem consumir tokens reais.
 
 ## O que funciona
 
@@ -63,7 +71,7 @@ O Vite usa `base: './'`, os arquivos públicos usam `import.meta.env.BASE_URL` e
 
 1. Importe o repositório no painel da Vercel.
 2. Framework: **Vite**. Build: `npm run build`. Diretório de saída: `dist`.
-3. Use Node.js 22. Não há variáveis de ambiente ou segredos necessários.
+3. Use Node.js 22. O modo clássico funciona sem segredos. Para ativar a Mochi, configure as variáveis privadas e as proteções descritas em [Integração Gemini](docs/gemini-integration.md).
 4. `vercel.json` contém a configuração. Publique pelo painel, ou com a CLI autenticada: `npx vercel` para preview e `npx vercel --prod` para produção.
 
 Este trabalho prepara os arquivos para deploy; executar o build local não publica nem envia os dados pessoais do planejamento a um serviço.
