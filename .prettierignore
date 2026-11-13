@@ -5,3 +5,4 @@ public/images/
 package-lock.json
 test-results/
 playwright-report/
+docs/screenshots/ui-polish/**/*.json

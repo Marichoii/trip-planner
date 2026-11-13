@@ -1,5 +1,7 @@
 # Criar a própria viagem
 
+> A interface foi revisada depois deste documento: veja a [auditoria visual](ui-audit.md), o [design system](design-system.md) e as [capturas antes/depois](screenshots/ui-polish/). As capturas abaixo são regeneradas pela suíte e mostram a versão atual.
+
 A Home anterior misturava inspiração, resumo financeiro, configurações e tarefas. O fluxo agora começa com um convite e revela os detalhes conforme o grupo avança:
 
 **Início → Criar viagem → Nossa sugestão → Meu roteiro → ferramentas.**
