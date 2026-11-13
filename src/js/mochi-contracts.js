@@ -202,6 +202,8 @@ export function validateOutput(operation, value, request) {
   }
   return parsed;
 }
+export const REVIEW_OK =
+  'As noites conferem e as regras de carga e pausas não sinalizaram problemas.';
 export function deterministicReview(route, profile) {
   const issues = [];
   const nights = route.bases.reduce((n, b) => n + b.nights, 0);
@@ -221,7 +223,6 @@ export function deterministicReview(route, profile) {
   }
   if (route.bases.length > Math.ceil(profile.nights / 3) && route.bases.length > 1)
     issues.push('A distribuição tem mais de uma base a cada três noites.');
-  if (!issues.length)
-    issues.push('As noites conferem e as regras de carga e pausas não sinalizaram problemas.');
+  if (!issues.length) issues.push(REVIEW_OK);
   return issues;
 }

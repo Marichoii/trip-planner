@@ -8,13 +8,14 @@ import {
 } from './mochi-state.js';
 import { restorePlannerArchive } from './planner-actions.js';
 import { deterministicReview } from './mochi-contracts.js';
-import { esc, localDate, uid } from './utils.js';
+import { esc, icon, localDate, uid } from './utils.js';
 import {
   avatar,
   mochiButton,
   mochiLoading,
   mochiError,
   mochiProposal,
+  mochiProposalActions,
   mochiReview,
   mochiChat,
 } from './mochi-components.js';
@@ -25,18 +26,25 @@ const titles = {
   refine: 'Vamos ajustar esse caminho?',
   analyze: 'Um olhar para os nossos dias.',
 };
+const intros = {
+  itinerary:
+    'A Mochi cria uma versão alternativa a partir das escolhas de vocês. Nada muda no roteiro até vocês aprovarem.',
+  refine:
+    'Conte o que gostariam de mudar. A Mochi mostra uma comparação com o roteiro atual antes de qualquer alteração.',
+  analyze:
+    'Primeiro o aplicativo confere noites, dias e pausas. Depois a Mochi sugere melhorias opcionais.',
+};
 export function connectMochi(ctx, client = createAIClient()) {
   const dialog = document.createElement('dialog');
   dialog.className = 'mochi-panel';
   dialog.setAttribute('aria-labelledby', 'mochi-title');
   document.body.append(dialog);
-  const launcher = document.createElement('button');
-  launcher.className = 'mochi-launcher';
-  launcher.type = 'button';
-  launcher.dataset.mochi = 'chat';
-  launcher.innerHTML = avatar() + '<span>Mochi ♡<small>Vamos conversar?</small></span>';
-  launcher.setAttribute('aria-label', 'Conversar com Mochi');
-  document.body.append(launcher);
+  // Um consentimento obrigatório dentro de um bloco recolhido é reaberto antes da validação.
+  dialog.addEventListener(
+    'invalid',
+    (event) => event.target.closest('details')?.setAttribute('open', ''),
+    true,
+  );
   let mode = 'chat',
     ready = false,
     loading = false,
@@ -55,13 +63,54 @@ export function connectMochi(ctx, client = createAIClient()) {
     applied = false,
     fingerprint = '',
     snapshot;
+  function privacy() {
+    const p = snapshot?.profile,
+      withRoute = mode !== 'itinerary',
+      granted = consent && mode === 'chat' && messages.length;
+    return `<details class="mochi-privacy ${granted ? 'is-granted' : ''}" ${granted ? '' : 'open'}><summary>${icon(granted ? 'shield-check' : 'lock')}<span><strong>Privacidade da conversa</strong>${granted ? '<small>Preferências autorizadas para esta conversa · rever</small>' : ''}</span>${icon('chevron-down')}</summary><div class="mochi-privacy-body"><p>Você decide se a Mochi pode usar as preferências da viagem${withRoute ? ' e o roteiro' : ''} para personalizar ${mode === 'chat' ? 'as respostas' : 'a sugestão'}. Ao autorizar, esses dados são enviados ao <strong>Google Gemini</strong>.</p><label class="mochi-check"><input name="consent" type="checkbox" required ${consent ? 'checked' : ''}><span>Autorizo compartilhar estas preferências${withRoute ? ' e este roteiro' : ''}.</span></label><label class="mochi-check"><input name="budget" type="checkbox" ${shareMoney ? 'checked' : ''}><span>Incluir resumo de orçamento <small>(total e meta mensal por pessoa · opcional)</small></span></label><details class="mochi-privacy-details"><summary>Ver detalhes dos dados compartilhados</summary><ul><li>${p ? `${p.travelers} viajantes · ${p.days} dias · ${p.nights} noites · ${p.year}. ` : ''}Ano, época, datas, origem, ritmo, interesses, prioridades e cidades.</li>${withRoute ? '<li>Bases e títulos das atividades do roteiro.</li>' : ''}${mode === 'chat' ? '<li>Conversa: até seis mensagens anteriores.</li>' : ''}<li>Não inclua nomes, documentos, e-mails ou dados bancários.</li><li>O uso e a retenção dependem do plano da API Google. Você pode planejar sem IA.</li></ul></details></div></details>`;
+  }
   function form() {
-    const p = snapshot?.profile;
-    return `<form id="mochi-request-form"><fieldset class="mochi-consent"><legend>Você escolhe o que compartilhar</legend><p class="small">${p ? `${p.travelers} viajantes · ${p.days} dias · ${p.nights} noites · ${p.year}. ` : ''}Ano, época, datas, origem, ritmo, interesses, prioridades e cidades.${mode !== 'itinerary' ? ' Inclui bases e títulos das atividades do roteiro.' : ''} Conversa: até seis mensagens anteriores.</p><label><input name="consent" type="checkbox" required ${consent ? 'checked' : ''}> Autorizo compartilhar estas preferências${mode !== 'itinerary' ? ' e este roteiro' : ''}.</label><label><input name="budget" type="checkbox" ${shareMoney ? 'checked' : ''}> Incluir resumo de orçamento (total e meta mensal por pessoa).</label><p class="small">Para gerar sugestões com IA, as preferências selecionadas serão enviadas ao Google Gemini.</p><small>Não inclua nomes, documentos, e-mails ou dados bancários. O uso e a retenção dependem do plano da API Google. Você pode planejar sem IA.</small></fieldset>${mode === 'chat' ? mochiChat(messages) : ''}${mode === 'chat' && !messages.length ? `<div class="mochi-questions">${['Maio ou novembro?', 'Como organizar seis malas grandes?', 'Qual cidade combina com anime?'].map((q) => `<button type="button" data-mochi="question" data-question="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}${mode === 'refine' || mode === 'chat' ? `<label class="mochi-input-label" for="mochi-message">${mode === 'chat' ? 'O que vamos descobrir?' : 'O que você quer mudar?'}</label><textarea id="mochi-message" name="message" rows="3" maxlength="1200" required placeholder="${mode === 'chat' ? 'Me conta a sua dúvida…' : 'Mais tempo em Osaka, uma pausa depois da Universal…'}">${esc(message)}</textarea>` : ''}${mode !== 'chat' ? `<label class="mochi-input-label" for="mochi-notes">Preferências adicionais (opcional)</label><textarea id="mochi-notes" name="notes" rows="2" maxlength="1000" placeholder="Só o que for relevante para esta sugestão">${esc(notes)}</textarea>` : ''}<div class="button-row mochi-form-actions"><button class="btn" type="submit">${mode === 'chat' ? 'Perguntar à Mochi' : mode === 'analyze' ? 'Revisar com Mochi' : 'Gerar proposta'}</button>${mode === 'chat' ? mochiButton('Limpar conversa', 'clear', 'small subtle') : ''}${mochiButton('Continuar sem IA', 'close', 'small subtle')}</div></form>`;
+    if (mode === 'chat')
+      return `<form id="mochi-request-form" class="mochi-form is-chat"><div class="mochi-scroll">${privacy()}${mochiChat(messages)}${!messages.length ? `<div class="mochi-questions" role="group" aria-label="Sugestões de perguntas">${['Maio ou novembro?', 'Como organizar seis malas grandes?', 'Qual cidade combina com anime?'].map((q) => `<button type="button" data-mochi="question" data-question="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}<p class="mochi-tagline">Você sonha. A Mochi sugere. Você decide.</p></div><div class="mochi-composer"><label class="sr-only" for="mochi-message">O que vamos descobrir?</label><div class="mochi-composer-field"><textarea id="mochi-message" name="message" rows="1" maxlength="1200" required placeholder="Pergunte à Mochi…" enterkeyhint="send">${esc(message)}</textarea><button class="mochi-send" type="submit">${icon('send-horizontal')}<span class="sr-only">Perguntar à Mochi</span></button></div><div class="mochi-composer-aux">${messages.length ? mochiButton(`${icon('rotate-ccw')} Limpar conversa`, 'clear', 'small subtle') : ''}${mochiButton('Continuar sem IA', 'close', 'small subtle')}${ready ? mochiButton('Sair do grupo', 'logout', 'small subtle') : ''}</div></div></form>`;
+    return `<form id="mochi-request-form" class="mochi-form"><div class="mochi-scroll"><p class="mochi-intro">${intros[mode]}</p>${privacy()}${mode === 'refine' ? `<label class="mochi-input-label" for="mochi-message">O que você quer mudar?</label><textarea id="mochi-message" name="message" rows="3" maxlength="1200" required placeholder="Mais tempo em Osaka, uma pausa depois da Universal…">${esc(message)}</textarea>` : ''}<label class="mochi-input-label" for="mochi-notes">Preferências adicionais <span>(opcional)</span></label><textarea id="mochi-notes" name="notes" rows="2" maxlength="1000" placeholder="Só o que for relevante para esta sugestão">${esc(notes)}</textarea><p class="mochi-tagline">Você sonha. A Mochi sugere. Você decide.</p></div><div class="mochi-action-bar"><button class="btn" type="submit">${icon(mode === 'analyze' ? 'list-checks' : 'wand-sparkles')} ${mode === 'analyze' ? 'Revisar com Mochi' : 'Gerar proposta'}</button>${mochiButton('Continuar sem IA', 'close', 'subtle')}${ready ? mochiButton('Sair do grupo', 'logout', 'small subtle mochi-logout') : ''}</div></form>`;
+  }
+  function view() {
+    if (loading) return 'loading';
+    if (applied) return 'success';
+    if (proposal) return 'proposal';
+    if (review) return 'review';
+    if (ready) return mode === 'chat' ? 'chat' : 'form';
+    return error ? 'error' : 'login';
+  }
+  function body(current) {
+    const errorBox = error ? mochiError(error) : '';
+    // Áreas roláveis sem controles internos precisam receber foco pelo teclado.
+    const scroll = `<div class="mochi-scroll" tabindex="0" role="region" aria-label="Conteúdo da Mochi">`;
+    if (current === 'loading')
+      return `${scroll}${mochiLoading()}</div><div class="mochi-action-bar">${mochiButton('Cancelar pedido', 'cancel')}</div>`;
+    if (current === 'success')
+      return `${scroll}${errorBox}<div class="mochi-success" role="status"><span class="mochi-success-icon">${icon('circle-check')}</span><h3>Um novo capítulo está no roteiro. ♡</h3><p>${ctx.ui.plannerSaved === false ? 'Não foi possível salvar neste navegador. Exporte um backup antes de sair.' : 'A versão anterior está guardada para quando você precisar.'}</p></div></div><div class="mochi-action-bar">${mochiButton('Ver nosso roteiro', 'close', '')}${mochiButton(`${icon('rotate-ccw')} Desfazer alteração`, 'undo')}</div>`;
+    if (current === 'proposal')
+      return `${scroll}${errorBox}${mochiProposal(proposal, snapshot.route || sharedRoute(ctx.getState().routes[ctx.getState().selectedRoute]))}</div>${mochiProposalActions()}`;
+    if (current === 'review')
+      return `${scroll}${errorBox}${mochiReview(review.data, review.meta.checks)}</div><div class="mochi-action-bar">${mochiButton('Fechar revisão', 'close', '')}</div>`;
+    if (current === 'chat' || current === 'form')
+      return errorBox
+        ? form().replace('<div class="mochi-scroll">', `<div class="mochi-scroll">${errorBox}`)
+        : form();
+    if (current === 'error')
+      return `${scroll}${errorBox}</div><div class="mochi-action-bar">${mochiButton(`${icon('refresh-cw')} Tentar novamente`, 'retry')}${mochiButton('Continuar sem IA', 'close', 'subtle')}</div>`;
+    return `<form id="mochi-login-form" class="mochi-form"><div class="mochi-scroll"><div class="mochi-login">${avatar()}<p class="mochi-login-intro">A Mochi é um cantinho do nosso grupo. Use o acesso compartilhado pela pessoa que administra a viagem.</p><label for="mochi-code">Acesso do grupo</label><input id="mochi-code" name="code" type="password" minlength="12" maxlength="128" autocomplete="current-password" required><p class="mochi-login-note">${icon('lock')} O código fica somente nesta sessão segura do servidor.</p></div></div><div class="mochi-action-bar"><button type="submit" class="btn">Entrar no grupo</button>${mochiButton('Continuar sem IA', 'close', 'subtle')}</div></form>`;
   }
   function draw() {
-    const hadFocus = dialog.contains(document.activeElement);
-    dialog.innerHTML = `<header class="mochi-panel-header">${avatar()}<div><span class="eyebrow">MOCHI ♡ · UM POUQUINHO DE AJUDA</span><h2 id="mochi-title">${titles[mode]}</h2></div><button class="icon-button" type="button" data-mochi="close" aria-label="Fechar Mochi">×</button></header><div class="mochi-panel-body">${error ? mochiError(error) : ''}${loading ? mochiLoading() + mochiButton('Cancelar pedido', 'cancel') : applied ? `<div class="mochi-success" role="status"><h3>Um novo capítulo está no roteiro. ♡</h3><p>${ctx.ui.plannerSaved === false ? 'Não foi possível salvar neste navegador. Exporte um backup antes de sair.' : 'A versão anterior está guardada para quando você precisar.'}</p><div class="button-row">${mochiButton('Desfazer alteração', 'undo')}${mochiButton('Ver nosso roteiro', 'close', '')}</div></div>` : proposal ? mochiProposal(proposal, snapshot.route || sharedRoute(ctx.getState().routes[ctx.getState().selectedRoute])) : review ? mochiReview(review.data, review.meta.checks) + mochiButton('Fechar revisão', 'close') : ready ? form() : error ? mochiButton('Tentar novamente', 'retry') : `<form id="mochi-login-form"><p class="mochi-login-intro">A Mochi é um cantinho do nosso grupo. Use o acesso compartilhado pela pessoa que administra a viagem.</p><label for="mochi-code">Acesso do grupo</label><input id="mochi-code" name="code" type="password" minlength="12" maxlength="128" autocomplete="current-password" required><div class="button-row"><button type="submit" class="btn">Entrar no grupo</button>${mochiButton('Continuar sem IA', 'close')}</div><p class="small muted">O código fica somente nesta sessão segura do servidor.</p></form>`}</div><footer class="mochi-panel-footer"><span>Você sonha. A Mochi sugere. Você decide.</span>${ready ? mochiButton('Sair do grupo', 'logout', 'small subtle') : ''}</footer>`;
+    const hadFocus = dialog.contains(document.activeElement),
+      current = view();
+    dialog.dataset.view = current;
+    dialog.dataset.mode = mode;
+    dialog.innerHTML = `<header class="mochi-panel-header">${avatar()}<div class="mochi-identity"><p class="mochi-name">Mochi <span aria-hidden="true">♡</span> <small>assistente de viagem</small></p><h2 id="mochi-title">${titles[mode]}</h2></div><button class="icon-button mochi-close" type="button" data-mochi="close" aria-label="Fechar Mochi">${icon('x')}</button></header><div class="mochi-panel-body">${body(current)}</div>`;
+    ctx.icons?.();
+    const scroller = dialog.querySelector('.mochi-scroll');
+    if (current === 'chat' && scroller) scroller.scrollTop = scroller.scrollHeight;
     if (dialog.open && (hadFocus || document.activeElement === document.body)) {
       const focusTarget = loading
         ? dialog.querySelector('[data-mochi=cancel]')
@@ -70,7 +119,7 @@ export function connectMochi(ctx, client = createAIClient()) {
           : review
             ? dialog.querySelector('.mochi-review h3')
             : dialog.querySelector(
-                '#mochi-message, #mochi-code, [name=consent], [data-mochi=undo], [data-mochi=retry]',
+                '[name=consent]:not(.is-granted [name=consent]), #mochi-message, #mochi-code, [data-mochi=undo], [data-mochi=retry]',
               );
       if (focusTarget) {
         if (focusTarget.tagName === 'H3') focusTarget.tabIndex = -1;
@@ -221,7 +270,7 @@ export function connectMochi(ctx, client = createAIClient()) {
         loading = false;
         draw();
         if (mode === 'chat') dialog.querySelector('#mochi-message')?.focus();
-        else dialog.querySelector('.mochi-panel-body')?.scrollTo(0, 0);
+        else dialog.querySelector('.mochi-scroll')?.scrollTo(0, 0);
       }
     }
   }
@@ -326,10 +375,24 @@ export function connectMochi(ctx, client = createAIClient()) {
     close();
   });
   window.addEventListener('hashchange', close);
-  return {
-    onRender(route) {
-      launcher.hidden = route === 'planner';
-    },
-    close,
-  };
+  // Enter envia; Shift+Enter quebra a linha no campo da conversa.
+  dialog.addEventListener('keydown', (event) => {
+    if (
+      event.key === 'Enter' &&
+      !event.shiftKey &&
+      !event.isComposing &&
+      event.target.id === 'mochi-message' &&
+      mode === 'chat'
+    ) {
+      event.preventDefault();
+      event.target.form?.requestSubmit();
+    }
+  });
+  dialog.addEventListener('input', (event) => {
+    if (event.target.id !== 'mochi-message' || mode !== 'chat') return;
+    const field = event.target;
+    field.style.height = 'auto';
+    field.style.height = `${Math.min(field.scrollHeight, 160)}px`;
+  });
+  return { open, close };
 }

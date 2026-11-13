@@ -1,0 +1,746 @@
+/* ============================================================
+   Ferramentas: estações, meses, destinos, eventos, roteiro,
+   orçamento, hospedagem, transporte, comidas, malas, regras,
+   checklist e fontes
+   ============================================================ */
+.results-count {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.cell-wrap {
+  min-width: 220px;
+  white-space: normal;
+}
+.th-sub {
+  display: block;
+  margin-top: 2px;
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Estações ---------- */
+.season-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: center;
+  overflow: hidden;
+}
+.season-hero h2 {
+  font-size: var(--text-3xl);
+}
+.season-hero p:not(.eyebrow) {
+  color: var(--color-text-secondary);
+}
+.season-hero-photo {
+  display: block;
+  order: -1;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  aspect-ratio: 16 / 10;
+}
+.season-hero-photo img {
+  width: 100%;
+  height: 100%;
+}
+.detail-grid h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.detail-grid h3 svg {
+  color: var(--color-accent);
+}
+.detail-grid p,
+.detail-grid li {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+@media (min-width: 900px) {
+  .season-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+  .season-hero-photo {
+    order: 0;
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* ---------- Comparar meses ---------- */
+.weight-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(96px, 140px) 24px;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-2) 0;
+  font-size: var(--text-sm);
+  color: var(--color-text);
+}
+.weight-row output {
+  font-weight: var(--weight-semibold);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.paper details summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+/* ---------- Destinos ---------- */
+.destination-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+.map-panel .notice {
+  margin-bottom: 0;
+}
+.destination-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: var(--space-4);
+}
+.destination-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  transition:
+    box-shadow var(--dur-med) var(--ease-out),
+    transform var(--dur-med) var(--ease-out);
+}
+.destination-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.destination-card > .cover {
+  aspect-ratio: 16 / 9;
+}
+.destination-card .body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  padding: var(--space-4);
+}
+.destination-card .eyebrow {
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+}
+.destination-card h3 {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+}
+.destination-card p {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.card-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+.card-buttons > div {
+  display: flex;
+  gap: var(--space-1);
+}
+.destination-card .icon-button {
+  border-color: transparent;
+  background: transparent;
+}
+.destination-card .icon-button:hover {
+  background: var(--color-surface-hover);
+}
+@media (min-width: 1024px) {
+  .destination-layout {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+  .map-panel {
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--space-4));
+  }
+  .map-panel .map {
+    height: calc(100dvh - var(--topbar-h) - 220px);
+    min-height: 420px;
+  }
+}
+
+/* ---------- Eventos ---------- */
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: var(--space-4);
+}
+.event-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+.event-card > .cover {
+  aspect-ratio: 16 / 7;
+}
+.event-cover .cover-kanji {
+  font-size: clamp(1.5rem, min(13cqi, 38cqb), 2.75rem);
+}
+.event-card .body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+.event-card h3 {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+}
+.event-card p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.event-card p svg {
+  width: 14px;
+}
+.event-card .foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+.event-card .foot .icon-button {
+  border-color: transparent;
+}
+
+/* ---------- Roteiro ---------- */
+.itinerary-context .notice {
+  margin-top: 0;
+}
+.saved-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+}
+.base-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px var(--touch);
+  align-items: end;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.base-row .icon-button {
+  height: var(--control-h);
+  border-color: transparent;
+}
+/* Celular: linha do tempo vertical, um dia por linha. */
+.calendar {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-left: 28px;
+}
+.calendar::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 9px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--color-border);
+}
+.day-card {
+  position: relative;
+  min-width: 0;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+.day-card::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: -24px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-bg);
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.day-card.dragover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  outline: 2px dashed var(--color-accent);
+  outline-offset: 2px;
+}
+.day-card header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  color: var(--color-text-muted);
+}
+.day-number {
+  color: var(--color-accent);
+}
+.day-card h3 {
+  margin: var(--space-1) 0 var(--space-3);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+.activity {
+  margin-bottom: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  cursor: grab;
+}
+.activity:active {
+  cursor: grabbing;
+}
+.activity.free {
+  border-left-color: var(--color-sage);
+  background: var(--color-sage-soft);
+}
+.activity p {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+.activity-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+}
+.activity-actions small {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.activity-buttons {
+  display: flex;
+  gap: 2px;
+  margin-right: calc(-1 * var(--space-2));
+}
+.activity button {
+  display: grid;
+  place-items: center;
+  width: var(--touch);
+  height: var(--touch);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-muted);
+}
+.activity button:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+.activity button[data-action='activity-remove']:hover {
+  color: var(--color-error);
+}
+.activity button svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.day-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: var(--touch);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+.day-add:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.day-add svg {
+  width: var(--icon-sm);
+}
+@media (min-width: 768px) {
+  .calendar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-left: 0;
+  }
+  .calendar::before,
+  .day-card::before {
+    display: none;
+  }
+}
+@media (min-width: 1024px) {
+  .calendar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1440px) {
+  .calendar {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .activity button {
+    width: 36px;
+    height: 36px;
+  }
+}
+@media (min-width: 1800px) {
+  .calendar {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+.planner-history summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--touch);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+}
+.planner-history > div {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.planner-history article {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+.planner-history h3 {
+  margin: 0;
+  font-size: var(--text-base);
+}
+.planner-history p,
+.planner-history small {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Orçamento ---------- */
+.budget-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+/* No celular o resultado aparece antes do formulário. */
+.budget-summary {
+  order: -1;
+  min-width: 0;
+}
+.results-live {
+  min-width: 0;
+}
+.form-section {
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+}
+.form-section:last-child {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.form-section h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  font-size: var(--text-lg);
+}
+.form-section h3 svg {
+  color: var(--color-accent);
+}
+.budget-summary details summary {
+  min-height: var(--touch);
+}
+.scenario-cards {
+  display: grid;
+  gap: var(--space-3);
+}
+.scenario-card {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+.scenario-card h3 {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+.scenario-card-total {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: var(--space-1) 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.scenario-card-total small {
+  font-family: var(--font-ui);
+  color: var(--color-text-muted);
+}
+.scenario-card dl {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+.scenario-card dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+.scenario-card dt {
+  color: var(--color-text-muted);
+}
+.scenario-card dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.scenario-table {
+  display: none;
+}
+.four-season-costs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+.season-cost-amount {
+  display: block;
+  margin: var(--space-2) 0;
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+@media (min-width: 560px) {
+  .four-season-costs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 768px) {
+  .scenario-cards {
+    display: none;
+  }
+  .scenario-table {
+    display: block;
+  }
+}
+@media (min-width: 1024px) {
+  .budget-layout {
+    grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr);
+    gap: var(--space-6);
+  }
+  .budget-summary {
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--space-4));
+    order: 0;
+  }
+  .four-season-costs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ---------- Hospedagem ---------- */
+.hotel-compare {
+  min-width: 720px;
+}
+.hotel-compare th,
+.hotel-compare td {
+  white-space: normal;
+}
+.hotel-compare tbody th,
+.hotel-compare thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  width: 168px;
+  background: var(--color-bg-sunken);
+}
+.hotel-compare td {
+  min-width: 200px;
+}
+.hotel-compare td span {
+  display: block;
+  margin: var(--space-1) 0;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Comidas e compras ---------- */
+.food-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: var(--space-5);
+  padding: 0;
+  overflow: hidden;
+}
+.food-banner > div {
+  padding: var(--space-5);
+}
+.food-banner img {
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  max-height: 280px;
+}
+.food-banner p:not(.eyebrow) {
+  color: var(--color-text-secondary);
+}
+.food-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: var(--space-4);
+}
+.food-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.food-card .badge {
+  align-self: flex-start;
+}
+.food-card h3 {
+  margin: var(--space-1) var(--space-6) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+}
+.food-card p {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.food-card > span:not(.badge) {
+  margin-top: auto;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.food-card .icon-button {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  border-color: transparent;
+  background: transparent;
+}
+@media (min-width: 768px) {
+  .food-banner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .food-banner img {
+    max-height: none;
+  }
+}
+
+/* ---------- Regras ---------- */
+.law-card {
+  border-top: 3px solid var(--color-accent);
+}
+.law-card h3 {
+  margin: var(--space-3) 0 var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-regular);
+}
+.law-card p {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.law-card .action {
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--color-accent);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text);
+}
+
+/* ---------- Checklist e notas ---------- */
+#notes {
+  min-height: 280px;
+}
+
+/* ---------- Fontes ---------- */
+.source-list {
+  display: grid;
+  gap: var(--space-3);
+}
+.source-list h3 {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+.source-list p {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+.source-list a {
+  overflow-wrap: anywhere;
+}
+.credits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  gap: var(--space-4);
+}
+.credits img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+.credits p {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-sm);
+}
+.credits .small {
+  font-size: var(--text-xs);
+}

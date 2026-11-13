@@ -15,7 +15,8 @@ Abra o endereço mostrado pelo Vite, normalmente `http://127.0.0.1:5173`. Use um
 
 ```sh
 npm test           # cálculos financeiros, roteiros, validação e persistência
-npm run test:e2e   # fluxos de interface, desktop e celular (Playwright)
+npm run test:e2e   # fluxos, responsividade e acessibilidade (Playwright + axe-core)
+npm run test:visual # matriz de capturas e métricas de layout (UI_VIEWPORTS=all: 12 tamanhos)
 npm run build      # artefato estático em dist/
 npm run preview    # conferir o build localmente
 ```
@@ -26,7 +27,7 @@ Para instalar o navegador dos testes, se necessário: `npx playwright install ch
 
 `#home` recebe o grupo com uma composição editorial. O botão **Vamos planejar nossa viagem** abre `#planner/1`, um wizard de seis etapas com progresso salvo, campos opcionais, interesses e até três prioridades. `#recommendations` mostra uma sugestão revisável; somente **Usar e editar este roteiro** aplica as escolhas.
 
-A navegação principal tem cinco destinos: Início, Criar viagem, Meu roteiro, Explorar Japão e Orçamento. Descobertas e organização ficam em grupos recolhíveis. Em telas de até 1024 px, essas cinco ações aparecem também na navegação inferior. `#explore` apresenta as ferramentas por assunto.
+A navegação principal tem cinco destinos: Início, Criar viagem, Meu roteiro, Explorar Japão e Orçamento. Descobertas e organização ficam em grupos recolhíveis. Cada faixa de tela tem seu próprio padrão: no celular, cabeçalho compacto (menu, página, busca em painel próprio e configurações) e barra inferior; no tablet vertical, barra inferior flutuante; no tablet horizontal e em notebooks pequenos, abas no cabeçalho; a partir de 1280 px, barra lateral fixa com busca integrada. `#explore` apresenta as ferramentas por assunto. Detalhes em [design system](docs/design-system.md) e [auditoria visual](docs/ui-audit.md).
 
 O wizard edita um rascunho separado da viagem ativa. Gerar ou rejeitar uma sugestão não altera o roteiro atual. Aceitar uma nova sugestão mantém os cinco modelos e pede confirmação quando há planejamento anterior; a versão ativa fica acessível em **Meu roteiro → Versões anteriores**. O ano começa em 2029 e pode ser ajustado entre 2027 e 2040, sem alterar as séries históricas ou prometer regras para esses anos.
 
@@ -80,8 +81,12 @@ Este trabalho prepara os arquivos para deploy; executar o build local não publi
 
 ```text
 src/
-  css/style.css           # componentes e ferramentas existentes
-  css/redesign.css        # Home editorial, wizard, resultado e navegação
+  css/index.css           # ponto de entrada: tokens → base → layout → componentes → páginas
+  css/tokens.css          # cores semânticas (claro/escuro), tipografia, espaço, camadas
+  css/layout.css          # barra lateral, cabeçalho, busca e navegação inferior
+  css/components.css      # botões, campos, cartões, tabelas, mapas, gráficos
+  css/pages/*.css         # início, wizard, resultado e ferramentas
+  css/mochi.css           # assistente Mochi
   data/
     climate.json          # JMA, normais 1991–2020, seis estações
     tourism.json          # JNTO, chegadas definitivas de 2025
@@ -95,7 +100,8 @@ src/
     main.js               # integração e ações das ferramentas existentes
     views.js              # telas das ferramentas e registro das rotas
     components.js         # componentes HTML compartilhados
-    navigation.js         # shell e grupos de navegação
+    navigation.js         # shell, grupos de navegação e busca
+    viewport.js           # teclado virtual e altura real da tela
     welcome.js            # Home e hub de exploração
     planner-views.js       # seis etapas, resultado e histórico
     planner-controller.js # interações e sincronização do wizard
@@ -107,8 +113,9 @@ src/
     storage.js            # schema, versão, importação e localStorage
     charts.js             # Chart.js, carregado quando necessário
     maps.js               # Leaflet, carregado quando necessário
+    mochi-entry.js        # botão e convites da Mochi; o restante carrega sob demanda
     utils.js              # formatação, escape e exportação
-public/images/            # fotos locais JPEG, ~2,55 MB no total
+public/images/            # fotos locais: JPEG original + WebP 480/800 px (1200 px na capa)
 tests/                    # testes unitários e e2e
 ```
 
@@ -128,7 +135,7 @@ Chart.js e Leaflet são carregados sob demanda; Lucide importa apenas os ícones
 
 **Imagens:** substitua ou acrescente fotos em `public/images`, usando arquivos otimizados e mantendo autor, URL de origem, licença, licença URL e alt em `images.json`. As oito fotos atuais usam a [licença Unsplash](https://unsplash.com/license); créditos completos na seção Fontes & sobre. As bibliotecas mantêm suas licenças em `node_modules` e em seus repositórios oficiais. Não substitua por imagens de busca sem verificar licença.
 
-**Tema:** variáveis no começo de `style.css`, camada editorial em `redesign.css` e sobrescritas do modo escuro em `[data-theme=dark]`. Textos das ferramentas ficam em `planning.js`/`views.js`; Home e wizard ficam nos módulos correspondentes. Fontes vêm do Google Fonts, com fallback de sistema.
+**Tema:** tokens semânticos em `src/css/tokens.css`; o modo escuro redefine os mesmos nomes em `[data-theme=dark]`. Componentes não usam cores soltas — veja [design system](docs/design-system.md). Textos das ferramentas ficam em `planning.js`/`views.js`; Home e wizard ficam nos módulos correspondentes. Fontes vêm do Google Fonts, com fallback de sistema.
 
 ## Matemática e limites
 

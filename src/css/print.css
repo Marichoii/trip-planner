@@ -1,0 +1,78 @@
+/* ============================================================
+   Impressão: roteiro e orçamento legíveis em papel
+   ============================================================ */
+@media print {
+  :root {
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-text: #111111;
+    --color-text-secondary: #333333;
+    --color-text-muted: #555555;
+    --color-border: #cccccc;
+  }
+  .sidebar,
+  .topbar,
+  .footer,
+  .button-row,
+  .no-print,
+  .day-add,
+  .activity-buttons,
+  .toast,
+  .skip-link,
+  .filters,
+  .tab-bar,
+  .map-toolbar,
+  .map-frame,
+  .mobile-primary-nav,
+  .mochi-launcher,
+  .mochi-editor-tools,
+  .menu-backdrop,
+  .wizard-footer,
+  .base-row button {
+    display: none !important;
+  }
+  .workspace {
+    margin: 0;
+  }
+  main {
+    max-width: none;
+    padding: 0;
+  }
+  body {
+    background: #ffffff;
+    color: #111111;
+  }
+  .paper,
+  .day-card {
+    break-inside: avoid;
+    box-shadow: none;
+  }
+  .calendar {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding-left: 0;
+  }
+  .calendar::before,
+  .day-card::before {
+    display: none;
+  }
+  .budget-layout,
+  .two-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .budget-summary {
+    position: static;
+    order: 0;
+  }
+  .print-only {
+    display: block;
+  }
+  a {
+    color: #222222;
+  }
+  select,
+  input {
+    border: 0;
+    background: none;
+    color: #111111;
+  }
+}
