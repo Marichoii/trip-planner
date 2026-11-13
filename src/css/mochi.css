@@ -1,0 +1,467 @@
+.mochi-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 43px;
+  border-radius: 48% 48% 38% 38%;
+  background: #f0d4d9;
+  color: #764d57;
+  border: 1px solid #d9b0bb;
+  box-shadow: inset 0 -6px 0 #e9c1cb;
+  font-size: 17px;
+  transform: rotate(-5deg);
+}
+.mochi-avatar span {
+  white-space: nowrap;
+}
+.mochi-invitation {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 32px;
+  margin: 24px 0 44px;
+  background: #f8eceb;
+  border: 1px solid #e9d3d5;
+  border-radius: 8px;
+}
+.mochi-invitation h2 {
+  font-size: 26px;
+  margin: 5px 0 10px;
+}
+.mochi-invitation p {
+  max-width: 620px;
+}
+.mochi-invitation small {
+  display: block;
+  margin-top: 12px;
+  color: #786b63;
+}
+.mochi-editor-tools {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 12px 0 25px;
+  padding: 22px;
+  border: 1px dashed #d4b3bc;
+  border-radius: 8px;
+  background: #fbf1ed;
+}
+.mochi-editor-tools .button-row {
+  margin-top: 10px;
+}
+.mochi-launcher {
+  position: fixed;
+  right: 27px;
+  bottom: 25px;
+  z-index: 35;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 18px;
+  border: 1px solid #d5b3bd;
+  background: #fff8f3;
+  color: #784b5b;
+  border-radius: 40px;
+  box-shadow: 0 5px 24px #66503b1c;
+  cursor: pointer;
+  font-family: inherit;
+}
+.mochi-launcher[hidden] {
+  display: none;
+}
+.mochi-launcher > .mochi-avatar {
+  width: 40px;
+  height: 33px;
+  font-size: 13px;
+}
+.mochi-launcher > span:last-child {
+  text-align: left;
+  font-weight: 600;
+}
+.mochi-launcher small {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.03em;
+}
+.mochi-panel {
+  position: fixed;
+  inset: 0 0 0 auto;
+  width: min(760px, 94vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid #dbc8c6;
+  background: #faf7f2;
+  color: #4f433e;
+  box-shadow: -15px 0 60px #35221d26;
+  overflow: hidden;
+}
+.mochi-panel[open] {
+  display: flex;
+  flex-direction: column;
+}
+.mochi-panel::backdrop {
+  background: #35282266;
+  backdrop-filter: blur(2px);
+}
+.mochi-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+  padding: 28px 30px 22px;
+  border-bottom: 1px solid #e9dcd4;
+}
+.mochi-panel-header > div {
+  flex: 1;
+  min-width: 0;
+}
+.mochi-panel-header .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #965e6b;
+}
+.mochi-panel-header h2 {
+  font-size: 24px;
+  line-height: 1.25;
+  margin: 7px 0 0;
+}
+.mochi-panel-header button {
+  align-self: flex-start;
+  font-size: 26px;
+}
+.mochi-panel-body {
+  padding: 26px 30px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+}
+.mochi-panel-footer {
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid #e9dcd4;
+  font-size: 11px;
+  color: #786b63;
+  background: #f7f0e8;
+  flex-shrink: 0;
+}
+.mochi-panel .button-row {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.mochi-panel textarea,
+.mochi-panel input[type='password'] {
+  width: 100%;
+  font: inherit;
+  font-size: 16px;
+  border: 1px solid #cbb9b1;
+  background: #fffdf9;
+  padding: 13px;
+  border-radius: 6px;
+  color: #4f433e;
+  resize: vertical;
+}
+.mochi-input-label {
+  display: block;
+  margin: 21px 0 8px;
+  font-weight: 500;
+}
+.mochi-consent {
+  border: 1px solid #e3cecf;
+  background: #f9eeeb;
+  border-radius: 8px;
+  padding: 18px;
+  margin: 0 0 25px;
+  min-width: 0;
+}
+.mochi-consent legend {
+  font-family: var(--serif, 'Playfair Display', serif);
+  font-size: 18px;
+  padding: 0 5px;
+}
+.mochi-consent label {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 13px 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.mochi-consent input {
+  accent-color: #975e6b;
+  flex: 0 0 auto;
+  margin-top: 5px;
+}
+.mochi-consent p {
+  margin: 4px 0 12px;
+}
+.mochi-consent small {
+  display: block;
+  font-size: 11px;
+  line-height: 1.7;
+  color: #786b63;
+}
+.mochi-form-actions {
+  margin-top: 18px;
+}
+.mochi-panel :focus-visible {
+  outline: 3px solid #975e6b;
+  outline-offset: 3px;
+}
+.mochi-loading {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 45px 0;
+}
+.mochi-loading .mochi-avatar {
+  animation: mochi-breathe 1.5s ease-in-out infinite;
+}
+.mochi-error {
+  padding: 18px;
+  border: 1px solid #d9b9b3;
+  border-radius: 8px;
+  background: #faebe4;
+  margin-bottom: 20px;
+}
+.mochi-error p {
+  margin: 0 0 10px;
+}
+.mochi-error small {
+  display: block;
+  margin-bottom: 10px;
+}
+.mochi-error a {
+  display: block;
+  margin-top: 10px;
+}
+.mochi-message {
+  padding: 19px 21px;
+  border: 1px solid #e5d7ce;
+  background: #fffdf9;
+  border-radius: 4px 18px 18px;
+  margin: 0 35px 18px 0;
+  overflow-wrap: anywhere;
+}
+.mochi-message.from-user {
+  margin: 0 0 18px 35px;
+  background: #f3e3e6;
+  border-color: #e3cdd3;
+  border-radius: 18px 4px 18px 18px;
+}
+.mochi-message p {
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 6px 0;
+}
+.mochi-message small {
+  font-size: 11px;
+  color: #8b606d;
+}
+.mochi-questions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+.mochi-questions button {
+  font: inherit;
+  font-size: 12px;
+  padding: 9px 12px;
+  background: #f7eee5;
+  border: 1px solid #e0d0c4;
+  border-radius: 20px;
+  color: #745b4f;
+  cursor: pointer;
+}
+.mochi-panel h3 {
+  font-size: 28px;
+  line-height: 1.35;
+  margin: 8px 0 16px;
+}
+.mochi-panel h4 {
+  font-size: 17px;
+  margin: 26px 0 10px;
+}
+.mochi-panel ul {
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+.mochi-panel li {
+  margin-bottom: 8px;
+}
+.mochi-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin: 24px 0;
+}
+.mochi-comparison > div {
+  border: 1px solid #ded0c8;
+  border-radius: 7px;
+  padding: 16px;
+  background: #f7f0e8;
+}
+.mochi-comparison > div:last-child {
+  background: #f4e6e8;
+  border-color: #dbc0c7;
+}
+.mochi-comparison h4 {
+  margin: 0 0 12px;
+}
+.mochi-comparison ul {
+  font-size: 13px;
+  margin: 0;
+}
+.mochi-proposal details {
+  border-block: 1px solid #e3d5cb;
+  padding: 16px 0;
+}
+.mochi-proposal summary {
+  cursor: pointer;
+  font-weight: 500;
+}
+.mochi-day {
+  padding: 16px 0;
+  border-bottom: 1px dashed #ded0c8;
+  font-size: 13px;
+}
+.mochi-day small {
+  display: block;
+  margin-top: 7px;
+  color: #786b63;
+}
+.mochi-apply-note {
+  padding: 16px;
+  background: #f4e6e8;
+  font-size: 13px;
+  border-radius: 6px;
+  margin-top: 26px;
+}
+.mochi-panel .mochi-success {
+  padding: 35px 0;
+}
+.mochi-login-intro {
+  margin-bottom: 25px;
+}
+.mochi-panel #mochi-code {
+  margin: 9px 0 20px;
+}
+@keyframes mochi-breathe {
+  50% {
+    transform: translateY(-4px) rotate(4deg);
+  }
+}
+@media (max-width: 1024px) {
+  .mochi-launcher {
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    right: 16px;
+  }
+  .mochi-launcher small {
+    display: none;
+  }
+}
+@media (max-width: 600px) {
+  .mochi-panel {
+    width: 100%;
+    border: 0;
+  }
+  .mochi-panel-header {
+    padding: 20px 17px;
+    gap: 12px;
+  }
+  .mochi-panel-header h2 {
+    font-size: 21px;
+  }
+  .mochi-panel-header > .mochi-avatar {
+    width: 42px;
+    height: 35px;
+    font-size: 14px;
+  }
+  .mochi-panel-body {
+    padding: 22px 18px;
+  }
+  .mochi-panel-footer {
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    font-size: 10px;
+  }
+  .mochi-consent {
+    padding: 13px;
+  }
+  .mochi-launcher {
+    padding: 9px;
+    border-radius: 50%;
+    bottom: calc(82px + env(safe-area-inset-bottom));
+    right: 12px;
+  }
+  .mochi-launcher > span:last-child {
+    display: none;
+  }
+  .mochi-invitation {
+    padding: 23px 18px;
+    gap: 15px;
+  }
+  .mochi-invitation > .mochi-avatar {
+    display: none;
+  }
+  .mochi-invitation h2 {
+    font-size: 24px;
+  }
+  .mochi-editor-tools {
+    padding: 17px;
+  }
+  .mochi-editor-tools > .mochi-avatar {
+    display: none;
+  }
+  .mochi-comparison {
+    gap: 8px;
+  }
+  .mochi-comparison > div {
+    padding: 11px;
+  }
+  .mochi-message {
+    margin-right: 18px;
+  }
+  .mochi-message.from-user {
+    margin-left: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mochi-loading .mochi-avatar {
+    animation: none;
+  }
+}
+[data-theme='dark'] .mochi-invitation,
+[data-theme='dark'] .mochi-editor-tools,
+[data-theme='dark'] .mochi-panel,
+[data-theme='dark'] .mochi-launcher {
+  background: #302724;
+  color: #f3e7df;
+}
+[data-theme='dark'] .mochi-consent,
+[data-theme='dark'] .mochi-message,
+[data-theme='dark'] .mochi-panel-footer,
+[data-theme='dark'] .mochi-comparison > div,
+[data-theme='dark'] .mochi-apply-note,
+[data-theme='dark'] .mochi-error {
+  background: #3b2e2c;
+  color: #f3e7df;
+}
+[data-theme='dark'] .mochi-panel textarea,
+[data-theme='dark'] .mochi-panel input[type='password'] {
+  background: #252220;
+  color: #f3e7df;
+}

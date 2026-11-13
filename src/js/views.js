@@ -1,3 +1,4 @@
+import { mochiEditorTools } from './mochi-components.js';
 import {
   seasons,
   monthly,
@@ -194,7 +195,7 @@ export function itineraryView(s, ui) {
       btn(`${icon('download')} Exportar JSON`, 'export-itinerary', '', 'secondary') +
         btn(`${icon('printer')} Imprimir`, 'print', '', 'secondary'),
     ) +
-    `<div class="itinerary-context">${!s.routeChosen ? notice(`Este é um modelo disponível para explorar, não uma decisão sua. <a href="#planner">Criar minha viagem</a> ajuda a encontrar um caminho com a nossa cara.`) : '<p class="saved-pill">Nosso roteiro escolhido · alterações salvas neste navegador.</p>'}</div><div class="filters"><label>${s.routeChosen ? 'Roteiro escolhido' : 'Modelo disponível para explorar'}<select data-route-select>${Object.entries(
+    `${mochiEditorTools()}<div class="itinerary-context">${!s.routeChosen ? notice(`Este é um modelo disponível para explorar, não uma decisão sua. <a href="#planner">Criar minha viagem</a> ajuda a encontrar um caminho com a nossa cara.`) : '<p class="saved-pill">Nosso roteiro escolhido · alterações salvas neste navegador.</p>'}</div><div class="filters"><label>${s.routeChosen ? 'Roteiro escolhido' : 'Modelo disponível para explorar'}<select data-route-select>${Object.entries(
       {
         ...routeNames,
         ...(s.routes.personalized ? { personalized: 'Nosso roteiro personalizado' } : {}),
