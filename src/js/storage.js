@@ -1,11 +1,11 @@
 import { scenarioBudget } from './budget.js';
 import { makeRoute, routeNames } from './itinerary.js';
-export const STORAGE_KEY = 'japan-diary-planner-v1';
-export const VERSION = 1;
+import { initialPlanner, migrateV1, validatePlanner } from './planner-state.js';
+export const STORAGE_KEY = 'japan-diary-planner-v2';
+export const LEGACY_STORAGE_KEY = 'japan-diary-planner-v1';
+export const VERSION = 2;
 export function initialState() {
-  return {
-    version: VERSION,
-    trip: {
+  const trip = {
       year: 2029,
       travelers: 6,
       days: 25,
@@ -14,8 +14,13 @@ export function initialState() {
       departureDate: null,
       selectedSeason: null,
     },
-    budget: scenarioBudget('balanced'),
+    budget = scenarioBudget('balanced');
+  return {
+    version: VERSION,
+    trip,
+    budget,
     selectedRoute: 'winter',
+    routeChosen: false,
     routes: Object.fromEntries(Object.keys(routeNames).map((key) => [key, makeRoute(key)])),
     favorites: { destinations: [], events: [], food: [] },
     checks: {},
@@ -29,115 +34,133 @@ export function initialState() {
     seasonQuotes: {},
     theme: 'light',
     weights: [1, 1, 1, 1, 1],
+    planner: initialPlanner(trip, budget),
   };
 }
-const object = (value) => value && typeof value === 'object' && !Array.isArray(value);
-const text = (value, max = 1000) => (typeof value === 'string' ? value.slice(0, max) : '');
-const numeric = (value, min = 0, max = 10000000) =>
-  typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
-const stringArray = (value) =>
-  Array.isArray(value) &&
-  value.length <= 2000 &&
-  value.every((v) => typeof v === 'string' && v.length <= 150);
-export function validateState(value) {
-  if (!object(value) || value.version !== VERSION)
-    throw new Error('Versão do backup incompatível. Use um arquivo exportado por esta versão.');
-  const t = value.trip,
-    b = value.budget;
+const object = (v) => v && typeof v === 'object' && !Array.isArray(v);
+const text = (v, max = 1000) => (typeof v === 'string' && v.length <= max ? v : '');
+const numeric = (v, min = 0, max = 10000000) =>
+  typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
+const stringArray = (v) =>
+  Array.isArray(v) &&
+  v.length <= 2000 &&
+  v.every((item) => typeof item === 'string' && item.length <= 150);
+function validateTrip(t) {
   if (
     !object(t) ||
+    !text(t.departureCity, 150)?.trim() ||
     !Number.isInteger(t.travelers) ||
     !numeric(t.travelers, 1, 50) ||
     !Number.isInteger(t.days) ||
     !numeric(t.days, 1, 90) ||
     !Number.isInteger(t.nights) ||
-    !numeric(t.nights, 0, 89)
+    !numeric(t.nights, 0, 89) ||
+    !Number.isInteger(t.year) ||
+    !numeric(t.year, 2027, 2040)
   )
     throw new Error('Configurações da viagem inválidas.');
   if (
     t.departureDate !== null &&
     (typeof t.departureDate !== 'string' ||
-      !/^2029-\d{2}-\d{2}$/.test(t.departureDate) ||
+      !new RegExp(`^${t.year}-\\d{2}-\\d{2}$`).test(t.departureDate) ||
       Number.isNaN(Date.parse(t.departureDate)) ||
       new Date(t.departureDate).toISOString().slice(0, 10) !== t.departureDate)
   )
-    throw new Error('A data de embarque deve ser válida e pertencer a 2029.');
-  const seed = initialState();
+    throw new Error(`A data de embarque deve ser válida e pertencer a ${t.year}.`);
+}
+function validateBudget(b) {
+  const fields = Object.keys(scenarioBudget('balanced')).filter(
+    (k) => !['scenario', 'savingsStart'].includes(k),
+  );
   if (
     !object(b) ||
-    Object.keys(seed.budget)
-      .filter((k) => !['scenario', 'savingsStart'].includes(k))
-      .some((k) => !numeric(b[k]))
+    fields.some((k) => !numeric(b[k])) ||
+    !/^\d{4}-(0[1-9]|1[0-2])$/.test(b.savingsStart || '')
   )
-    throw new Error('Valores financeiros inválidos.');
-  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(b.savingsStart || ''))
-    throw new Error('Mês inicial da poupança inválido.');
-  if (!object(value.routes) || !Object.keys(routeNames).includes(value.selectedRoute))
-    throw new Error('Roteiro inválido.');
-  for (const key of Object.keys(routeNames)) {
-    const route = value.routes[key];
-    if (
-      !object(route) ||
-      !Array.isArray(route.bases) ||
-      route.bases.length > 100 ||
-      !Array.isArray(route.days) ||
-      route.days.length > 90
+    throw new Error('Valores financeiros ou mês inicial inválidos.');
+}
+export function validateRouteData(route) {
+  if (
+    !object(route) ||
+    !Array.isArray(route.bases) ||
+    route.bases.length > 100 ||
+    !Array.isArray(route.days) ||
+    route.days.length > 90
+  )
+    throw new Error('Formato de roteiro inválido.');
+  const ids = new Set(),
+    days = new Set();
+  if (
+    route.bases.some(
+      (b) =>
+        !object(b) ||
+        !text(b.city, 150) ||
+        !Number.isInteger(b.nights) ||
+        !numeric(b.nights, 0, 89),
     )
-      throw new Error('Formato de roteiro inválido.');
-    const ids = new Set();
+  )
+    throw new Error('Bases de roteiro inválidas.');
+  for (const d of route.days) {
     if (
-      route.bases.some(
-        (b) =>
-          !object(b) ||
-          !text(b.city, 150) ||
-          !numeric(b.nights, 0, 89) ||
-          !Number.isInteger(b.nights),
-      )
+      !object(d) ||
+      !Number.isInteger(d.day) ||
+      !numeric(d.day, 1, 90) ||
+      days.has(d.day) ||
+      !Array.isArray(d.activities) ||
+      d.activities.length > 100
     )
-      throw new Error('Bases de roteiro inválidas.');
-    const days = new Set();
-    for (const d of route.days) {
+      throw new Error('Dias de roteiro inválidos.');
+    days.add(d.day);
+    for (const a of d.activities) {
       if (
-        !object(d) ||
-        !Number.isInteger(d.day) ||
-        !numeric(d.day, 1, 90) ||
-        days.has(d.day) ||
-        !Array.isArray(d.activities) ||
-        d.activities.length > 100
+        !object(a) ||
+        !text(a.id, 150) ||
+        ids.has(a.id) ||
+        !text(a.title, 300) ||
+        !numeric(a.cost)
       )
-        throw new Error('Dias de roteiro inválidos.');
-      days.add(d.day);
-      for (const a of d.activities) {
-        if (
-          !object(a) ||
-          !text(a.id, 150) ||
-          ids.has(a.id) ||
-          !text(a.title, 300) ||
-          !numeric(a.cost)
-        )
-          throw new Error('Atividade inválida.');
-        ids.add(a.id);
-      }
+        throw new Error('Atividade inválida.');
+      ids.add(a.id);
     }
   }
+}
+export function validateState(value) {
+  if (!object(value) || ![1, VERSION].includes(value.version))
+    throw new Error('Versão do backup incompatível. Use um backup das versões 1 ou 2.');
+  const legacy = value.version === 1,
+    t = value.trip,
+    b = value.budget;
+  validateTrip(t);
+  validateBudget(b);
+  if (
+    !object(value.routes) ||
+    ![...Object.keys(routeNames), 'personalized'].includes(value.selectedRoute) ||
+    !value.routes[value.selectedRoute]
+  )
+    throw new Error('Roteiro inválido.');
+  for (const key of Object.keys(routeNames)) validateRouteData(value.routes[key]);
+  if (value.routes.personalized) validateRouteData(value.routes.personalized);
   if (
     !object(value.favorites) ||
     ['destinations', 'events', 'food'].some((k) => !stringArray(value.favorites[k]))
   )
     throw new Error('Favoritos inválidos.');
-  for (const k of ['checks', 'packed'])
+  for (const key of ['checks', 'packed'])
     if (
-      !object(value[k]) ||
-      Object.keys(value[k]).length > 5000 ||
-      Object.values(value[k]).some((v) => typeof v !== 'boolean')
+      !object(value[key]) ||
+      Object.keys(value[key]).length > 5000 ||
+      Object.values(value[key]).some((v) => typeof v !== 'boolean')
     )
       throw new Error('Checklist inválido.');
-  for (const k of ['lodgings', 'legs', 'wishlist', 'tasks'])
-    if (!Array.isArray(value[k]) || value[k].length > 1000 || value[k].some((v) => !object(v)))
+  for (const key of ['lodgings', 'legs', 'wishlist', 'tasks']) {
+    if (
+      !Array.isArray(value[key]) ||
+      value[key].length > 1000 ||
+      value[key].some((v) => !object(v))
+    )
       throw new Error('Listas inválidas.');
-  for (const k of ['lodgings', 'legs', 'wishlist', 'tasks']) {
     const ids = new Set();
-    for (const item of value[k]) {
+    for (const item of value[key]) {
       if (!text(item.id, 150) || ids.has(item.id))
         throw new Error('Identificadores de lista inválidos ou duplicados.');
       ids.add(item.id);
@@ -169,8 +192,7 @@ export function validateState(value) {
     )
   )
     throw new Error('Wishlist inválida.');
-  if (value.tasks.some((t) => !text(t.id, 150) || !text(t.title, 300)))
-    throw new Error('Tarefas inválidas.');
+  if (value.tasks.some((t) => !text(t.title, 300))) throw new Error('Tarefas inválidas.');
   if (typeof value.notes !== 'string' || value.notes.length > 100000)
     throw new Error('Notas inválidas.');
   if (value.exchangeRate !== null && !numeric(value.exchangeRate, 0.000001, 100))
@@ -182,57 +204,81 @@ export function validateState(value) {
   )
     throw new Error('Pesos inválidos.');
   if (value.seasonQuotes !== undefined) {
-    if (!object(value.seasonQuotes)) throw new Error('Comparações de estação inválidas.');
+    if (!object(value.seasonQuotes)) throw new Error('Comparações inválidas.');
     for (const [key, q] of Object.entries(value.seasonQuotes)) {
       if (
         !['spring', 'summer', 'autumn', 'winter'].includes(key) ||
         !object(q) ||
         !object(q.trip) ||
-        !object(q.budget) ||
         !numeric(q.trip.travelers, 1, 50) ||
         !numeric(q.trip.days, 1, 90) ||
-        !numeric(q.trip.nights, 0, 89) ||
-        Object.keys(seed.budget)
-          .filter((k) => !['scenario', 'savingsStart'].includes(k))
-          .some((k) => !numeric(q.budget[k]))
+        !numeric(q.trip.nights, 0, 89)
       )
         throw new Error('Orçamento de estação inválido.');
+      validateBudget(q.budget);
     }
   }
-  return {
-    ...seed,
-    ...value,
-    trip: {
-      ...seed.trip,
-      ...t,
-      year: 2029,
-      selectedSeason: ['spring', 'summer', 'autumn', 'winter'].includes(t.selectedSeason)
-        ? t.selectedSeason
-        : null,
-    },
-    budget: {
-      ...b,
-      scenario: Object.keys({ economic: 1, balanced: 1, comfortable: 1 }).includes(b.scenario)
-        ? b.scenario
-        : 'balanced',
-    },
-    theme: value.theme === 'dark' ? 'dark' : 'light',
-  };
+  const seed = initialState(),
+    normalized = {
+      ...seed,
+      ...value,
+      trip: {
+        ...seed.trip,
+        ...t,
+        selectedSeason: ['spring', 'summer', 'autumn', 'winter'].includes(t.selectedSeason)
+          ? t.selectedSeason
+          : null,
+      },
+      budget: {
+        ...b,
+        scenario: ['economic', 'balanced', 'comfortable'].includes(b.scenario)
+          ? b.scenario
+          : 'balanced',
+      },
+      theme: value.theme === 'dark' ? 'dark' : 'light',
+    };
+  const result = legacy ? migrateV1(normalized) : normalized;
+  if (typeof result.routeChosen !== 'boolean')
+    throw new Error('Estado de escolha de roteiro inválido.');
+  validatePlanner(result.planner);
+  validateBudget(result.planner.draft.budget);
+  if (result.planner.result) {
+    validateRouteData(result.planner.result.route);
+    validateBudget(result.planner.result.profile.budget);
+  }
+  if (result.planner.acceptedProfile) validateBudget(result.planner.acceptedProfile.budget);
+  if (result.planner.baselineRoute) validateRouteData(result.planner.baselineRoute);
+  for (const copy of result.planner.history) {
+    validateRouteData(copy.route);
+    validateTrip(copy.trip);
+    validateBudget(copy.budget);
+  }
+  return result;
 }
 export function loadState(storage) {
+  let sourceKey = STORAGE_KEY;
   try {
-    const raw = storage.getItem(STORAGE_KEY);
-    if (raw) return { state: validateState(JSON.parse(raw)), warning: null };
-    const state = initialState();
-    const old = storage.getItem('jp-trip-notes');
-    if (old) state.notes = text(old, 100000);
+    let raw = storage.getItem(STORAGE_KEY);
+    if (!raw) {
+      raw = storage.getItem(LEGACY_STORAGE_KEY);
+      if (raw) sourceKey = LEGACY_STORAGE_KEY;
+    }
+    if (raw)
+      return {
+        state: validateState(JSON.parse(raw)),
+        warning: null,
+        migrated: sourceKey === LEGACY_STORAGE_KEY,
+      };
+    const state = initialState(),
+      old = storage.getItem('jp-trip-notes');
+    if (old) state.notes = String(old).slice(0, 100000);
     return { state, warning: null };
   } catch {
     let recovered = false;
     try {
-      const raw = storage.getItem(STORAGE_KEY);
+      const raw = storage.getItem(sourceKey);
       if (raw) {
-        storage.setItem(STORAGE_KEY + '-recovery', raw);
+        storage.setItem(sourceKey + '-recovery', raw);
         recovered = true;
       }
     } catch {}

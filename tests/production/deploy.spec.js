@@ -9,10 +9,12 @@ test('build funciona em subdiretório com imagens, gráficos e mapa', async ({ p
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto('./');
-  await expect(page.locator('.polaroid img')).toBeVisible();
+  await expect(page.locator('.welcome-main-photo img')).toBeVisible();
   await expect
     .poll(() =>
-      page.locator('.polaroid img').evaluate((img) => img.complete && img.naturalWidth > 0),
+      page
+        .locator('.welcome-main-photo img')
+        .evaluate((img) => img.complete && img.naturalWidth > 0),
     )
     .toBe(true);
   for (const route of ['months', 'destinations', 'itinerary', 'budget']) {
@@ -52,6 +54,13 @@ test('build funciona em subdiretório com imagens, gráficos e mapa', async ({ p
     await expect(page.locator('main h1')).toBeVisible();
     await page.screenshot({ path: `test-results/${route}-mobile.png`, fullPage: false });
   }
+  await page.goto('./#planner');
+  await page.locator('[data-planner-action=season][data-id=summer]').click();
+  for (let step = 1; step < 6; step++)
+    await page.locator('#planner-page [data-planner-action=next]').click();
+  await page.locator('[data-planner-action=generate]').click();
+  await expect(page).toHaveURL(/\/trip-planner\/#recommendations/);
+  await expect(page.locator('#recommendation-map .leaflet-marker-icon')).toHaveCount(3);
   expect(failures).toEqual([]);
   expect(errors).toEqual([]);
 });

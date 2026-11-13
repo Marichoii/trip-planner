@@ -40,7 +40,10 @@ test('favoritos, filtros do mapa e uma cidade no roteiro persistem', async ({ pa
   await page.goto('/');
   await page.getByRole('button', { name: 'Favoritar Verão', exact: true }).click();
   await page.reload();
-  await expect(page.locator('.stat').last()).toContainText('Verão');
+  await expect(page.getByRole('button', { name: 'Desmarcar Verão', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
   await page.goto('/#destinations');
   await page.locator('[data-ui=region]').selectOption('Okinawa');
   await expect(page.locator('.destination-card')).toHaveCount(4);
@@ -168,11 +171,12 @@ test('backup exporta, rejeita arquivo inválido e pede revisão antes de importa
 test('mobile: navegação, modal e telas não criam overflow horizontal', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.locator('.home-columns').scrollIntoViewIfNeeded();
+  await page.locator('.welcome-how').scrollIntoViewIfNeeded();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'test-results/home-mobile.png', fullPage: true });
   await page.getByRole('button', { name: 'Abrir navegação' }).click();
   await expect(page.locator('.sidebar')).toBeVisible();
+  await page.locator('[data-nav-group=discover] summary').click();
   await page.locator('[data-nav=months]').click();
   await expect(page.locator('main h1')).toContainText('Quando');
   for (const section of sections) {

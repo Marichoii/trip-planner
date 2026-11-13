@@ -61,6 +61,12 @@ function map(id, points) {
   }, 50);
 }
 export function initMaps(s, ui, route) {
+  if (route === 'recommendations' && s.planner.result) {
+    const points = s.planner.result.route.bases
+      .map((b) => destinations.find((d) => d.id === b.destinationId))
+      .filter(Boolean);
+    map('recommendation-map', points);
+  }
   if (route === 'destinations') map('destination-map', filteredDestinations(s, ui));
   if (route === 'itinerary' && ui.itineraryView === 'map') {
     const points = s.routes[s.selectedRoute].bases
