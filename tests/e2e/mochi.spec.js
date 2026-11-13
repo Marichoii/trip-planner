@@ -7,7 +7,7 @@ import { mkdir } from 'node:fs/promises';
 const panel = (page) => page.locator('.mochi-panel');
 const button = (page, action) => page.locator(`[data-mochi="${action}"]`);
 const saved = (page) => page.evaluate((key) => JSON.parse(localStorage.getItem(key)), STORAGE_KEY);
-async function setup(page, { login = false, fail = false, delay = false } = {}) {
+async function setup(page, { fail = false, delay = false } = {}) {
   const state = initialState();
   state.planner.result = buildRecommendation(state.planner.draft, 'classic', '2026-11-13');
   state.planner.status = 'ready';
@@ -19,19 +19,12 @@ async function setup(page, { login = false, fail = false, delay = false } = {}) 
     { key: STORAGE_KEY, state },
   );
   const requests = [];
-  let authenticated = !login;
   await page.route('**/api/ai/*', async (route) => {
-    const operation = new URL(route.request().url()).pathname.split('/').at(-1),
-      method = route.request().method();
+    const operation = new URL(route.request().url()).pathname.split('/').at(-1);
     if (operation === 'session') {
       if (fail) return route.fulfill({ status: 503, json: { error: { code: 'disabled' } } });
-      if (method === 'POST') {
-        expect(route.request().postDataJSON()).toEqual({ code: 'test-only-group-access' });
-        authenticated = true;
-      }
-      if (method === 'DELETE') authenticated = false;
       return route.fulfill({
-        json: { enabled: true, authenticated, csrf: authenticated ? 'test-only-csrf' : null },
+        json: { enabled: true, csrf: 'test-only-csrf' },
       });
     }
     const data = route.request().postDataJSON();
@@ -106,14 +99,15 @@ test('refinar compara cada dia, permite ajustar pedido e só aplica ao confirmar
   await expect(page.locator('.planner-history')).toContainText('Versões anteriores');
   expect(requests.map((r) => r.operation)).toEqual(['refine', 'refine']);
 });
-test('chat exige acesso, limita contexto, limpa conversa e revisão separa certezas', async ({
+test('chat abre sem login, limita contexto, limpa conversa e revisão separa certezas', async ({
   page,
 }) => {
-  const { requests } = await setup(page, { login: true });
+  const { requests } = await setup(page);
   await page.goto('/#itinerary');
   await page.getByRole('button', { name: 'Conversar com Mochi', exact: true }).click();
-  await panel(page).locator('[name=code]').fill('test-only-group-access');
-  await panel(page).getByRole('button', { name: 'Entrar no grupo', exact: true }).click();
+  await expect(panel(page).locator('#mochi-request-form')).toBeVisible();
+  await expect(panel(page).locator('input[type=password]')).toHaveCount(0);
+  await expect(panel(page).getByRole('button', { name: 'Sair do grupo' })).toHaveCount(0);
   await consent(page);
   await panel(page)
     .getByRole('button', { name: 'Como organizar seis malas grandes?', exact: true })

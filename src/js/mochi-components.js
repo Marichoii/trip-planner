@@ -11,7 +11,7 @@ export function mochiError(code) {
     rate_limited: 'O limite de uso foi atingido. Tente mais tarde.',
     busy: 'Já há uma solicitação em andamento. Aguarde um pouquinho.',
     provider_limited: 'O serviço atingiu um limite temporário. Tente mais tarde.',
-    access_required: 'Entre novamente com o acesso do grupo.',
+    session_expired: 'A conexão da Mochi expirou. Toque em Tentar novamente.',
     timeout: 'A resposta demorou mais que o esperado.',
     invalid_response: 'A sugestão não passou pelas verificações de integridade.',
     cancelled: 'Pedido cancelado. Seu roteiro continua como estava.',

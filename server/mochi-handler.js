@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
 import { RESTING, requestSchemas, deterministicReview } from '../src/js/mochi-contracts.js';
 import {
   configuration,
@@ -10,7 +9,6 @@ import {
   issueSession,
   csrfToken,
   sessionCookie,
-  verifyCode,
   privateId,
   redisStore,
 } from './mochi-security.js';
@@ -64,20 +62,23 @@ export function createHandler(operation, deps = {}) {
       if (!config.ready) throw new SafeError('disabled');
       checkOrigin(req, config);
       if (operation === 'session' && req.method === 'GET') {
-        const session = readSession(req, config);
+        let session = readSession(req, config);
+        if (!session) {
+          const issued = issueSession(config);
+          session = issued.session;
+          res.setHeader('Set-Cookie', sessionCookie(config, issued.token));
+        }
         return reply(200, {
           enabled: true,
-          authenticated: !!session,
-          csrf: session ? csrfToken(config, session) : null,
+          csrf: csrfToken(config, session),
         });
       }
-      if (operation === 'session' && req.method === 'DELETE') {
-        requireSession(req, config);
-        res.setHeader('Set-Cookie', sessionCookie(config, '', true));
-        return reply(200, { ok: true });
+      if (operation === 'session') {
+        res.setHeader('Allow', 'GET');
+        throw new SafeError('method_not_allowed', 405);
       }
       if (req.method !== 'POST') {
-        res.setHeader('Allow', operation === 'session' ? 'GET, POST, DELETE' : 'POST');
+        res.setHeader('Allow', 'POST');
         throw new SafeError('method_not_allowed', 405);
       }
       const input = await body(req);
@@ -92,20 +93,6 @@ export function createHandler(operation, deps = {}) {
             'unknown',
         ).split(',')[0],
       );
-      if (operation === 'session') {
-        const parsed = z.strictObject({ code: z.string().min(12).max(128) }).safeParse(input);
-        if (!parsed.success) throw new SafeError('invalid_input', 400);
-        await store.login(ip, now);
-        if (!(await verifyCode(parsed.data.code, config)))
-          throw new SafeError('access_required', 401);
-        const { token, session } = issueSession(config);
-        res.setHeader('Set-Cookie', sessionCookie(config, token));
-        return reply(200, {
-          enabled: true,
-          authenticated: true,
-          csrf: csrfToken(config, session),
-        });
-      }
       const session = requireSession(req, config),
         parsed = requestSchemas[operation].safeParse(input);
       if (!parsed.success) throw new SafeError('invalid_input', 400);

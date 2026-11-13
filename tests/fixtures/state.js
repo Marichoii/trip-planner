@@ -38,7 +38,7 @@ export async function mockMochi(context) {
   await context.route('**/api/ai/*', async (route) => {
     const operation = new URL(route.request().url()).pathname.split('/').at(-1);
     if (operation === 'session')
-      return route.fulfill({ json: { enabled: true, authenticated: true, csrf: 'test-csrf' } });
+      return route.fulfill({ json: { enabled: true, csrf: 'test-csrf' } });
     const data = route.request().postDataJSON();
     const result =
       operation === 'chat' ? chat : operation === 'analyze' ? review : proposal(data.profile);

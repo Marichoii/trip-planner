@@ -71,8 +71,8 @@ export function connectMochi(ctx, client = createAIClient()) {
   }
   function form() {
     if (mode === 'chat')
-      return `<form id="mochi-request-form" class="mochi-form is-chat"><div class="mochi-scroll">${privacy()}${mochiChat(messages)}${!messages.length ? `<div class="mochi-questions" role="group" aria-label="Sugestões de perguntas">${['Maio ou novembro?', 'Como organizar seis malas grandes?', 'Qual cidade combina com anime?'].map((q) => `<button type="button" data-mochi="question" data-question="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}<p class="mochi-tagline">Você sonha. A Mochi sugere. Você decide.</p></div><div class="mochi-composer"><label class="sr-only" for="mochi-message">O que vamos descobrir?</label><div class="mochi-composer-field"><textarea id="mochi-message" name="message" rows="1" maxlength="1200" required placeholder="Pergunte à Mochi…" enterkeyhint="send">${esc(message)}</textarea><button class="mochi-send" type="submit">${icon('send-horizontal')}<span class="sr-only">Perguntar à Mochi</span></button></div><div class="mochi-composer-aux">${messages.length ? mochiButton(`${icon('rotate-ccw')} Limpar conversa`, 'clear', 'small subtle') : ''}${mochiButton('Continuar sem IA', 'close', 'small subtle')}${ready ? mochiButton('Sair do grupo', 'logout', 'small subtle') : ''}</div></div></form>`;
-    return `<form id="mochi-request-form" class="mochi-form"><div class="mochi-scroll"><p class="mochi-intro">${intros[mode]}</p>${privacy()}${mode === 'refine' ? `<label class="mochi-input-label" for="mochi-message">O que você quer mudar?</label><textarea id="mochi-message" name="message" rows="3" maxlength="1200" required placeholder="Mais tempo em Osaka, uma pausa depois da Universal…">${esc(message)}</textarea>` : ''}<label class="mochi-input-label" for="mochi-notes">Preferências adicionais <span>(opcional)</span></label><textarea id="mochi-notes" name="notes" rows="2" maxlength="1000" placeholder="Só o que for relevante para esta sugestão">${esc(notes)}</textarea><p class="mochi-tagline">Você sonha. A Mochi sugere. Você decide.</p></div><div class="mochi-action-bar"><button class="btn" type="submit">${icon(mode === 'analyze' ? 'list-checks' : 'wand-sparkles')} ${mode === 'analyze' ? 'Revisar com Mochi' : 'Gerar proposta'}</button>${mochiButton('Continuar sem IA', 'close', 'subtle')}${ready ? mochiButton('Sair do grupo', 'logout', 'small subtle mochi-logout') : ''}</div></form>`;
+      return `<form id="mochi-request-form" class="mochi-form is-chat"><div class="mochi-scroll">${privacy()}${mochiChat(messages)}${!messages.length ? `<div class="mochi-questions" role="group" aria-label="Sugestões de perguntas">${['Maio ou novembro?', 'Como organizar seis malas grandes?', 'Qual cidade combina com anime?'].map((q) => `<button type="button" data-mochi="question" data-question="${esc(q)}">${esc(q)}</button>`).join('')}</div>` : ''}<p class="mochi-tagline">Você sonha. A Mochi sugere. Você decide.</p></div><div class="mochi-composer"><label class="sr-only" for="mochi-message">O que vamos descobrir?</label><div class="mochi-composer-field"><textarea id="mochi-message" name="message" rows="1" maxlength="1200" required placeholder="Pergunte à Mochi…" enterkeyhint="send">${esc(message)}</textarea><button class="mochi-send" type="submit">${icon('send-horizontal')}<span class="sr-only">Perguntar à Mochi</span></button></div><div class="mochi-composer-aux">${messages.length ? mochiButton(`${icon('rotate-ccw')} Limpar conversa`, 'clear', 'small subtle') : ''}${mochiButton('Continuar sem IA', 'close', 'small subtle')}</div></div></form>`;
+    return `<form id="mochi-request-form" class="mochi-form"><div class="mochi-scroll"><p class="mochi-intro">${intros[mode]}</p>${privacy()}${mode === 'refine' ? `<label class="mochi-input-label" for="mochi-message">O que você quer mudar?</label><textarea id="mochi-message" name="message" rows="3" maxlength="1200" required placeholder="Mais tempo em Osaka, uma pausa depois da Universal…">${esc(message)}</textarea>` : ''}<label class="mochi-input-label" for="mochi-notes">Preferências adicionais <span>(opcional)</span></label><textarea id="mochi-notes" name="notes" rows="2" maxlength="1000" placeholder="Só o que for relevante para esta sugestão">${esc(notes)}</textarea><p class="mochi-tagline">Você sonha. A Mochi sugere. Você decide.</p></div><div class="mochi-action-bar"><button class="btn" type="submit">${icon(mode === 'analyze' ? 'list-checks' : 'wand-sparkles')} ${mode === 'analyze' ? 'Revisar com Mochi' : 'Gerar proposta'}</button>${mochiButton('Continuar sem IA', 'close', 'subtle')}</div></form>`;
   }
   function view() {
     if (loading) return 'loading';
@@ -80,7 +80,7 @@ export function connectMochi(ctx, client = createAIClient()) {
     if (proposal) return 'proposal';
     if (review) return 'review';
     if (ready) return mode === 'chat' ? 'chat' : 'form';
-    return error ? 'error' : 'login';
+    return 'error';
   }
   function body(current) {
     const errorBox = error ? mochiError(error) : '';
@@ -100,7 +100,7 @@ export function connectMochi(ctx, client = createAIClient()) {
         : form();
     if (current === 'error')
       return `${scroll}${errorBox}</div><div class="mochi-action-bar">${mochiButton(`${icon('refresh-cw')} Tentar novamente`, 'retry')}${mochiButton('Continuar sem IA', 'close', 'subtle')}</div>`;
-    return `<form id="mochi-login-form" class="mochi-form"><div class="mochi-scroll"><div class="mochi-login">${avatar()}<p class="mochi-login-intro">A Mochi é um cantinho do nosso grupo. Use o acesso compartilhado pela pessoa que administra a viagem.</p><label for="mochi-code">Acesso do grupo</label><input id="mochi-code" name="code" type="password" minlength="12" maxlength="128" autocomplete="current-password" required><p class="mochi-login-note">${icon('lock')} O código fica somente nesta sessão segura do servidor.</p></div></div><div class="mochi-action-bar"><button type="submit" class="btn">Entrar no grupo</button>${mochiButton('Continuar sem IA', 'close', 'subtle')}</div></form>`;
+    return '';
   }
   function draw() {
     const hadFocus = dialog.contains(document.activeElement),
@@ -119,7 +119,7 @@ export function connectMochi(ctx, client = createAIClient()) {
           : review
             ? dialog.querySelector('.mochi-review h3')
             : dialog.querySelector(
-                '[name=consent]:not(.is-granted [name=consent]), #mochi-message, #mochi-code, [data-mochi=undo], [data-mochi=retry]',
+                '[name=consent]:not(.is-granted [name=consent]), #mochi-message, [data-mochi=undo], [data-mochi=retry]',
               );
       if (focusTarget) {
         if (focusTarget.tagName === 'H3') focusTarget.tabIndex = -1;
@@ -144,7 +144,7 @@ export function connectMochi(ctx, client = createAIClient()) {
     try {
       const result = await client.status(controller.signal);
       if (token !== run) return;
-      ready = result.enabled && result.authenticated;
+      ready = result.enabled === true;
       error = null;
     } catch (e) {
       if (token !== run) return;
@@ -186,25 +186,6 @@ export function connectMochi(ctx, client = createAIClient()) {
   async function submit(formElement) {
     if (loading) return;
     const values = new FormData(formElement);
-    if (formElement.id === 'mochi-login-form') {
-      const token = ++run;
-      controller = new AbortController();
-      loading = true;
-      error = null;
-      draw();
-      try {
-        await client.login(values.get('code'), controller.signal);
-        if (token === run) ready = true;
-      } catch (e) {
-        if (token === run) error = e.code || 'unavailable';
-      } finally {
-        if (token === run) {
-          loading = false;
-          draw();
-        }
-      }
-      return;
-    }
     consent = values.has('consent');
     shareMoney = values.has('budget');
     notes = String(values.get('notes') || '');
@@ -262,7 +243,7 @@ export function connectMochi(ctx, client = createAIClient()) {
     } catch (e) {
       if (token === run) {
         error = e.code || 'unavailable';
-        if (error === 'access_required') ready = false;
+        if (error === 'session_expired') ready = false;
       }
     } finally {
       clearTimeout(timer);
@@ -316,19 +297,6 @@ export function connectMochi(ctx, client = createAIClient()) {
       pending = null;
       draw();
       dialog.querySelector('#mochi-message')?.focus();
-      return;
-    }
-    if (action === 'logout') {
-      cancel();
-      try {
-        await client.logout();
-        ready = false;
-        messages = [];
-        error = null;
-      } catch (e) {
-        error = e.code || 'unavailable';
-      }
-      draw();
       return;
     }
     if (action === 'apply') {

@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
-import { scryptSync } from 'node:crypto';
 import { createHandler } from '../server/mochi-handler.js';
 import {
   configuration,
@@ -21,21 +20,17 @@ import { createAIClient } from '../src/js/ai-client.js';
 import { mochiChat } from '../src/js/mochi-components.js';
 import { input, proposal, chat, review } from './fixtures/mochi.js';
 // Synthetic test-only credentials. No real provider or Redis is used.
-const salt = '0'.repeat(32),
-  access = 'test-only-group-access';
 const env = {
   AI_ENABLED: 'true',
   GEMINI_API_KEY: 'test-only-placeholder',
   GEMINI_MODEL: 'gemini-3.5-flash-lite',
-  MOCHI_GROUP_ACCESS_HASH: `scrypt:${salt}:${scryptSync(access, salt, 64).toString('hex')}`,
-  MOCHI_SESSION_SECRET: 'synthetic_test_only_session_secret_0000000000',
   MOCHI_ALLOWED_ORIGINS: 'https://planner.example',
   UPSTASH_REDIS_REST_URL: 'https://test-only.upstash.io',
   UPSTASH_REDIS_REST_TOKEN: 'test-only-placeholder',
 };
 const config = configuration(env),
   auth = issueSession(config);
-function request(body = input(), method = 'POST', authenticated = true) {
+function request(body = input(), method = 'POST', withSession = true) {
   const req = new EventEmitter();
   Object.assign(req, {
     method,
@@ -43,7 +38,7 @@ function request(body = input(), method = 'POST', authenticated = true) {
     headers: {
       origin: 'https://planner.example',
       'content-type': 'application/json',
-      ...(authenticated
+      ...(withSession
         ? {
             cookie: `${config.cookie}=${auth.token}`,
             'x-mochi-csrf': csrfToken(config, auth.session),
@@ -70,7 +65,6 @@ function response() {
 function harness(options = {}) {
   const calls = { provider: 0, reserved: 0, released: 0, metrics: [], logs: [] };
   const store = {
-    async login() {},
     async reserve() {
       calls.reserved++;
       return ['a', 'b'];
@@ -99,11 +93,9 @@ function harness(options = {}) {
   });
   return { handler, calls };
 }
-test('fail closed sem chave, autenticação, Redis, origem ou flag', async () => {
+test('fail closed sem chave, Redis, origem ou flag', async () => {
   for (const field of [
     'GEMINI_API_KEY',
-    'MOCHI_GROUP_ACCESS_HASH',
-    'MOCHI_SESSION_SECRET',
     'UPSTASH_REDIS_REST_URL',
     'UPSTASH_REDIS_REST_TOKEN',
     'MOCHI_ALLOWED_ORIGINS',
@@ -133,54 +125,55 @@ test('sessão, assinatura, origem e CSRF são conferidos no servidor', async () 
     assert.equal(calls.provider, 0);
   }
   assert.equal(readSession(request(), config, auth.session.exp + 1), null);
-  assert.equal(readSession(request(), { ...config, groupHash: config.groupHash + 'a' }), null);
+  assert.equal(
+    readSession(request(), configuration({ ...env, GEMINI_API_KEY: 'rotated-test-key' })),
+    null,
+  );
 });
-test('login exige código verificado, limita tentativas e emite cookie HttpOnly Secure', async () => {
-  let attempts = 0;
-  const { handler } = harness({
-    operation: 'session',
-    store: {
-      async login() {
-        attempts++;
-      },
-    },
-  });
-  const bad = response();
-  await handler(request({ code: 'wrong-test-only-code' }, 'POST', false), bad);
-  assert.equal(bad.statusCode, 401);
-  const good = response();
-  await handler(request({ code: access }, 'POST', false), good);
-  assert.equal(good.statusCode, 200);
+test('Mochi abre sem código de grupo e cria cookie técnico automaticamente', async () => {
+  const { handler, calls } = harness({ operation: 'session' }),
+    res = response();
+  assert.equal(config.ready, true);
+  await handler(request(undefined, 'GET', false), res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.enabled, true);
+  assert.equal(res.body.authenticated, undefined);
+  assert.ok(res.body.csrf);
   assert.match(
-    good.headers['Set-Cookie'],
+    res.headers['Set-Cookie'],
     /HttpOnly; SameSite=Strict; Path=\/; Max-Age=28800; Secure/,
   );
-  assert.ok(good.body.csrf);
-  assert.equal(attempts, 2);
-  const { handler: limited } = harness({
-    operation: 'session',
-    store: {
-      async login() {
-        throw new SafeError('rate_limited', 429);
-      },
-    },
-  });
-  const res = response();
-  await limited(request({ code: access }, 'POST', false), res);
-  assert.equal(res.statusCode, 429);
+  assert.equal(calls.provider, 0);
+  assert.equal(calls.reserved, 0);
+  const cookie = res.headers['Set-Cookie'].split(';')[0];
+  const session = readSession({ headers: { cookie } }, config);
+  assert.ok(session);
+  assert.equal(res.body.csrf, csrfToken(config, session));
+  const api = harness(),
+    answer = response(),
+    req = request();
+  req.headers.cookie = cookie;
+  req.headers['x-mochi-csrf'] = res.body.csrf;
+  await api.handler(req, answer);
+  assert.equal(answer.statusCode, 200);
+  assert.equal(api.calls.provider, 1);
 });
-test('status same-origin funciona sem Origin e logout exige CSRF', async () => {
+test('status same-origin reutiliza cookie; login e logout antigos não são aceitos', async () => {
   const { handler } = harness({ operation: 'session' }),
-    req = request(undefined, 'GET');
+    req = request(undefined, 'GET'),
+    res = response();
   delete req.headers.origin;
   req.headers.referer = 'https://planner.example/';
-  const res = response();
   await handler(req, res);
-  assert.equal(res.body.authenticated, true);
-  const out = response();
-  await handler(request(undefined, 'DELETE'), out);
-  assert.equal(out.statusCode, 200);
-  assert.match(out.headers['Set-Cookie'], /Max-Age=0/);
+  assert.equal(res.statusCode, 200);
+  assert.ok(res.body.csrf);
+  assert.equal(res.headers['Set-Cookie'], undefined);
+  for (const method of ['POST', 'DELETE']) {
+    const out = response();
+    await handler(request(undefined, method), out);
+    assert.equal(out.statusCode, 405);
+    assert.equal(out.headers.Allow, 'GET');
+  }
 });
 test('rejeita campos extras, tamanho, histórico e dias inconsistentes antes do provedor', async () => {
   const invalid = [
@@ -243,7 +236,6 @@ test('adaptador REST usa Lua atômico, limites globais e leases expirantes, sem 
     commands.push(JSON.parse(options.body));
     return { ok: true, json: async () => ({ result: 1 }) };
   });
-  await store.login('ip', 0);
   const keys = await store.reserve('sid', 'ip', 'request', 0);
   await store.release(keys, 'request');
   await store.metrics('chat', 'ok', { input: 1, output: 2, total: 3 }, 0);

@@ -2,7 +2,7 @@
 
 A Mochi acrescenta geração, alterações por conversa, chat e revisão ao Japan Diary. O motor clássico em `src/js/recommendations.js`, a calculadora e os dados locais continuam independentes da IA. Nenhuma chamada ao Gemini acontece ao carregar páginas, digitar, navegar pelo mapa ou recalcular valores.
 
-A implementação usa Vite no navegador e cinco Vercel Functions Node.js em `/api/ai`. A chave e o SDK `@google/genai` ficam no servidor. O navegador recebe somente dados validados. Sem chave, acesso de grupo, segredo de sessão, origem autorizada **e** Redis configurados, os endpoints respondem `503 disabled` e não chamam o provedor. Não existe alternativa com chave no frontend.
+A implementação usa Vite no navegador e cinco Vercel Functions Node.js em `/api/ai`. A chave e o SDK `@google/genai` ficam no servidor. O navegador recebe somente dados validados. Sem chave, origem autorizada **e** Redis configurados, os endpoints respondem `503 disabled` e não chamam o provedor. Não existe alternativa com chave no frontend.
 
 ## Modelo e acesso
 
@@ -21,20 +21,12 @@ Verificação documental em **13/11/2026**: [`gemini-3.5-flash-lite`](https://ai
 | `GEMINI_API_KEY`           | Chave do projeto Google                                                  |
 | `GEMINI_MODEL`             | Padrão `gemini-3.5-flash-lite`                                           |
 | `AI_ENABLED`               | Somente `true` permite ativação; demais proteções continuam obrigatórias |
-| `MOCHI_GROUP_ACCESS_HASH`  | Hash scrypt do código compartilhado com o grupo                          |
-| `MOCHI_SESSION_SECRET`     | Segredo aleatório para HMAC e sessões                                    |
 | `UPSTASH_REDIS_REST_URL`   | URL HTTPS privada da API REST do Upstash Redis                           |
 | `UPSTASH_REDIS_REST_TOKEN` | Token privado do Redis, com permissão para scripts e gravação            |
 | `MOCHI_ALLOWED_ORIGINS`    | Origens exatas separadas por vírgula, sem caminho ou barra final         |
 | `MOCHI_LOCAL_HTTP`         | `true` exclusivamente para desenvolvimento em localhost/127.0.0.1        |
 
-Para preparar o acesso, execute em **seu terminal privado**:
-
-```bash
-node scripts/mochi-access.mjs
-```
-
-O script recebe um código de 12–128 caracteres sem exibi-lo, gera um salt, um hash scrypt e um segredo aleatório. Coloque o hash e o segredo no ambiente privado; compartilhe apenas o código com os amigos por um canal apropriado. Não execute o script em CI nem publique sua saída. Não há código de grupo embutido no JavaScript distribuído.
+A Mochi abre diretamente, sem cadastro, senha ou código de grupo. Não há segredo de sessão adicional para configurar. O consentimento para compartilhar preferências continua obrigatório.
 
 ### Testar as Functions localmente
 
@@ -53,11 +45,13 @@ Se a Mochi não abrir o acesso local: confira se `/api/ai/session` retorna JSON,
 
 Sem credenciais, ainda é possível verificar `503`, usar o site clássico e executar todos os testes. Com credenciais reais, use uma única ação explícita de teste e confira a cota; não execute a suíte contra o provedor real.
 
-## Acesso, sessão e proteção persistente
+## Abertura direta e proteção persistente
 
-O código do grupo é conferido no servidor com scrypt e comparação em tempo constante. Um login válido emite cookie assinado com HMAC, `HttpOnly`, `Secure`, `SameSite=Strict`, caminho `/` e expiração de oito horas. Em produção ele usa prefixo `__Host-`. A exceção HTTP só vale para ambiente local; `VERCEL_ENV=production` a desativa. A API também exige origem exata e token CSRF derivado da sessão para cada operação de escrita.
+O acesso à Mochi é aberto aos visitantes do site, dentro das cotas globais. Não há autenticação nem restrição ao grupo de amigos. A mudança remove o código de grupo e as duas variáveis extras de acesso; chave Gemini, Redis, origem e flag de ativação continuam necessários.
 
-Sair remove o cookie do navegador. Para invalidar todas as sessões e acessos anteriores, troque **o código/hash e o segredo de sessão** e publique o novo ambiente. O código identifica o grupo; esta primeira versão não mantém contas individuais nem permite revogar somente um participante. A sessão é um token assinado: a remoção do cookie no logout não revoga uma cópia roubada antes da expiração. A rotação do segredo invalida essas cópias.
+Ao abrir a Mochi, o navegador obtém automaticamente um identificador técnico de oito horas. O cookie é assinado no servidor, `HttpOnly`, `Secure`, `SameSite=Strict`, caminho `/` e prefixo `__Host-` em produção. Sua chave de assinatura é derivada da chave Gemini com HMAC e um contexto separado; nenhum segredo adicional é pedido ou enviado ao navegador. Esse identificador serve aos limites por navegador e ao token CSRF; não comprova identidade nem concede acesso privado. A exceção HTTP só vale para ambiente local; `VERCEL_ENV=production` a desativa. Trocar a chave Gemini invalida esses cookies.
+
+Origem e CSRF limitam requisições entre sites no navegador, mas não autenticam visitantes. Qualquer visitante pode consumir a cota diária compartilhada. Os limites persistentes no Redis permanecem ativos e não são substituídos por contadores em memória.
 
 Crie um banco [Upstash Redis](https://upstash.com/docs/redis/features/restapi) dedicado, ou use um já autorizado. Configure a URL REST e o token no servidor. Nenhum banco, plano pago ou faturamento é criado automaticamente por este código. Os scripts Lua fazem a reserva de cota e concorrência de forma atômica, compartilhada entre instâncias serverless, com expiração. Todas as chaves usam o mesmo hash tag Redis e o prefixo `mochi:{group}:v1:`. Ambientes que compartilham esse banco compartilham os limites.
 
@@ -67,7 +61,6 @@ Crie um banco [Upstash Redis](https://upstash.com/docs/redis/features/restapi) d
 | Sessão                      | 8 solicitações por hora UTC                                                   |
 | IP pseudonimizado           | 12 solicitações por hora UTC                                                  |
 | Concorrência                | 2 no grupo e 1 por sessão                                                     |
-| Tentativas de login         | 30/hora no grupo e 5/hora por IP                                              |
 | Lease de concorrência       | 60 segundos; limpeza automática e TTL de 70 segundos                          |
 | Corpo HTTP                  | 64.000 bytes                                                                  |
 | Mensagem / notas adicionais | 1.200 / 1.000 caracteres                                                      |
@@ -85,15 +78,13 @@ Cancelar interrompe a espera do cliente e sinaliza o abort ao SDK. Conforme a [d
 
 Todas as respostas usam JSON e `Cache-Control: no-store`. O acesso foi implementado para **frontend e backend na mesma origem**. Não habilitamos CORS com credenciais entre domínios. GitHub Pages continua publicando a experiência clássica; para usar Mochi, abra o frontend hospedado na Vercel junto de suas Functions. Nenhuma URL pública externa com chave é adicionada ao frontend.
 
-| Método e endpoint        | Entrada / resultado                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------- |
-| `GET /api/ai/session`    | Estado do acesso e token CSRF da sessão; não chama Gemini                          |
-| `POST /api/ai/session`   | `{code}`; verifica código e limites de login; emite cookie e CSRF                  |
-| `DELETE /api/ai/session` | Cookie + `X-Mochi-CSRF`; remove cookie                                             |
-| `POST /api/ai/itinerary` | Preferências mínimas e orçamento opcional; retorna proposta                        |
-| `POST /api/ai/refine`    | Preferências + roteiro relevante + pedido; retorna proposta completa para comparar |
-| `POST /api/ai/chat`      | Preferências + roteiro opcional + mensagem + histórico limitado                    |
-| `POST /api/ai/analyze`   | Preferências + roteiro; retorna análise e verificações determinísticas             |
+| Método e endpoint        | Entrada / resultado                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `GET /api/ai/session`    | Cria/reutiliza cookie técnico e retorna token CSRF automaticamente; não chama Gemini |
+| `POST /api/ai/itinerary` | Preferências mínimas e orçamento opcional; retorna proposta                          |
+| `POST /api/ai/refine`    | Preferências + roteiro relevante + pedido; retorna proposta completa para comparar   |
+| `POST /api/ai/chat`      | Preferências + roteiro opcional + mensagem + histórico limitado                      |
+| `POST /api/ai/analyze`   | Preferências + roteiro; retorna análise e verificações determinísticas               |
 
 Os quatro endpoints de IA exigem cookie e cabeçalho `X-Mochi-CSRF`. O cliente cuida deles; não salve o token de sessão em localStorage. Os schemas completos são a fonte de verdade em `src/js/mochi-contracts.js`. Objetos têm campos estritos; dados extras como backup completo são rejeitados.
 
@@ -104,7 +95,7 @@ O chat mantém até 20 mensagens **somente em memória durante a sessão da pág
 Sucesso: `{data, meta: {requestId, mode, checks?}}`. `mode` é `gemini` ou `local` para respostas protegidas no chat. Erros: `{error: {code, message, requestId}}`. Códigos relevantes:
 
 - `400 invalid_input`, `413 too_large`, `405 method_not_allowed`.
-- `401 access_required`, `403 access_required/origin_rejected`.
+- `401 session_expired`, `403 session_expired/origin_rejected`.
 - `429 rate_limited/busy/provider_limited`, com `Retry-After` quando disponível.
 - `502 invalid_response`, `504 timeout`, `499 cancelled` quando a conexão ainda existe.
 - `503 disabled/protection_unavailable/provider_unavailable/unavailable`.
@@ -128,11 +119,11 @@ O analisador verifica soma das noites, dias além da duração, excesso de ativi
 - Consulte uso e cotas no Google AI Studio e os [limites por projeto/modelo](https://ai.google.dev/gemini-api/docs/rate-limits). Chaves do mesmo projeto compartilham quotas. Uma resposta 429 não é repetida automaticamente.
 - Revise a [tabela oficial de preços](https://ai.google.dev/gemini-api/docs/pricing) e o plano antes de ativar qualquer faturamento. Este projeto não ativa billing, não contrata serviço pago e não pressupõe que uma cota gratuita estará disponível.
 - Se usar billing, configure cotas baixas no provedor e alertas no Google Cloud. Alertas de orçamento não são, sozinhos, um bloqueio rígido de gastos. A combinação de cota diária de pedidos e limite de tokens limita exposição; os tokens de entrada também dependem do texto enviado.
-- A Vercel registra apenas UUID do pedido, operação, código de resultado, duração e contagens disponíveis de tokens. Nunca registra corpo, resposta, código de grupo, cookie, IP bruto ou chave. IPs são pseudonimizados com HMAC somente nas chaves do limiter. Erros brutos não são registrados.
+- A Vercel registra apenas UUID do pedido, operação, código de resultado, duração e contagens disponíveis de tokens. Nunca registra corpo, resposta, cookie, IP bruto ou chave. IPs são pseudonimizados com HMAC somente nas chaves do limiter. Erros brutos não são registrados.
 - Redis mantém contadores diários em hashes `mochi:{group}:v1:metrics:<dia UTC desde epoch>`, com TTL de 30 dias: pedidos por operação/status e tokens disponíveis. `usageUnavailable` indica ausência de metadados; não equivale a zero. Compare com o consumo real no provedor, inclusive chamadas canceladas que podem não retornar metadados. Essas métricas básicas não substituem a fatura do Google.
 - Os [termos Gemini](https://ai.google.dev/gemini-api/terms) distinguem serviços gratuitos e pagos. Dados do serviço gratuito podem ser usados para aprimorar produtos e revisados por pessoas; serviços pagos têm condições diferentes, incluindo retenção temporária para segurança. Consulte os termos aplicáveis ao projeto; não prometa retenção zero. Não envie dados sensíveis de participantes.
 
-Para desligar emergencialmente, defina `AI_ENABLED=false` na Vercel e faça redeploy para aplicar o novo ambiente às Functions. Para bloquear também um vazamento, revogue a chave no Google e rotacione segredos. A chave revogada deixa de funcionar mesmo em deploys antigos. O modo clássico continua disponível.
+Para desligar emergencialmente, defina `AI_ENABLED=false` na Vercel e faça redeploy para aplicar o novo ambiente às Functions. Para bloquear também um vazamento, revogue a chave no Google e configure sua substituta no servidor. A chave revogada deixa de funcionar mesmo em deploys antigos. O modo clássico continua disponível.
 
 ## Publicar na Vercel
 
@@ -140,7 +131,7 @@ Para desligar emergencialmente, defina `AI_ENABLED=false` na Vercel e faça rede
 2. Configure as variáveis privadas no painel **Settings → Environment Variables**, nos ambientes necessários. Use origens exatas de produção e preview. Não use wildcard em `MOCHI_ALLOWED_ORIGINS`; previews sem origem própria configurada ficam desabilitados por origem.
 3. Em produção, deixe `MOCHI_LOCAL_HTTP=false`. Use HTTPS e o mesmo host para frontend e API. Não inclua segredos em `vercel.json`, código ou variáveis Vite.
 4. Publique a branch/PR no ambiente escolhido. A integração não modifica o workflow de publicação do GitHub Pages. Deploys antigos mantêm seus ambientes; revise previews e revogue chaves expostas se houver incidente.
-5. Sem login, confirme que uma ação de IA recebe `401` e que o planejamento clássico funciona. Com configuração faltante, espere `503`. Depois, entre no grupo, autorize somente dados mínimos e faça **uma** solicitação manual. Revise a proposta antes de aplicar e confira os registros de consumo. Não exiba cookies/chaves em capturas.
+5. Abra a Mochi e confirme que o formulário aparece sem pedir código ou senha. Com configuração faltante, espere `503`. Autorize somente dados mínimos e faça **uma** solicitação manual. Revise a proposta antes de aplicar e confira os registros de consumo. Não exiba cookies/chaves em capturas.
 6. Teste aplicar/desfazer e o modo clássico. Verifique o cookie `Secure/HttpOnly/SameSite=Strict`, o cabeçalho CSRF e os limites no ambiente de preview, sem contornar o limiter para demonstrações públicas.
 
 Não foi feito deploy nem chamada real ao Gemini durante a implementação. O acesso da conta Google, as permissões do Redis e as Functions hospedadas dependem dessa configuração da administradora.
@@ -156,7 +147,7 @@ npm run format:check
 
 Os testes Node exercitam os handlers, sessão/CSRF, falhas de configuração, validação, SDK simulado, limiter REST simulado, timeout/cancelamento, erros e integração com versões de roteiros. O adaptador Redis é verificado com transporte simulado; não foi conectado a um Redis real. Os testes Playwright interceptam todas as chamadas `/api/ai` e cobrem geração, refinamento, análise, chat, consentimento, fallback, cancelamento, XSS, aplicar/desfazer e layout. Não há chamadas reais ao Google e nenhum teste depende de segredos. Os testes anteriores de backups, orçamento, wizard e mapas são mantidos.
 
-Verificação executada nesta implementação: **49 testes Node**, **31 casos Playwright** e **1 teste do build em `/trip-planner/`** aprovados, além de `npm run build`, `npm run format:check` e `git diff --check`. As capturas foram inspecionadas em desktop, tablet e celular. SDK, Functions hospedadas e Redis reais ainda precisam da validação de configuração descrita acima.
+Verificação da remoção do login: **55 testes Node** e **9 casos Playwright da Mochi** aprovados, além de `npm run build`, `npm run format:check` e `git diff --check`. O fluxo clássico e o build em `/trip-planner/` já tinham sido validados na integração inicial. As capturas foram inspecionadas em desktop, tablet e celular. SDK, Functions hospedadas e Redis reais ainda precisam da validação de configuração descrita acima.
 
 Capturas de respostas simuladas, em 1440, 768 e 390 px:
 

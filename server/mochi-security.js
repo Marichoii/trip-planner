@@ -1,6 +1,4 @@
-import { createHmac, randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
-import { promisify } from 'node:util';
-const scrypt = promisify(scryptCallback);
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 export class SafeError extends Error {
   constructor(code, status = 503, retryAfter = 0) {
     super(code);
@@ -33,8 +31,6 @@ export function configuration(env = process.env) {
   const ready =
     env.AI_ENABLED === 'true' &&
     !!env.GEMINI_API_KEY &&
-    /^[A-Za-z0-9_-]{32,}$/.test(env.MOCHI_SESSION_SECRET || '') &&
-    /^scrypt:[a-f0-9]{32}:[a-f0-9]{128}$/.test(env.MOCHI_GROUP_ACCESS_HASH || '') &&
     /^https:\/\/[a-z0-9.-]+\.upstash\.io$/.test(env.UPSTASH_REDIS_REST_URL || '') &&
     !!env.UPSTASH_REDIS_REST_TOKEN &&
     !!validOrigins &&
@@ -45,8 +41,10 @@ export function configuration(env = process.env) {
     local,
     model,
     key: env.GEMINI_API_KEY,
-    secret: env.MOCHI_SESSION_SECRET,
-    groupHash: env.MOCHI_GROUP_ACCESS_HASH,
+    // Domain-separated signing key: no extra secret or manual group access to configure.
+    signingKey: env.GEMINI_API_KEY
+      ? createHmac('sha256', env.GEMINI_API_KEY).update('mochi:anonymous-browser:v2').digest()
+      : null,
     redisUrl: env.UPSTASH_REDIS_REST_URL,
     redisToken: env.UPSTASH_REDIS_REST_TOKEN,
     cookie: local ? 'mochi_session' : '__Host-mochi_session',
@@ -54,7 +52,7 @@ export function configuration(env = process.env) {
   };
 }
 const hmac = (config, value) =>
-  createHmac('sha256', config.secret).update(value).digest('base64url');
+  createHmac('sha256', config.signingKey).update(value).digest('base64url');
 function equal(a, b) {
   const x = Buffer.from(a || ''),
     y = Buffer.from(b || '');
@@ -64,7 +62,6 @@ export function issueSession(config, now = Date.now()) {
   const session = {
     id: randomBytes(24).toString('base64url'),
     exp: now + 8 * 3600e3,
-    version: hmac(config, config.groupHash),
   };
   const payload = Buffer.from(JSON.stringify(session)).toString('base64url');
   return { session, token: payload + '.' + hmac(config, payload) };
@@ -83,8 +80,7 @@ export function readSession(req, config, now = Date.now()) {
     return /^[\w-]{32}$/.test(s.id) &&
       Number.isFinite(s.exp) &&
       s.exp > now &&
-      s.exp <= now + 8 * 3600e3 &&
-      equal(s.version, hmac(config, config.groupHash))
+      s.exp <= now + 8 * 3600e3
       ? s
       : null;
   } catch {
@@ -94,15 +90,10 @@ export function readSession(req, config, now = Date.now()) {
 export const csrfToken = (config, session) => hmac(config, 'csrf:' + session.id);
 export function requireSession(req, config) {
   const s = readSession(req, config);
-  if (!s) throw new SafeError('access_required', 401);
+  if (!s) throw new SafeError('session_expired', 401);
   if (!equal(req.headers['x-mochi-csrf'], csrfToken(config, s)))
-    throw new SafeError('access_required', 403);
+    throw new SafeError('session_expired', 403);
   return s;
-}
-export async function verifyCode(code, config) {
-  const [, salt, hash] = config.groupHash.split(':');
-  const result = await scrypt(code, salt, 64);
-  return equal(result.toString('hex'), hash);
 }
 export function sessionCookie(config, token = '', clear = false) {
   return `${config.cookie}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${clear ? 0 : 28800}${config.local ? '' : '; Secure'}`;
@@ -117,7 +108,7 @@ export function checkOrigin(req, config) {
   }
   if (!config.origins.includes(origin)) throw new SafeError('origin_rejected', 403);
 }
-export const privateId = (config, value) => hmac(config, value).slice(0, 32);
+export const privateId = (config, value) => hmac(config, 'ip:' + value).slice(0, 32);
 
 // One atomic script across all instances: request budgets AND expiring concurrency leases.
 export const RESERVE_SCRIPT = `
@@ -129,10 +120,6 @@ if redis.call('ZCARD',KEYS[4]) >= 2 or redis.call('ZCARD',KEYS[5]) >= 1 then ret
 for i=1,3 do redis.call('INCR',KEYS[i]); redis.call('EXPIRE',KEYS[i],tonumber(ARGV[i+6])) end
 redis.call('ZADD',KEYS[4],now+60000,ARGV[2]); redis.call('EXPIRE',KEYS[4],70)
 redis.call('ZADD',KEYS[5],now+60000,ARGV[2]); redis.call('EXPIRE',KEYS[5],70)
-return 1`;
-export const LOGIN_SCRIPT = `
-for i=1,2 do if tonumber(redis.call('GET',KEYS[i]) or '0') >= tonumber(ARGV[i]) then return 0 end end
-for i=1,2 do redis.call('INCR',KEYS[i]); redis.call('EXPIRE',KEYS[i],3600) end
 return 1`;
 export function redisStore(config, fetcher = fetch) {
   async function command(args) {
@@ -156,21 +143,6 @@ export function redisStore(config, fetcher = fetch) {
   }
   const prefix = 'mochi:{group}:v1:';
   return {
-    async login(ip, now) {
-      const hour = Math.floor(now / 3600e3);
-      if (
-        (await command([
-          'EVAL',
-          LOGIN_SCRIPT,
-          2,
-          prefix + 'login:' + hour,
-          prefix + 'login:' + ip + ':' + hour,
-          30,
-          5,
-        ])) !== 1
-      )
-        throw new SafeError('rate_limited', 429, 3600);
-    },
     async reserve(session, ip, id, now) {
       const day = Math.floor(now / 86400e3),
         hour = Math.floor(now / 3600e3);

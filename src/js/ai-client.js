@@ -42,15 +42,6 @@ export function createAIClient(fetcher = fetch) {
       csrf = result.csrf;
       return result;
     },
-    async login(code, signal) {
-      const result = await call('session', { data: { code }, signal });
-      csrf = result.csrf;
-      return result;
-    },
-    async logout() {
-      await call('session', { method: 'DELETE' });
-      csrf = null;
-    },
     async request(operation, input, signal) {
       const parsed = requestSchemas[operation].safeParse(input);
       if (!parsed.success)
