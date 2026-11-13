@@ -15,7 +15,7 @@ export function needsAcceptanceConfirmation(state) {
       .some((k) => state.budget[k] !== standard[k])
   );
 }
-function archiveCurrent(state, resultId, date) {
+export function archiveCurrent(state, resultId, date) {
   if (state.planner.history.length >= 100)
     throw new Error('O histórico tem 100 versões. Exporte um backup antes de continuar.');
   return {

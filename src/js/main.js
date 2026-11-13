@@ -1,5 +1,7 @@
 import '../css/style.css';
 import '../css/redesign.css';
+import '../css/mochi.css';
+import { connectMochi } from './mochi-controller.js';
 import { navigationItems, shellMarkup, updateNavigation } from './navigation.js';
 import { connectPlanner } from './planner-controller.js';
 import {
@@ -177,6 +179,7 @@ const icons = {
 };
 const nav = navigationItems;
 let plannerController;
+let mochiController;
 let storage;
 try {
   storage = window.localStorage;
@@ -232,6 +235,7 @@ async function render({ focus = false } = {}) {
   activeRoute = parsed.route;
   plannerController?.prepare(activeRoute);
   document.body.dataset.page = activeRoute;
+  mochiController?.onRender(activeRoute);
   document.querySelector('meta[name=theme-color]').content =
     state.theme === 'dark' ? '#252220' : '#faf7f2';
   if (activeRoute === 'seasons' && seasons.some((v) => v.id === parsed.detail))
@@ -1123,6 +1127,15 @@ plannerController = connectPlanner({
   closeModal,
 });
 shell();
+mochiController = connectMochi({
+  getState: () => state,
+  setState: (next) => {
+    state = next;
+  },
+  persist,
+  render,
+  ui,
+});
 render().then(syncSidebar);
 setInterval(tick, 30000);
 if (loaded.warning) setTimeout(() => toast(loaded.warning), 600);

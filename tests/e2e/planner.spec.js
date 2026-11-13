@@ -187,9 +187,9 @@ test('mobile: navegação, modal e telas não criam overflow horizontal', async 
       .toBe(true);
   }
   await page.getByRole('button', { name: 'Configurações da viagem' }).click();
-  await expect(page.locator('dialog')).toBeVisible();
+  await expect(page.locator('#modal')).toBeVisible();
   expect(
-    await page.locator('dialog').evaluate((e) => e.getBoundingClientRect().right <= innerWidth),
+    await page.locator('#modal').evaluate((e) => e.getBoundingClientRect().right <= innerWidth),
   ).toBe(true);
 });
 test('desktop: captura visual, busca e mudança de tema', async ({ page }) => {
@@ -200,7 +200,7 @@ test('desktop: captura visual, busca e mudança de tema', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.locator('#global-search').fill('Nikko');
   await page.locator('#search-results a').first().click();
-  await expect(page.locator('dialog')).toContainText('Nikko');
+  await expect(page.locator('#modal')).toContainText('Nikko');
   await page.getByRole('button', { name: 'Fechar janela' }).click();
   await expect(page.locator('.leaflet-container')).toBeVisible();
 });
