@@ -208,3 +208,7 @@ export function moveActivity(route, id, target) {
   }
   return false;
 }
+
+export function routeName(key) {
+  return routeNames[key] || 'Nosso roteiro personalizado';
+}

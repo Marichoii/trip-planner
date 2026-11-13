@@ -27,7 +27,7 @@ import {
   tripDayDate,
 } from './utils.js';
 import { calculateBudget, scenarios, lodgingCost, transportCost, wishlistCost } from './budget.js';
-import { routeNames, cityForDay, validateRoute } from './itinerary.js';
+import { routeNames, routeName, cityForDay, validateRoute } from './itinerary.js';
 export {
   seasons,
   destinations,
@@ -42,59 +42,36 @@ export {
   criteria,
   qualitativeScores,
 };
-export const img = (id, cls = '', eager = false) => {
-  const item = images.images.find((i) => i.id === id) || images.images[0];
-  return `<img src="${import.meta.env.BASE_URL}${esc(item.file)}" alt="${esc(item.alt)}" class="${cls}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" />`;
-};
-export const btn = (text, action, extra = '', cls = '') =>
-  `<button type="button" class="btn ${cls}" data-action="${action}" ${extra}>${text}</button>`;
-export const go = (id, text, cls = '') => `<a href="#${id}" class="btn ${cls}">${text}</a>`;
-export const observed = (value, unit = '') =>
-  typeof value === 'number' && Number.isFinite(value)
-    ? `${new Intl.NumberFormat('pt-BR').format(value)}${unit}`
-    : 'Dado indisponível';
-export const source = (name, url, period = 'Referência editorial', date = '2026-11-13') =>
-  `<div class="source"><span>Fonte: ${link(url, name)}</span><span>Período: ${esc(period)}</span><span>Verificado: ${dateLabel(date)}</span></div>`;
-export const notice = (text, cls = '') =>
-  `<div class="notice ${cls}">${icon('info')}<div>${text}</div></div>`;
-export const empty = (text) => `<div class="empty">${icon('notebook-pen')}<p>${text}</p></div>`;
-export const field = (label, name, value, opts = '') =>
-  `<label>${label}<input name="${name}" value="${esc(value ?? '')}" ${opts} /></label>`;
-export const opt = (value, label, current) =>
-  `<option value="${esc(value)}" ${String(current) === String(value) ? 'selected' : ''}>${esc(label)}</option>`;
-export const heading = (eyebrow, title, description, actions = '') =>
-  `<header class="page-heading"><div><p class="eyebrow">${eyebrow}</p><h1 tabindex="-1">${title}</h1><p>${description}</p></div>${actions ? `<div class="button-row no-print">${actions}</div>` : ''}</header>`;
-export const checkItem = (id, title, checked, group) =>
-  `<label class="check-item ${checked ? 'checked' : ''}"><input type="checkbox" data-check="${group}" data-id="${esc(id)}" ${checked ? 'checked' : ''} /><span>${esc(title)}</span></label>`;
+import {
+  img,
+  btn,
+  go,
+  observed,
+  source,
+  notice,
+  empty,
+  field,
+  opt,
+  heading,
+  checkItem,
+} from './components.js';
+export {
+  img,
+  btn,
+  go,
+  observed,
+  source,
+  notice,
+  empty,
+  field,
+  opt,
+  heading,
+  checkItem,
+} from './components.js';
+import { welcomeView, exploreView } from './welcome.js';
+import { plannerView, recommendationView, plannerHistoryView } from './planner-views.js';
 export function home(s) {
-  const b = calculateBudget(s.trip, s.budget),
-    fav = seasons.find((v) => v.id === s.trip.selectedSeason),
-    route = s.routes[s.selectedRoute];
-  const done = checklist.filter((_, i) => s.checks[`main-${i}`]).length;
-  return `<section class="hero"><div><p class="eyebrow">a little guide to our big adventure</p><h1>Japan Diary<br><em>2029</em> <span style="font-size:.5em;color:var(--rose);font-weight:400">♡</span></h1><p class="subtitle">${s.trip.travelers} friends, ${s.trip.days} days, countless memories.</p><p class="description">Nosso cantinho para planejar uma viagem inesquecível pelo Japão — escolhendo a estação, as cidades e cada detalhe, sem pressa.</p><div class="button-row">${go('seasons', `${icon('flower-2')} Encontrar nossa estação`)}${go('destinations', `${icon('map')} Explorar o Japão`, 'secondary')}</div>${s.trip.departureDate ? `<p class="countdown" id="countdown"></p>` : ''}</div><figure class="polaroid">${img('hero', '', true)}<figcaption>somewhere in Kyoto, someday with us.</figcaption><div class="photo-stamp"><span>OUR NEXT</span>JAPAN<span>ADVENTURE</span></div></figure><span class="jp" lang="ja">旅のしおり ・ 二〇二九</span></section>
- <div class="stats"><div class="stat"><span class="stat-icon">${icon('users')}</span><div><strong>${s.trip.travelers} amigos</strong><small>Uma viagem para lembrar</small></div></div><div class="stat"><span class="stat-icon">${icon('calendar-days')}</span><div><strong>${s.trip.days} dias · ${s.trip.nights} noites</strong><small>${s.trip.departureDate ? dateLabel(s.trip.departureDate) : 'Datas ainda em aberto'}</small></div></div><div class="stat"><span class="stat-icon">${icon('plane')}</span><div><strong>Brasília → Japão</strong><small>Um sonho do outro lado do mundo</small></div></div><div class="stat"><span class="stat-icon">${icon('heart')}</span><div><strong>${fav ? fav.name : 'Qual estação?'}</strong><small>${fav ? 'Nossa favorita por enquanto' : 'Vamos descobrir juntos'}</small></div></div></div>
- <div class="section-top"><div><h2>Quatro estações, mil possibilidades.</h2><p>O mesmo Japão. Quatro jeitos de se apaixonar.</p></div><a href="#seasons" class="text-button">Comparar estações ${icon('arrow-right')}</a></div>
- <div class="season-grid">${seasons
-   .map(
-     (v) =>
-       `<article class="season-card ${s.trip.selectedSeason === v.id ? 'chosen' : ''}"><a href="#seasons/${v.id}" style="text-decoration:none;color:inherit">${img(v.id)}<span class="jp-corner" lang="ja">${v.jp}</span><div class="card-body"><span class="english">${v.english} · ${v.months
-         .split(' — ')
-         .map((m) => m.slice(0, 3))
-         .join(
-           ' — ',
-         )}</span><h3>${v.name}</h3><p>${v.highlights[0]}<br>${v.highlights[1]}</p></div></a><button class="heart ${s.trip.selectedSeason === v.id ? 'selected' : ''}" data-action="favorite-season" data-id="${v.id}" aria-label="${s.trip.selectedSeason === v.id ? 'Desmarcar' : 'Favoritar'} ${v.name}" aria-pressed="${s.trip.selectedSeason === v.id}">${icon('heart')}</button></article>`,
-   )
-   .join('')}</div>
- <div class="home-columns"><section class="paper"><p class="eyebrow">little by little</p><h2>Nosso caminho pelo Japão</h2><p class="small muted">${routeNames[s.selectedRoute]}</p><div class="route-line">${route.bases.map((v) => `<div class="route-node">${esc(v.city.split(' / ')[0])}<small>${v.nights} noites</small></div>`).join('')}</div><a href="#itinerary" class="text-button">Abrir nosso roteiro ${icon('arrow-right')}</a></section><section class="paper"><p class="eyebrow">saving for the memories</p><h2>Um sonho que cabe no plano</h2><span class="budget-big">${money(b.person)}</span><span class="small muted">estimativa por pessoa · cenário ${scenarios[s.budget.scenario].name.toLowerCase()}</span><div class="progress"><span style="width:${b.progress}%"></span></div><span class="small muted">${Math.round(b.progress)}% da meta guardada</span><br><a href="#budget" class="text-button">Planejar nosso orçamento ${icon('arrow-right')}</a></section><section class="paper"><p class="eyebrow">one step at a time</p><h2>Vamos começar por aqui?</h2><div class="check-list">${checklist
-   .slice(0, 3)
-   .map(
-     (v, i) =>
-       `<label class="mini-check"><input type="checkbox" data-check="checks" data-id="main-${i}" ${s.checks[`main-${i}`] ? 'checked' : ''} />${v}</label>`,
-   )
-   .join(
-     '',
-   )}</div><a href="#checklist" class="text-button">Ver checklist · ${done}/${checklist.length} ${icon('arrow-right')}</a></section></div>
- <div class="note-strip"><span class="serif">A melhor parte começa antes de embarcar.</span><span>Feito para decidir juntos, com calma. (˶ᵔ ᵕ ᵔ˶) ♡<br><time id="home-clock"></time></span>${btn(`${icon('sliders-horizontal')} Ajustar viagem`, 'settings', '', 'small subtle')}</div>`;
+  return welcomeView(s);
 }
 export function seasonsView(s, ui) {
   const v = seasons.find((v) => v.id === ui.season) || seasons[0];
@@ -217,15 +194,19 @@ export function itineraryView(s, ui) {
       btn(`${icon('download')} Exportar JSON`, 'export-itinerary', '', 'secondary') +
         btn(`${icon('printer')} Imprimir`, 'print', '', 'secondary'),
     ) +
-    `<div class="filters"><label>Roteiro selecionado<select data-route-select>${Object.entries(
-      routeNames,
+    `<div class="itinerary-context">${!s.routeChosen ? notice(`Este é um modelo disponível para explorar, não uma decisão sua. <a href="#planner">Criar minha viagem</a> ajuda a encontrar um caminho com a nossa cara.`) : '<p class="saved-pill">Nosso roteiro escolhido · alterações salvas neste navegador.</p>'}</div><div class="filters"><label>${s.routeChosen ? 'Roteiro escolhido' : 'Modelo disponível para explorar'}<select data-route-select>${Object.entries(
+      {
+        ...routeNames,
+        ...(s.routes.personalized ? { personalized: 'Nosso roteiro personalizado' } : {}),
+      },
     )
       .map(([id, name]) => opt(id, name, s.selectedRoute))
       .join(
         '',
       )}</select></label><label>Visualização<select data-ui="itineraryView">${opt('calendar', 'Calendário', ui.itineraryView || 'calendar')}${opt('map', 'Mapa das bases', ui.itineraryView)}</select></label>${btn(`${icon('rotate-ccw')} Restaurar esta rota`, 'restore-route', '', 'secondary')}</div>
  <div class="two-columns"><section class="paper"><h2>Nossas bases</h2><p class="small muted">Poucas trocas de hotel, mais tempo para aproveitar.</p><div id="base-list">${r.bases.map((b, i) => `<div class="base-row">${field('Cidade / base', `base-city-${i}`, b.city, `data-base="${i}" data-field="city" maxlength="150" required`)}${field('Noites', `base-nights-${i}`, b.nights, `type="number" min="0" max="89" step="1" data-base="${i}" data-field="nights" required`)}<button class="icon-button" data-action="remove-base" data-id="${i}" aria-label="Remover base ${esc(b.city)}">${icon('trash-2')}</button></div>`).join('')}</div><div class="button-row">${btn(`${icon('plus')} Nova base`, 'add-base', '', 'small secondary')}${btn(`${icon('sliders-horizontal')} Duração e datas`, 'settings', '', 'small subtle')}</div><div class="source"><span>${validation.nights} noites distribuídas / ${s.trip.nights} planejadas</span><span>${s.trip.days} dias · início: ${dateLabel(s.trip.departureDate)}</span></div></section><section class="paper"><h2>Um roteiro que respira</h2><p class="small muted">Arraste uma atividade para outro dia ou use o botão de mover. Custos em reais por pessoa; sugestões de ingressos não representam disponibilidade.</p>${validation.messages.length ? validation.messages.map((m) => notice(esc(m))).join('') : notice('As bases somam o total configurado e há pausas no roteiro.', 'success')}<p class="small muted">Para Okinawa/Hokkaido, cote voos internos, bagagem, transfers e dias de margem. As atividades têm custo inicial zero até você preencher uma estimativa.</p><div class="summary-row"><span>Atividades estimadas</span><strong>${money(r.days.flatMap((d) => d.activities).reduce((n, a) => n + a.cost, 0))} / pessoa</strong></div></section></div>
- ${ui.itineraryView === 'map' ? `<section class="paper spaced"><h2>As bases no mapa</h2><div id="itinerary-map" class="map compact"></div><p class="small muted">Marcadores das bases reconhecidas. Sem linhas ou tempos de trajeto. Bases personalizadas podem ser consultadas no Google Maps.</p><div class="chip-row">${r.bases.map((b) => link(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.city + ' Japan')}`, b.city, 'btn small secondary')).join('')}</div></section>` : `<div class="calendar">${days.map((d) => `<section class="day-card" data-day="${d.day}" aria-label="Dia ${d.day}"><header><span>DIA ${String(d.day).padStart(2, '0')}</span><span>${s.trip.departureDate ? dateLabel(tripDayDate(s.trip.departureDate, d.day)).replace(' de 2029', '') : ''}</span></header><h3>${esc(cityForDay(r, d.day))}</h3>${d.activities.map((a) => `<article class="activity ${a.free ? 'free' : ''}" draggable="true" data-activity="${esc(a.id)}"><p>${esc(a.title)}</p><div class="activity-actions"><small class="muted">${a.cost ? money(a.cost) : 'A estimar'}</small><div><button data-action="activity-favorite" data-id="${esc(a.id)}" class="${a.favorite ? 'favorited' : ''}" aria-label="Favoritar atividade">${icon('heart')}</button><button data-action="activity-edit" data-id="${esc(a.id)}" aria-label="Editar atividade">${icon('pencil')}</button><button data-action="activity-move" data-id="${esc(a.id)}" aria-label="Mover atividade para outro dia">${icon('move')}</button><button data-action="activity-remove" data-id="${esc(a.id)}" aria-label="Remover atividade">${icon('x')}</button></div></div></article>`).join('')}<button class="day-add" data-action="activity-add" data-day="${d.day}">+ Adicionar atividade</button></section>`).join('')}</div>`}`
+ ${ui.itineraryView === 'map' ? `<section class="paper spaced"><h2>As bases no mapa</h2><div id="itinerary-map" class="map compact"></div><p class="small muted">Marcadores das bases reconhecidas. Sem linhas ou tempos de trajeto. Bases personalizadas podem ser consultadas no Google Maps.</p><div class="chip-row">${r.bases.map((b) => link(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(b.city + ' Japan')}`, b.city, 'btn small secondary')).join('')}</div></section>` : `<div class="calendar">${days.map((d) => `<section class="day-card" data-day="${d.day}" aria-label="Dia ${d.day}"><header><span>DIA ${String(d.day).padStart(2, '0')}</span><span>${s.trip.departureDate ? dateLabel(tripDayDate(s.trip.departureDate, d.day)).replace(' de 2029', '') : ''}</span></header><h3>${esc(cityForDay(r, d.day))}</h3>${d.activities.map((a) => `<article class="activity ${a.free ? 'free' : ''}" draggable="true" data-activity="${esc(a.id)}"><p>${esc(a.title)}</p><div class="activity-actions"><small class="muted">${a.cost ? money(a.cost) : 'A estimar'}</small><div><button data-action="activity-favorite" data-id="${esc(a.id)}" class="${a.favorite ? 'favorited' : ''}" aria-label="Favoritar atividade">${icon('heart')}</button><button data-action="activity-edit" data-id="${esc(a.id)}" aria-label="Editar atividade">${icon('pencil')}</button><button data-action="activity-move" data-id="${esc(a.id)}" aria-label="Mover atividade para outro dia">${icon('move')}</button><button data-action="activity-remove" data-id="${esc(a.id)}" aria-label="Remover atividade">${icon('x')}</button></div></div></article>`).join('')}<button class="day-add" data-action="activity-add" data-day="${d.day}">+ Adicionar atividade</button></section>`).join('')}</div>`}` +
+    plannerHistoryView(s)
   );
 }
 export const budgetFields = [
@@ -273,7 +254,7 @@ export function budgetView(s, ui) {
       .join(
         '',
       )}</div>${notice('Referências de <strong>novembro de 2026</strong>, para 25 dias/24 noites: não são tarifas de 2029. Escolher um cenário substitui as estimativas de despesas; saldo e datas da poupança são preservados. Nenhuma estação aplica multiplicadores de preço.', 'info')}
- <div class="budget-layout"><section class="paper"><form id="budget-form"><div class="form-section"><h3>${icon('users')} A nossa viagem</h3><div class="form-grid">${field('Viajantes', 'travelers', s.trip.travelers, 'type="number" min="1" max="50" step="1" required data-budget-trip')}${field('Dias', 'days', s.trip.days, 'type="number" min="1" max="90" step="1" required data-budget-trip')}${field('Noites', 'nights', s.trip.nights, 'type="number" min="0" max="89" step="1" required data-budget-trip')}${field('Embarque · 2029', 'departureDate', s.trip.departureDate, 'type="date" min="2029-01-01" max="2029-12-31" data-budget-trip')}</div></div><div class="form-section"><h3>${icon('wallet')} Quanto vamos precisar?</h3><div class="form-grid">${budgetFields.map(([key, label, hint]) => field(`${label} <span class="muted">${hint} · R$</span>`, key, s.budget[key], 'type="number" min="0" max="10000000" step="0.01" required data-budget')).join('')}</div></div><div class="form-section"><h3>${icon('piggy-bank')} Um pouco a cada mês</h3><div class="form-grid">${field('Primeiro mês de depósito', 'savingsStart', s.budget.savingsStart, 'type="month" required data-budget')}${field('Saldo já guardado / pessoa · R$', 'saved', s.budget.saved, 'type="number" min="0" max="10000000" step="0.01" required data-budget')}</div><p class="small muted spaced">Exemplo do PDF: dezembro/2026 a janeiro/2029 = 26 depósitos para embarque em fevereiro/2029. A data da nossa viagem continua em aberto.</p></div></form></section><aside class="budget-summary"><section class="paper results-live" id="budget-summary" aria-live="polite">${budgetSummary(s)}</section><section class="paper chart-card spaced"><h2>Para onde vai o orçamento</h2><div class="chart-box small"><canvas id="budget-chart" role="img" aria-label="Distribuição dos gastos por categoria; valores no resumo financeiro"></canvas></div></section></aside></div>
+ <div class="budget-layout"><section class="paper"><form id="budget-form"><div class="form-section"><h3>${icon('users')} A nossa viagem</h3><div class="form-grid">${field('Viajantes', 'travelers', s.trip.travelers, 'type="number" min="1" max="50" step="1" required data-budget-trip')}${field('Dias', 'days', s.trip.days, 'type="number" min="1" max="90" step="1" required data-budget-trip')}${field('Noites', 'nights', s.trip.nights, 'type="number" min="0" max="89" step="1" required data-budget-trip')}${field(`Embarque · ${s.trip.year}`, 'departureDate', s.trip.departureDate, `type="date" min="${s.trip.year}-01-01" max="${s.trip.year}-12-31" data-budget-trip`)}</div></div><div class="form-section"><h3>${icon('wallet')} Quanto vamos precisar?</h3><div class="form-grid">${budgetFields.map(([key, label, hint]) => field(`${label} <span class="muted">${hint} · R$</span>`, key, s.budget[key], 'type="number" min="0" max="10000000" step="0.01" required data-budget')).join('')}</div></div><div class="form-section"><h3>${icon('piggy-bank')} Um pouco a cada mês</h3><div class="form-grid">${field('Primeiro mês de depósito', 'savingsStart', s.budget.savingsStart, 'type="month" required data-budget')}${field('Saldo já guardado / pessoa · R$', 'saved', s.budget.saved, 'type="number" min="0" max="10000000" step="0.01" required data-budget')}</div><p class="small muted spaced">Exemplo do PDF: dezembro/2026 a janeiro/2029 = 26 depósitos para embarque em fevereiro/2029. A data da nossa viagem continua em aberto.</p></div></form></section><aside class="budget-summary"><section class="paper results-live" id="budget-summary" aria-live="polite">${budgetSummary(s)}</section><section class="paper chart-card spaced"><h2>Para onde vai o orçamento</h2><div class="chart-box small"><canvas id="budget-chart" role="img" aria-label="Distribuição dos gastos por categoria; valores no resumo financeiro"></canvas></div></section></aside></div>
  <div class="section-top"><h2>Três jeitos de planejar</h2><span class="badge neutral">Valores de referência / pessoa</span></div><div class="table-wrap"><table><thead><tr><th>Cenário</th><th>Total / pessoa</th><th>Total / ${s.trip.travelers} viajantes</th><th>Meta mensal · 26 depósitos</th><th>Acumulado</th><th>Diferença para o atual</th></tr></thead><tbody>${Object.values(
    scenarios,
  )
@@ -542,6 +523,9 @@ export function sourcesView() {
 }
 export const views = {
   home,
+  planner: plannerView,
+  recommendations: recommendationView,
+  explore: exploreView,
   seasons: seasonsView,
   months: monthsView,
   destinations: destinationsView,

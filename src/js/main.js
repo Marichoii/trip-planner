@@ -1,4 +1,7 @@
 import '../css/style.css';
+import '../css/redesign.css';
+import { navigationItems, shellMarkup, updateNavigation } from './navigation.js';
+import { connectPlanner } from './planner-controller.js';
 import {
   createIcons,
   Flower2,
@@ -55,6 +58,20 @@ import {
   Car,
   ExternalLink,
   Bookmark,
+  ArrowLeft,
+  Minus,
+  CloudSun,
+  Coffee,
+  Compass,
+  Gamepad2,
+  ShoppingBag,
+  Landmark,
+  Waves,
+  Music2,
+  Camera,
+  Sprout,
+  ChevronDown,
+  History,
 } from 'lucide';
 import {
   views,
@@ -87,7 +104,7 @@ import {
 } from './utils.js';
 import { loadState, saveState, parseBackup, validateState } from './storage.js';
 import { scenarioBudget, calculateBudget, transportCost, scenarios } from './budget.js';
-import { makeRoute, moveActivity, routeNames } from './itinerary.js';
+import { makeRoute, moveActivity, routeNames, routeName } from './itinerary.js';
 const icons = {
   Flower2,
   Home,
@@ -143,23 +160,23 @@ const icons = {
   Car,
   ExternalLink,
   Bookmark,
+  ArrowLeft,
+  Minus,
+  CloudSun,
+  Coffee,
+  Compass,
+  Gamepad2,
+  ShoppingBag,
+  Landmark,
+  Waves,
+  Music2,
+  Camera,
+  Sprout,
+  ChevronDown,
+  History,
 };
-const nav = [
-  ['home', 'Nosso diário', 'home', 'O COMEÇO'],
-  ['seasons', 'As quatro estações', 'flower-2'],
-  ['months', 'Quando ir?', 'calendar-days'],
-  ['destinations', 'Destinos & mapa', 'map'],
-  ['events', 'Eventos & festivais', 'sparkles'],
-  ['itinerary', 'Nosso roteiro', 'route', 'O NOSSO PLANO'],
-  ['budget', 'Orçamento', 'wallet'],
-  ['hotels', 'Onde ficar', 'bed-double'],
-  ['transport', 'Como se deslocar', 'train-front'],
-  ['food', 'Comidas & compras', 'utensils'],
-  ['packing', 'Preparar as malas', 'backpack'],
-  ['rules', 'Regras de viagem', 'shield-check', 'ANTES DE EMBARCAR'],
-  ['checklist', 'Checklist & notas', 'notebook-pen'],
-  ['sources', 'Fontes & sobre', 'book-open'],
-];
+const nav = navigationItems;
+let plannerController;
 let storage;
 try {
   storage = window.localStorage;
@@ -184,7 +201,9 @@ function refreshIcons() {
   createIcons({ icons, attrs: { 'stroke-width': 1.7 } });
 }
 function persist() {
+  plannerController?.syncFromTools();
   const saved = saveState(storage, state);
+  ui.plannerSaved = saved;
   const status = document.getElementById('save-status');
   if (status)
     status.innerHTML =
@@ -195,8 +214,8 @@ function persist() {
 }
 function shell() {
   document.documentElement.dataset.theme = state.theme;
-  document.getElementById('app').innerHTML =
-    `<aside class="sidebar" aria-label="Navegação principal"><a href="#home" class="brand"><img src="${import.meta.env.BASE_URL}icons/sakura.svg" alt="" /><div><strong>Japan Diary</strong><small>the 2029 adventure</small></div></a><nav>${nav.map(([id, label, i, group]) => `${group ? `<div class="nav-group">${group}</div>` : ''}<a class="nav-link" href="#${id}" data-nav="${id}">${icon(i)} ${label}</a>`).join('')}</nav><div class="side-bottom"><p>A little guide to<br>our big adventure. ♡</p><div class="chip-row"><span class="badge neutral">2029</span><span class="badge neutral">旅のしおり</span></div><p class="tiny spaced">Planejado com carinho, sem pressa.</p></div></aside><button class="menu-backdrop" data-action="menu" aria-label="Fechar menu"></button><div class="workspace"><header class="topbar"><button class="icon-button mobile-menu" data-action="menu" aria-label="Abrir navegação" aria-expanded="false">${icon('menu')}</button><div class="breadcrumb"><span class="crumb-root">Nosso próximo capítulo</span><span class="crumb-divider">/</span><strong id="current-page">Nosso diário</strong></div><div class="top-actions"><div class="search-wrap"><label class="search-box">${icon('search')}<input id="global-search" type="search" placeholder="Buscar no nosso diário…" aria-label="Buscar cidades, atrações e assuntos" aria-controls="search-results" aria-expanded="false" autocomplete="off" /></label><div id="search-results" class="search-results" hidden></div></div><div class="japan-time"><span>日本</span> <time id="japan-clock"></time> <span class="muted">JST</span></div><span id="save-status" class="save-status">${icon('check-check')} Salvo neste navegador</span><button class="icon-button" data-action="theme" aria-label="Alternar tema claro e escuro">${icon('moon')}</button><button class="icon-button" data-action="settings" aria-label="Configurações da viagem">${icon('sliders-horizontal')}</button></div></header><main id="main" tabindex="-1"></main></div>`;
+  document.getElementById('app').innerHTML = shellMarkup(state);
+  updateNavigation(state, 'home');
   refreshIcons();
   tick();
   persist();
@@ -211,6 +230,10 @@ async function render({ focus = false } = {}) {
   maps?.disposeMaps();
   const parsed = parsedRoute();
   activeRoute = parsed.route;
+  plannerController?.prepare(activeRoute);
+  document.body.dataset.page = activeRoute;
+  document.querySelector('meta[name=theme-color]').content =
+    state.theme === 'dark' ? '#252220' : '#faf7f2';
   if (activeRoute === 'seasons' && seasons.some((v) => v.id === parsed.detail))
     ui.season = parsed.detail;
   document.title = `${nav.find((n) => n[0] === activeRoute)[1]} · Japan Diary 2029`;
@@ -218,12 +241,7 @@ async function render({ focus = false } = {}) {
     views[activeRoute](state, ui) +
     `<footer class="footer"><span>Japan Diary 2029 · a little guide to our big adventure. ♡</span><span>Planejamento local · <a href="#sources">Fontes, créditos e limites dos dados</a></span></footer>`;
   document.getElementById('current-page').textContent = nav.find((n) => n[0] === activeRoute)[1];
-  document.querySelectorAll('[data-nav]').forEach((el) => {
-    const current = el.dataset.nav === activeRoute;
-    el.classList.toggle('active', current);
-    if (current) el.setAttribute('aria-current', 'page');
-    else el.removeAttribute('aria-current');
-  });
+  updateNavigation(state, activeRoute);
   document.body.classList.remove('menu-open');
   document.querySelector('.mobile-menu').setAttribute('aria-expanded', 'false');
   syncSidebar();
@@ -234,7 +252,7 @@ async function render({ focus = false } = {}) {
     document.querySelector('#main h1')?.focus({ preventScroll: true });
   }
   const stale = (new Date(localDate()) - new Date('2026-11-13')) / 86400000 > 180;
-  if (stale) {
+  if (stale && !['home', 'planner'].includes(activeRoute)) {
     const p = document.createElement('div');
     p.innerHTML = notice(
       'Fontes verificadas em 13/11/2026. Mais de 180 dias se passaram: revalide informações, tarifas e regras antes de decidir.',
@@ -251,6 +269,7 @@ async function render({ focus = false } = {}) {
     }
     if (
       activeRoute === 'destinations' ||
+      activeRoute === 'recommendations' ||
       (activeRoute === 'itinerary' && ui.itineraryView === 'map')
     ) {
       const module = await import('./maps.js');
@@ -320,7 +339,7 @@ function confirmAction(title, message, action, id = '') {
 }
 function settings() {
   showModal(
-    `<h2 id="modal-title">A nossa viagem</h2><p class="small muted">2029 está no horizonte. O resto, decidimos juntos.</p><form id="settings-form"><div class="form-grid">${field('Viajantes', 'travelers', state.trip.travelers, 'type="number" min="1" max="50" step="1" required')}${field('Dias', 'days', state.trip.days, 'type="number" min="1" max="90" step="1" required')}${field('Noites', 'nights', state.trip.nights, 'type="number" min="0" max="89" step="1" required')}${field('Data de embarque · opcional', 'departureDate', state.trip.departureDate, 'type="date" min="2029-01-01" max="2029-12-31"')}<label>Estação favorita<select name="selectedSeason">${opt('', 'Ainda vamos escolher', state.trip.selectedSeason)}${seasons.map((v) => opt(v.id, v.name, state.trip.selectedSeason)).join('')}</select></label><label>Origem<input value="Brasília, Brasil" readonly /></label></div><p class="small muted spaced">A duração não redistribui as noites das bases nem apaga atividades. Você poderá ajustar as diferenças no roteiro. A hospedagem mantém a diária cotada.</p><div class="button-row"><button class="btn" type="submit">Salvar configurações</button></div></form>`,
+    `<h2 id="modal-title">A nossa viagem</h2><p class="small muted">2029 está no horizonte. O resto, decidimos juntos.</p><form id="settings-form"><div class="form-grid">${field('Viajantes', 'travelers', state.trip.travelers, 'type="number" min="1" max="50" step="1" required')}${field('Dias', 'days', state.trip.days, 'type="number" min="1" max="90" step="1" required')}${field('Noites', 'nights', state.trip.nights, 'type="number" min="0" max="89" step="1" required')}${field('Data de embarque · opcional', 'departureDate', state.trip.departureDate, `type="date" min="${state.trip.year}-01-01" max="${state.trip.year}-12-31"`)}<label>Estação favorita<select name="selectedSeason">${opt('', 'Ainda vamos escolher', state.trip.selectedSeason)}${seasons.map((v) => opt(v.id, v.name, state.trip.selectedSeason)).join('')}</select></label>${field('Origem', 'departureCity', state.trip.departureCity, 'required maxlength="150"')}${field('Ano', 'year', state.trip.year, 'type="number" min="2027" max="2040" step="1" required')}</div><p class="small muted spaced">A duração não redistribui as noites das bases nem apaga atividades. Você poderá ajustar as diferenças no roteiro. A hospedagem mantém a diária cotada.</p><div class="button-row"><button class="btn" type="submit">Salvar configurações</button></div></form>`,
   );
 }
 function activityForm(id, day) {
@@ -428,11 +447,12 @@ const actions = {
     const d = destinations.find((d) => d.id === el.dataset.id);
     if (!d) return;
     showModal(
-      `<h2 id="modal-title">Levar ${d.name} para o roteiro</h2><p class="small muted">Roteiro: ${routeNames[state.selectedRoute]}. Nenhuma tarifa ou duração é adicionada automaticamente.</p><form id="destination-form" data-id="${d.id}"><div class="form-grid"><label>Adicionar visita no dia<select name="day">${Array.from({ length: state.trip.days }, (_, i) => opt(i + 1, `Dia ${i + 1}`, 1)).join('')}</select></label>${field('Estimativa por pessoa · R$', 'cost', 0, 'type="number" min="0" max="10000000" step="0.01" required')}<label class="full" style="flex-direction:row;align-items:center"><input type="checkbox" name="asBase" /> Criar também uma base de hospedagem (0 noites para distribuir)</label></div><div class="button-row"><button class="btn" type="submit">Adicionar ao roteiro</button></div></form>`,
+      `<h2 id="modal-title">Levar ${d.name} para o roteiro</h2><p class="small muted">Roteiro: ${routeName(state.selectedRoute)}. Nenhuma tarifa ou duração é adicionada automaticamente.</p><form id="destination-form" data-id="${d.id}"><div class="form-grid"><label>Adicionar visita no dia<select name="day">${Array.from({ length: state.trip.days }, (_, i) => opt(i + 1, `Dia ${i + 1}`, 1)).join('')}</select></label>${field('Estimativa por pessoa · R$', 'cost', 0, 'type="number" min="0" max="10000000" step="0.01" required')}<label class="full" style="flex-direction:row;align-items:center"><input type="checkbox" name="asBase" /> Criar também uma base de hospedagem (0 noites para distribuir)</label></div><div class="button-row"><button class="btn" type="submit">Adicionar ao roteiro</button></div></form>`,
     );
   },
   'choose-route'(el) {
     state.selectedRoute = el.dataset.id;
+    state.routeChosen = true;
     persist();
     closeModal();
     if (activeRoute === 'itinerary') render();
@@ -447,13 +467,18 @@ const actions = {
     );
   },
   'confirm-restore-route'() {
-    state.routes[state.selectedRoute] = makeRoute(state.selectedRoute);
+    state.routes[state.selectedRoute] =
+      state.selectedRoute === 'personalized' && state.planner.baselineRoute
+        ? JSON.parse(JSON.stringify(state.planner.baselineRoute))
+        : makeRoute(state.selectedRoute);
+    state.routeChosen = true;
     persist();
     closeModal();
     render();
     toast('Roteiro original restaurado.');
   },
   'add-base'() {
+    state.routeChosen = true;
     state.routes[state.selectedRoute].bases.push({
       id: uid(),
       city: 'Nova base',
@@ -464,6 +489,7 @@ const actions = {
     render();
   },
   'remove-base'(el) {
+    state.routeChosen = true;
     state.routes[state.selectedRoute].bases.splice(Number(el.dataset.id), 1);
     persist();
     render();
@@ -476,6 +502,7 @@ const actions = {
     if (day) activityForm(el.dataset.id, day.day);
   },
   'activity-favorite'(el) {
+    state.routeChosen = true;
     const { activity } = findActivity(el.dataset.id);
     if (activity) {
       activity.favorite = !activity.favorite;
@@ -484,6 +511,7 @@ const actions = {
     }
   },
   'activity-remove'(el) {
+    state.routeChosen = true;
     const { day } = findActivity(el.dataset.id);
     if (day) {
       day.activities = day.activities.filter((a) => a.id !== el.dataset.id);
@@ -648,6 +676,7 @@ const actions = {
   'confirm-import'() {
     if (!ui.pendingImport) return;
     state = ui.pendingImport;
+    plannerController?.reset();
     delete ui.pendingImport;
     persist();
     closeModal();
@@ -789,6 +818,7 @@ document.addEventListener('change', async (event) => {
   }
   if (el.hasAttribute('data-route-select')) {
     state.selectedRoute = el.value;
+    state.routeChosen = true;
     persist();
     render();
   }
@@ -798,6 +828,7 @@ document.addEventListener('change', async (event) => {
     render();
   }
   if (el.dataset.base !== undefined) {
+    state.routeChosen = true;
     if (!el.validity.valid) return;
     const base = state.routes[state.selectedRoute].bases[Number(el.dataset.base)];
     base[el.dataset.field] =
@@ -854,6 +885,8 @@ document.addEventListener('submit', (event) => {
         ...state,
         trip: {
           ...state.trip,
+          year: num('year'),
+          departureCity: get('departureCity'),
           travelers: num('travelers'),
           days: num('days'),
           nights: num('nights'),
@@ -871,6 +904,7 @@ document.addEventListener('submit', (event) => {
       break;
     }
     case 'activity-form': {
+      state.routeChosen = true;
       const { activity, day } = findActivity(id);
       const target = ensureDay(num('day'));
       if (activity) {
@@ -887,11 +921,13 @@ document.addEventListener('submit', (event) => {
       break;
     }
     case 'move-form': {
+      state.routeChosen = true;
       ensureDay(num('day'));
       moveActivity(state.routes[state.selectedRoute], id, num('day'));
       break;
     }
     case 'destination-form': {
+      state.routeChosen = true;
       const d = destinations.find((d) => d.id === id);
       if (!d) return;
       ensureDay(num('day')).activities.push({
@@ -1008,6 +1044,7 @@ document.addEventListener('drop', (event) => {
   const day = event.target.closest('.day-card');
   if (day && draggedId) {
     event.preventDefault();
+    state.routeChosen = true;
     ensureDay(Number(day.dataset.day));
     moveActivity(state.routes[state.selectedRoute], draggedId, Number(day.dataset.day));
     persist();
@@ -1023,9 +1060,9 @@ function syncSidebar() {
   const sidebar = document.querySelector('.sidebar');
   if (sidebar)
     sidebar.inert =
-      matchMedia('(max-width:760px)').matches && !document.body.classList.contains('menu-open');
+      matchMedia('(max-width:1024px)').matches && !document.body.classList.contains('menu-open');
 }
-matchMedia('(max-width:760px)').addEventListener('change', syncSidebar);
+matchMedia('(max-width:1024px)').addEventListener('change', syncSidebar);
 document.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     hideSearch();
@@ -1039,7 +1076,9 @@ document.addEventListener('keydown', (event) => {
     maps?.resizeMaps();
   }
   if (event.key === 'Tab' && document.body.classList.contains('menu-open')) {
-    const links = [...document.querySelectorAll('.sidebar a')],
+    const links = [
+        ...document.querySelectorAll('.sidebar a, .sidebar summary, .sidebar button'),
+      ].filter((el) => el.getClientRects().length && !el.disabled),
       first = links[0],
       last = links.at(-1);
     if (event.shiftKey && document.activeElement === first) {
@@ -1070,6 +1109,18 @@ window.addEventListener('hashchange', () => {
 window.addEventListener('beforeunload', () => {
   clearTimeout(notesTimer);
   saveState(storage, state);
+});
+plannerController = connectPlanner({
+  getState: () => state,
+  setState: (next) => {
+    state = next;
+  },
+  ui,
+  persist,
+  render,
+  icons: refreshIcons,
+  showModal,
+  closeModal,
 });
 shell();
 render().then(syncSidebar);

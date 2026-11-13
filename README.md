@@ -20,11 +20,21 @@ npm run build      # artefato estático em dist/
 npm run preview    # conferir o build localmente
 ```
 
-Para instalar o navegador dos testes, se necessário: `npx playwright install chromium`. A suíte inicia seu próprio servidor na porta 5173; ele é encerrado ao concluir. Capturas visuais são geradas em `test-results/`. Para verificar os caminhos de produção em um subdiretório, rode `npm run build && npm run test:production`. Se quiser usar um Chromium já instalado, defina `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` com o caminho do executável. Use `npm run format` ou `npm run format:check` para a formatação.
+Para instalar o navegador dos testes, se necessário: `npx playwright install chromium`. A suíte inicia seu próprio servidor na porta 5173; ele é encerrado ao concluir. Os testes existentes continuam gerando capturas em `test-results/`. O novo fluxo também salva Home, seis etapas e resultado em `docs/screenshots/`, nas larguras 1440, 768 e 390 px. Para verificar os caminhos de produção em um subdiretório, rode `npm run build && npm run test:production`. Se quiser usar um Chromium já instalado, defina `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` com o caminho do executável. Use `npm run format` ou `npm run format:check` para a formatação.
+
+## O novo começo
+
+`#home` recebe o grupo com uma composição editorial. O botão **Vamos planejar nossa viagem** abre `#planner/1`, um wizard de seis etapas com progresso salvo, campos opcionais, interesses e até três prioridades. `#recommendations` mostra uma sugestão revisável; somente **Usar e editar este roteiro** aplica as escolhas.
+
+A navegação principal tem cinco destinos: Início, Criar viagem, Meu roteiro, Explorar Japão e Orçamento. Descobertas e organização ficam em grupos recolhíveis. Em telas de até 1024 px, essas cinco ações aparecem também na navegação inferior. `#explore` apresenta as ferramentas por assunto.
+
+O wizard edita um rascunho separado da viagem ativa. Gerar ou rejeitar uma sugestão não altera o roteiro atual. Aceitar uma nova sugestão mantém os cinco modelos e pede confirmação quando há planejamento anterior; a versão ativa fica acessível em **Meu roteiro → Versões anteriores**. O ano começa em 2029 e pode ser ajustado entre 2027 e 2040, sem alterar as séries históricas ou prometer regras para esses anos.
+
+Os motivos de cada recomendação são visíveis. A lógica é determinística, com conteúdo do próprio projeto: não há chamada a modelo de IA, nem cálculo de preço ou trajeto real.
 
 ## O que funciona
 
-As 14 seções são acessíveis pela sidebar ou menu móvel, com navegação por hash sem recarregar a aplicação. Há busca global, tema escuro, relógio do Japão e contagem de dias somente depois de definir embarque.
+As ferramentas anteriores continuam acessíveis pela sidebar, pelo explorador ou pelo menu móvel, com navegação por hash sem recarregar a aplicação. Busca global, tema escuro, gráficos, mapas, dados oficiais, favoritos e exportações foram preservados. O relógio do Japão aparece no cabeçalho e no fim da Home.
 
 - Quatro estações com clima de seis cidades, cuidados, roupas, sugestões e favoritos.
 - Comparação dos 12 meses: temperatura, precipitação, umidade, chegadas internacionais e modelo editorial com pesos editáveis. Os dados tabulares acompanham os gráficos.
@@ -62,7 +72,8 @@ Este trabalho prepara os arquivos para deploy; executar o build local não publi
 
 ```text
 src/
-  css/style.css            # variáveis, componentes, responsive, impressão e temas
+  css/style.css           # componentes e ferramentas existentes
+  css/redesign.css        # Home editorial, wizard, resultado e navegação
   data/
     climate.json          # JMA, normais 1991–2020, seis estações
     tourism.json          # JNTO, chegadas definitivas de 2025
@@ -71,9 +82,18 @@ src/
     images.json           # autores, alt, licença e origem das fotos
     destinations.js       # pontos aproximados e conteúdo de destinos
     planning.js           # estações, tendências e listas editoriais
+    preferences.js        # interesses, prioridades e ritmos de viagem
   js/
-    main.js               # navegação, formulários e ações
-    views.js              # componentes e telas
+    main.js               # integração e ações das ferramentas existentes
+    views.js              # telas das ferramentas e registro das rotas
+    components.js         # componentes HTML compartilhados
+    navigation.js         # shell e grupos de navegação
+    welcome.js            # Home e hub de exploração
+    planner-views.js       # seis etapas, resultado e histórico
+    planner-controller.js # interações e sincronização do wizard
+    planner-state.js      # perfil, validações e migração
+    planner-actions.js    # aceitação e restauração protegidas
+    recommendations.js    # recomendações e distribuição de noites, sem DOM
     budget.js             # matemática financeira, sem DOM
     itinerary.js          # rotas, movimento e validações, sem DOM
     storage.js            # schema, versão, importação e localStorage
@@ -100,7 +120,7 @@ Chart.js e Leaflet são carregados sob demanda; Lucide importa apenas os ícones
 
 **Imagens:** substitua ou acrescente fotos em `public/images`, usando arquivos otimizados e mantendo autor, URL de origem, licença, licença URL e alt em `images.json`. As oito fotos atuais usam a [licença Unsplash](https://unsplash.com/license); créditos completos na seção Fontes & sobre. As bibliotecas mantêm suas licenças em `node_modules` e em seus repositórios oficiais. Não substitua por imagens de busca sem verificar licença.
 
-**Tema:** variáveis no começo de `style.css`; sobrescritas do modo escuro em `[data-theme=dark]`. Textos editoriais ficam em `planning.js` e `views.js`. Fontes vêm do Google Fonts, com fallback de sistema.
+**Tema:** variáveis no começo de `style.css`, camada editorial em `redesign.css` e sobrescritas do modo escuro em `[data-theme=dark]`. Textos das ferramentas ficam em `planning.js`/`views.js`; Home e wizard ficam nos módulos correspondentes. Fontes vêm do Google Fonts, com fallback de sistema.
 
 ## Matemática e limites
 
@@ -114,8 +134,19 @@ O número de noites das bases e a duração configurada são validados separadam
 
 ## Persistência, backup e privacidade
 
-A chave é `japan-diary-planner-v1`, schema versão 1. Os dados ficam no navegador e na origem atual (host/porta). Não há conta, backend ou sincronização. Limpar os dados do navegador remove o planejamento. Uma mudança de domínio cria um armazenamento diferente.
+A chave atual é `japan-diary-planner-v2`, schema versão 2. Se ela ainda não existe, a aplicação lê `japan-diary-planner-v1`, valida e migra o conteúdo. A chave antiga é mantida intacta; novos salvamentos usam apenas v2. Backups JSON das versões 1 e 2 são aceitos. A rota interna padrão de inverno não é tratada como decisão do usuário. Um roteiro anterior modificado ou uma rota diferente do padrão é reconhecido como planejamento existente. Os dados ficam no navegador e na origem atual (host/porta). Não há conta, backend ou sincronização. Limpar os dados do navegador remove o planejamento. Uma mudança de domínio cria um armazenamento diferente.
 
-Em **Checklist & notas** ou **Fontes & sobre**, use **Fazer backup / Exportar planejamento** e depois **Importar cópia** no outro dispositivo. Se houver estado corrompido, uma cópia é preservada em `japan-diary-planner-v1-recovery` quando o armazenamento permitir. A importação valida versão, dados financeiros e roteiros, aceita até 2 MB e exige revisar antes de substituir. Exportações específicas de orçamento/roteiro são para consulta; use o **backup completo** para importar. CSV usa separador `;` e proteção contra interpretação de fórmulas.
+Em **Checklist & notas** ou **Fontes & sobre**, use **Fazer backup / Exportar planejamento** e depois **Importar cópia** no outro dispositivo. Se houver estado corrompido, uma cópia é preservada em `<chave de origem>-recovery` quando o armazenamento permitir. A importação valida versão, dados financeiros e roteiros, aceita até 2 MB e exige revisar antes de substituir. Exportações específicas de orçamento/roteiro são para consulta; use o **backup completo** para importar. CSV usa separador `;` e proteção contra interpretação de fórmulas.
 
 Notas do projeto anterior (`jp-trip-notes`) são migradas quando ainda não há estado novo. Se o armazenamento estiver bloqueado ou cheio, a interface avisa; exporte o estado antes de sair. Não inclua nomes completos, dados de passaporte ou dados bancários. Backups incluem os valores preenchidos: compartilhe conscientemente com o grupo.
+
+## Como as sugestões funcionam
+
+- Cidades explicitamente selecionadas têm precedência. O agrupamento regional associa algumas visitas a bases (por exemplo, Kyoto/Nara a Osaka), sempre pedindo consulta dos acessos.
+- O ranking soma afinidade de estação e interesses. Uma prioridade recebe peso adicional conforme a posição entre as três escolhidas. Os motivos exibidos diferenciam afinidade com o grupo de uma base de apoio do modelo.
+- O modelo inicial usa os roteiros existentes. Verão com praias inclui Okinawa; verão com natureza pode incluir Hokkaido; inverno mantém opções de neve. Sem estação escolhida, o resultado continua rotulado como uma ideia em aberto.
+- Ritmo tranquilo e perfil econômico limitam trocas de base. Duração curta reduz bases; cidades desejadas que não couberem continuam nas preferências e são explicadas nas observações. O sistema não promete menor tarifa nem deslocamento viável sem consulta.
+- As noites são distribuídas pelo método dos maiores restos. A soma corresponde ao total configurado; as atividades têm pausas e começam com custo zero. O ritmo intenso acrescenta ideias opcionais, sem preencher horários ou reservar ingressos.
+- A sugestão financeira só aparece com cenário ou valores escolhidos. Aceitar um orçamento preserva saldo poupado e início da poupança. Escolher “Ainda não sabemos” mantém os valores já existentes na ferramenta avançada.
+
+A migração, o motor de recomendações, a aceitação e o histórico têm testes próprios. Os testes Playwright cobrem navegação anterior/próximo, opcionais, recuperação do progresso, Okinawa, neve, edição, importação v1 e os tamanhos de tela solicitados. Veja [a documentação do redesign](docs/redesign.md) e [as capturas](docs/screenshots/).
