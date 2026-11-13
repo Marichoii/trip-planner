@@ -1,0 +1,86 @@
+{
+  "lastVerified": "2026-11-13",
+  "note": "Fotografias reais baixadas para uso editorial neste planejador, sob a licença gratuita do Unsplash. Arquivos locais redimensionados pelo serviço de imagens da fonte, sem geração por IA. Os créditos são mantidos como cortesia. Não são imagens Unsplash+. Não representam reservas, disponibilidade ou fotografias de todos os destinos citados.",
+  "images": [
+    {
+      "id": "hero",
+      "file": "images/hero.jpg",
+      "alt": "Pagode Yasaka entre casas tradicionais de uma rua de Kyoto, fotografado pela manhã.",
+      "author": "Filipe Freitas",
+      "source": "https://unsplash.com/photos/a-narrow-street-with-a-pagoda-in-the-background-yQvYgnh9XEg",
+      "original": "https://images.unsplash.com/photo-1717496376319-ee3d354ac2d8",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "spring",
+      "file": "images/spring.jpg",
+      "alt": "Monte Fuji coberto de neve ao fundo de um riacho cercado por cerejeiras floridas.",
+      "author": "Gaku Suyama",
+      "source": "https://unsplash.com/photos/mount-fuji-seen-through-cherry-blossoms-and-a-stream-o8c1em1RybI",
+      "original": "https://images.unsplash.com/photo-1775970406840-d523776a3a2a",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "summer",
+      "file": "images/summer.jpg",
+      "alt": "Pequena praia de areia clara e água turquesa em Miyakojima, Okinawa, vista entre a vegetação.",
+      "author": "Roméo A.",
+      "source": "https://unsplash.com/photos/tropical-coastline-with-lush-greenery-and-clear-turquoise-water-g7Y1TgK-vhU",
+      "original": "https://images.unsplash.com/photo-1778402285674-bb83dbda5e1d",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "autumn",
+      "file": "images/autumn.jpg",
+      "alt": "Edificação tradicional de Kyoto sob uma árvore de folhas vermelhas e alaranjadas no outono.",
+      "author": "Hat Trick",
+      "source": "https://unsplash.com/photos/traditional-japanese-building-surrounded-by-vibrant-autumn-foliage-sfYZYMaFOpM",
+      "original": "https://images.unsplash.com/photo-1769343273593-08dff07c346d",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "winter",
+      "file": "images/winter.jpg",
+      "alt": "Caminho ladeado por árvores e montes de neve em Shirogane, Biei, Hokkaido.",
+      "author": "Natalie Su",
+      "source": "https://unsplash.com/photos/a-person-riding-skis-down-a-snow-covered-road-R5UuDkZDNl4",
+      "original": "https://images.unsplash.com/photo-1673751243703-c997afe9e7c4",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "tokyo",
+      "file": "images/tokyo.jpg",
+      "alt": "Rua de Tóquio iluminada por letreiros de neon à noite.",
+      "author": "Aria W",
+      "source": "https://unsplash.com/photos/neon-lights-illuminate-a-busy-city-street-at-night-C-A85qKMl1I",
+      "original": "https://images.unsplash.com/photo-1745869237012-c1545775f0e0",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "osaka",
+      "file": "images/osaka.jpg",
+      "alt": "Pedestres e letreiros comerciais em Dotonbori, Osaka.",
+      "author": "Roméo A.",
+      "source": "https://unsplash.com/photos/a-crowd-of-people-walking-down-a-street-next-to-tall-buildings-U4CKBEYR2nc",
+      "original": "https://images.unsplash.com/photo-1648129423661-a8985f47a7ff",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    },
+    {
+      "id": "food",
+      "file": "images/food.jpg",
+      "alt": "Tigela de ramen com macarrão, caldo e acompanhamentos em restaurante de Osaka.",
+      "author": "Crystal Jo",
+      "source": "https://unsplash.com/photos/ramen-dish-on-brown-ceramic-bowl-TWTxHN2QIGc",
+      "original": "https://images.unsplash.com/photo-1591325418441-ff678baf78ef",
+      "license": "Unsplash License",
+      "licenseUrl": "https://unsplash.com/license"
+    }
+  ]
+}

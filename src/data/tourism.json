@@ -1,0 +1,18 @@
+{
+  "year": 2025,
+  "period": "janeiro–dezembro de 2025",
+  "source": "https://www.jnto.go.jp/statistics/data/_files/20261021_1615-4.pdf",
+  "sourceIndex": "https://www.jnto.go.jp/statistics/data/visitors-statistics/",
+  "sourceName": "Japan National Tourism Organization (JNTO)",
+  "sourcePage": 2,
+  "lastVerified": "2026-11-13",
+  "kind": "historical",
+  "status": "Valores definitivos de 2025, conforme nota 2 da página 2 da tabela publicada em 21/10/2026.",
+  "unit": "pessoas",
+  "arrivals": [
+    3781629, 3258491, 3497755, 3909128, 3693587, 3377985, 3437118, 3428406, 3267228, 3896524,
+    3517659, 3617791
+  ],
+  "annualTotal": 42683301,
+  "note": "Chegadas de visitantes estrangeiros ao Japão em 2025 (linha Total), de janeiro a dezembro. Inclui finalidades além de lazer, como negócios e estudos; não representa pessoas únicas, turismo doméstico, filas em atrações ou ocupação de hotéis. As chegadas internacionais sozinhas não medem lotação no Obon ou na Golden Week. Não é previsão para 2029. Fonte: 日本政府観光局（JNTO）."
+}

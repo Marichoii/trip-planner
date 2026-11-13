@@ -1,0 +1,237 @@
+{
+  "lastVerified": "2026-11-13",
+  "notice": "Fontes oficiais consultadas em 13/11/2026. Regras atuais e mudanças anunciadas não garantem as condições de entrada ou os tributos de 2029. Revalide antes de comprar e novamente antes do embarque. A isenção de visto brasileira atual tem prazo até 29/09/2029; viagens posteriores precisam de nova conferência.",
+  "items": [
+    {
+      "id": "visa",
+      "title": "Brasileiros: até 90 dias com passaporte eletrônico",
+      "status": "Em vigor",
+      "effectiveDate": "2026-09-30",
+      "expiresAt": "2029-09-29",
+      "summary": "A isenção para curta permanência exige passaporte comum brasileiro com chip e não permite trabalho remunerado. A troca de notas de 2026 prorroga a medida até 29 de setembro de 2029, inclusive. A entrada continua sujeita à análise migratória.",
+      "action": "Conferir o passaporte de cada viajante. Para outubro, novembro ou dezembro de 2029, verificar uma nova prorrogação ou o visto exigido antes de comprar passagens.",
+      "source": {
+        "name": "Itamaraty · acordo de prorrogação Brasil–Japão",
+        "url": "https://concordia.itamaraty.gov.br/acordo/13297?TipoAcordo=BL&tipoPesquisa=2"
+      },
+      "additionalSources": [
+        {
+          "name": "Embaixada do Japão no Brasil · público e atividades permitidas",
+          "url": "https://www.br.emb-japan.go.jp/itpr_pt/11_000001_00627.html"
+        }
+      ],
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "jesta",
+      "title": "JESTA: lei promulgada; início operacional pendente",
+      "status": "Mudança anunciada",
+      "effectiveDate": null,
+      "deadline": "2029-03-31",
+      "summary": "A Lei nº 32 de 2026, promulgada em 5 de junho de 2026, criou a base do sistema eletrônico de autorização de viagem. As disposições do JESTA entram em vigor em data definida por decreto, até 31 de março de 2029. A data exata de operação não foi confirmada nesta verificação.",
+      "action": "Consultar a Imigração japonesa sobre início, elegibilidade e procedimento. Não comprar autorizações em sites intermediários nem tratar o prazo legal como data de lançamento já confirmada.",
+      "source": {
+        "name": "Immigration Services Agency · revisão da lei de 2026",
+        "url": "https://www.moj.go.jp/isa/01_00643.html"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "tax-free",
+      "title": "Tax-free: compra com imposto e reembolso posterior",
+      "status": "Em vigor",
+      "effectiveDate": "2026-11-01",
+      "summary": "Para compras elegíveis feitas a partir de 1º de novembro de 2026, o consumidor paga o preço com imposto. O reembolso é feito após a confirmação alfandegária de que os produtos estão saindo do Japão. Há condições de elegibilidade e procedimentos próprios.",
+      "action": "Guardar recibos e manter os bens disponíveis para inspeção. Conferir o procedimento no aeroporto internacional de saída antes de despachar as malas; não descontar o reembolso como receita garantida no orçamento.",
+      "source": {
+        "name": "Japan Customs · Tax Exemption (Refund) Program",
+        "url": "https://www.customs.go.jp/kaigairyoko/taxrefund.htm"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "departure-tax",
+      "title": "Taxa nacional de saída: ¥3.000",
+      "status": "Em vigor",
+      "effectiveDate": "2026-07-01",
+      "summary": "A taxa internacional de turismo é de ¥3.000 por saída do Japão, com exceções legais e regra transitória para certos bilhetes emitidos até 30/06/2026. Em transporte comercial, a companhia normalmente recolhe o tributo.",
+      "action": "Verificar se o valor já está nas taxas da passagem para evitar contar a mesma despesa duas vezes. Reconsultar a tarifa ao cotar os voos de 2029.",
+      "source": {
+        "name": "National Tax Agency · International Tourist Tax",
+        "url": "https://www.nta.go.jp/english/taxes/indirect/basic_knowledge.htm"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "osaka-tax",
+      "title": "Osaka: imposto de hospedagem por pessoa e noite",
+      "status": "Em vigor",
+      "effectiveDate": "2025-09-01",
+      "summary": "Sobre a base tributável por pessoa/noite: menos de ¥5.000 é isento; de ¥5.000 a menos de ¥15.000 paga ¥200; de ¥15.000 a menos de ¥20.000 paga ¥400; a partir de ¥20.000 paga ¥500. A base inclui certas cobranças obrigatórias e exclui refeições.",
+      "action": "Solicitar o total final para os seis hóspedes, incluindo limpeza e tributos. Não aplicar a faixa ao preço do apartamento inteiro sem identificar a base por hóspede.",
+      "source": {
+        "name": "Governo da Prefeitura de Osaka · hospedagem",
+        "url": "https://www.pref.osaka.lg.jp/o050040/zei/alacarte/osakafunoshukuhakushisetsunishukuhakusuruminasama.html"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "kyoto-tax",
+      "title": "Kyoto: faixas de hospedagem revistas em março de 2026",
+      "status": "Em vigor",
+      "effectiveDate": "2026-03-01",
+      "summary": "Por pessoa/noite, as faixas são: diária inferior a ¥6.000 → ¥200; ¥6.000–19.999 → ¥400; ¥20.000–49.999 → ¥1.000; ¥50.000–99.999 → ¥4.000; ¥100.000 ou mais → ¥10.000. Usar a base definida pela cidade.",
+      "action": "Comparar pernoitar em Kyoto com bate-voltas desde Osaka usando o custo final de hospedagem e transporte, sem presumir que uma opção sempre será mais barata.",
+      "source": {
+        "name": "Kyoto City Tourism Association · novas faixas",
+        "url": "https://kyoto.travel/en/news/tax-change/"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "tokyo-tax",
+      "title": "Tóquio: mudança anunciada para abril de 2027",
+      "status": "Mudança anunciada",
+      "effectiveDate": "2027-04-01",
+      "summary": "A página oficial prevê imposto de hospedagem de 3% sobre a diária tributável por pessoa/noite, isentando valores inferiores a ¥13.000, a partir de 01/04/2027. O alcance passa a incluir outras modalidades de alojamento, como minpaku.",
+      "action": "Pedir à hospedagem a base tributável e o imposto calculado. Para a viagem de 2029, conferir se a regra e a data de vigência continuam as mesmas.",
+      "source": {
+        "name": "Tokyo Metropolitan Government · Accommodation Tax",
+        "url": "https://www.tax.metro.tokyo.lg.jp/kazei/leisure/shuk/2"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "brazil-customs",
+      "title": "Retorno ao Brasil: cota aérea de US$ 1.000",
+      "status": "Em vigor",
+      "effectiveDate": null,
+      "summary": "Na chegada por avião ou navio, certos bens da bagagem acompanhada contam com cota de US$ 1.000 por viajante. Existem limites de quantidade e critérios específicos para bens de uso pessoal. A cota é individual e não se soma entre amigos.",
+      "action": "Organizar recibos e a wishlist de cada pessoa. Verificar a necessidade de e-DBV; não tratar todo eletrônico ou presente como bem de uso pessoal automaticamente.",
+      "source": {
+        "name": "Receita Federal · isenções, cotas e limites",
+        "url": "https://www.gov.br/receitafederal/pt-br/assuntos/aduana-e-comercio-exterior/viagens-internacionais/guia-do-viajante/entrada-no-brasil/cota-de-isencao-duty-free-e-bagagem-tributavel"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "medicines",
+      "title": "Medicamentos: conferir o princípio ativo antes de viajar",
+      "status": "Em vigor",
+      "effectiveDate": null,
+      "summary": "Medicamentos sujeitos a controle especial no Japão podem exigir autorização prévia de importação e exportação; alguns são proibidos. Receita brasileira, quantidade pequena ou uso pessoal não garantem autorização para todos os princípios ativos.",
+      "action": "Conferir cada princípio ativo com o MHLW e a autoridade competente do aeroporto. Solicitar os documentos necessários com antecedência e levar receita e embalagens originais.",
+      "source": {
+        "name": "MHLW · Narcotics Control Department",
+        "url": "https://www.ncd.mhlw.go.jp/en/application2.html"
+      },
+      "additionalSources": [
+        { "name": "MHLW · Import Confirmation", "url": "https://impconf.mhlw.go.jp/about_en.htm" }
+      ],
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "minpaku",
+      "title": "Apartamentos: confirmar licença e capacidade autorizada",
+      "status": "Em vigor",
+      "effectiveDate": null,
+      "summary": "A oferta de hospedagem residencial deve ter licença de hotelaria, notificação sob a lei de hospedagem residencial ou certificação de zona especial. Um anúncio numa plataforma não substitui a verificação da regularidade e do número de hóspedes.",
+      "action": "Pedir o número de licença/notificação, confirmar seis hóspedes autorizados, camas reais, regras do prédio e taxas finais antes de reservar.",
+      "source": {
+        "name": "Japan Tourism Agency · minpaku legalizado",
+        "url": "https://www.mlit.go.jp/kankocho/minpaku/business/host/announcement.html"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "baggage",
+      "title": "Shinkansen: malas grandes precisam de planejamento",
+      "status": "Em vigor",
+      "effectiveDate": null,
+      "summary": "Nos serviços abrangidos do Tokaido, Sanyo e Kyushu Shinkansen, bagagem de grandes dimensões requer reserva de assento com espaço apropriado. A regra usa a soma das três dimensões; consultar o operador para o limite de 160–250 cm e para a linha escolhida.",
+      "action": "Medir todas as malas e verificar a reserva exigida no bilhete. O sistema não calcula automaticamente franquias de ônibus, aviões ou trens de outras linhas.",
+      "source": {
+        "name": "smartEX · Taking Baggage Onboard",
+        "url": "https://smart-ex.jp/en/entraining/oversized-baggage/"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "driving",
+      "title": "Dirigir: CNH e PID não têm validade automática no Japão",
+      "status": "Em vigor",
+      "effectiveDate": null,
+      "summary": "O Japão reconhece permissões internacionais emitidas conforme a Convenção de Genebra de 1949 e outras hipóteses específicas de habilitação. Uma permissão emitida sob outra convenção não é aceita apenas por ser internacional.",
+      "action": "Confirmar com a autoridade japonesa se a documentação de cada motorista é reconhecida antes de cogitar aluguel em Okinawa ou Hokkaido. Manter ônibus, táxi e tours como alternativas no orçamento.",
+      "source": {
+        "name": "Tokyo Metropolitan Police · validade de PID",
+        "url": "https://www.keishicho.metro.tokyo.lg.jp/multilingual/english/finding_services/faq/drivers_license/drivers_license01.html"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "passport",
+      "title": "Identificação: levar o passaporte original",
+      "status": "Em vigor",
+      "effectiveDate": null,
+      "summary": "Visitantes estrangeiros de curta permanência devem portar o passaporte e apresentá-lo quando solicitado pela autoridade competente. A cópia digital é útil como backup, mas não substitui a obrigação de portar o documento.",
+      "action": "Usar uma bolsa segura para o original e manter cópia separada. Não guardar números de passaporte no campo de notas compartilhadas do grupo.",
+      "source": {
+        "name": "Immigration Services Agency · porte de passaporte",
+        "url": "https://www.moj.go.jp/isa/applications/procedures/ryoken_00001.html?lang=ja"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "onsen",
+      "title": "Onsen, tatuagens e regras de cada estabelecimento",
+      "status": "Regra do estabelecimento",
+      "effectiveDate": null,
+      "summary": "As políticas para tatuagens e uso dos banhos variam por instalação. Alguns locais oferecem banho privado ou aceitam coberturas; outros restringem a entrada. São condições do estabelecimento, não uma proibição nacional de tatuagens.",
+      "action": "Consultar as regras do onsen escolhido. Lavar o corpo antes de entrar e manter toalhas fora da água. Considerar banho privativo para maior flexibilidade.",
+      "source": {
+        "name": "Japan Tourism Agency · perguntas sobre ryokan",
+        "url": "https://www.mlit.go.jp/kankocho/ryokan/list_en.html"
+      },
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "insurance",
+      "title": "Seguro: escolher coberturas para o roteiro real",
+      "status": "Orientação de viagem",
+      "effectiveDate": null,
+      "summary": "A JNTO recomenda fortemente seguro de viagem e orienta conferir despesas médicas, doenças preexistentes, atividades cobertas e forma de pagamento do atendimento. Esta é uma recomendação de planejamento; não apresentamos o seguro como obrigação nacional de entrada para todos os turistas.",
+      "action": "Comparar limites, franquias, atendimento de saúde, repatriação, resgate e cancelamento/interrupção. Se houver esqui, snowboard, snorkel ou mergulho, pedir confirmação expressa da cobertura e das exclusões. Não presumir que o seguro do cartão, do parque ou da operadora cobre essas atividades.",
+      "source": {
+        "name": "JNTO · Travel Insurance in Japan",
+        "url": "https://faq.japan-travel.jnto.go.jp/en/plan/travel-insurance-in-japan/"
+      },
+      "additionalSources": [
+        {
+          "name": "JNTO · natureza, praias e esportes de inverno com responsabilidade",
+          "url": "https://www.japan.travel/en/responsible-travel-guide/enjoying-nature-responsibly/"
+        }
+      ],
+      "verifiedAt": "2026-11-13"
+    },
+    {
+      "id": "local-etiquette",
+      "title": "Respeito local: transporte, templos, lixo e espaços privados",
+      "status": "Orientação de viagem",
+      "effectiveDate": null,
+      "summary": "A JNTO recomenda voz baixa no transporte público, cuidado com malas e circulação, descarte correto de resíduos e respeito a moradores, patrimônio e propriedade privada. Costumes de convivência e regras de cada local não devem ser apresentados como uma única lei nacional de etiqueta.",
+      "action": "Evitar chamadas no trem, respeitar filas e manter passagens livres. Levar o lixo até uma lixeira adequada e seguir a separação local. Em templos e santuários, seguir placas, horários e restrições de fotografia; não entrar em áreas fechadas ou privadas e pedir permissão para fotografar pessoas.",
+      "source": {
+        "name": "JNTO · Traveling Mindfully",
+        "url": "https://www.japan.travel/en/responsible-travel-guide/traveling-mindfully/"
+      },
+      "additionalSources": [
+        {
+          "name": "Japan Tourism Agency · Travel Etiquette for the Future",
+          "url": "https://www.mlit.go.jp/kankocho/responsible-traveler/en.html"
+        }
+      ],
+      "verifiedAt": "2026-11-13"
+    }
+  ]
+}
