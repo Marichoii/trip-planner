@@ -11,12 +11,14 @@ import { calculateBudget } from './budget.js';
 
 export function sharedProfile(state, operation) {
   const draft =
-    operation === 'itinerary'
-      ? state.planner.result?.profile || state.planner.draft
-      : state.planner.acceptedProfile || state.planner.draft;
+    operation === 'coach' || (operation === 'itinerary' && state.planner.dirty)
+      ? state.planner.draft
+      : operation === 'itinerary'
+        ? state.planner.result?.profile || state.planner.draft
+        : state.planner.acceptedProfile || state.planner.draft;
   const t = state.trip;
   const source =
-    operation === 'itinerary'
+    operation === 'itinerary' || operation === 'coach'
       ? draft
       : {
           ...draft,
@@ -47,7 +49,9 @@ export function sharedRoute(route) {
   });
 }
 export function sharedBudget(state, profile, operation) {
-  const chosen = state.planner.result?.profile;
+  const chosen = state.planner.dirty
+    ? state.planner.draft
+    : state.planner.result?.profile || state.planner.draft;
   const budget =
     operation === 'itinerary' && chosen && ![null, 'unknown'].includes(chosen.budgetChoice)
       ? chosen.budget

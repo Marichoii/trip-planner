@@ -419,3 +419,46 @@ test('cliente valida entrada, trata falha de rede e cancela sem aplicar', async 
   });
   await assert.rejects(abortClient.request('itinerary', input()), (e) => e.code === 'cancelled');
 });
+
+test('acompanhamento atravessa handler e provider com contrato próprio e perfil mínimo', async () => {
+  const context = {
+    ...input(),
+    step: 3,
+    question: 'Como organizar as pausas?',
+    budgetChoice: 'balanced',
+  };
+  context.profile.travelNotes = 'Jardins e cafés';
+  const advice = {
+    summary: 'Reserve espaço para descansar entre os passeios.',
+    suggestions: [
+      { reason: 'Dá espaço para explorar com calma.', change: { field: 'pace', value: 'calm' } },
+    ],
+    cautions: [],
+  };
+  let captured;
+  const provider = {
+    models: {
+      async generateContent(args) {
+        captured = args;
+        return {
+          text: JSON.stringify(advice),
+          usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 80, totalTokenCount: 180 },
+        };
+      },
+    },
+  };
+  const { handler, calls } = harness({
+    operation: 'coach',
+    generate: (op, body, cfg, signal) => generate(op, body, cfg, signal, provider),
+  });
+  const res = response();
+  await handler(request(context), res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body.data, advice);
+  assert.equal(calls.reserved, 1);
+  assert.equal(calls.released, 1);
+  assert.match(captured.config.systemInstruction, /seis etapas/);
+  assert.equal(captured.config.maxOutputTokens, 1200);
+  assert.equal(JSON.parse(captured.contents).request.profile.travelNotes, 'Jardins e cafés');
+  assert.deepEqual(captured.config.responseJsonSchema, providerSchema('coach'));
+});

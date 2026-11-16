@@ -12,7 +12,7 @@ export function mochiApiPlugin(deps = {}) {
         ...process.env,
       };
       const handlers = new Map(
-        ['session', 'itinerary', 'refine', 'chat', 'analyze'].map((operation) => [
+        ['session', 'itinerary', 'refine', 'chat', 'analyze', 'coach'].map((operation) => [
           '/api/ai/' + operation,
           createHandler(operation, { ...deps, env }),
         ]),

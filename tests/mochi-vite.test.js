@@ -29,9 +29,9 @@ function middleware(env = {}) {
       handle(req, res, () => resolve({ next: true }));
     });
 }
-test('servidor Vite atende as cinco rotas de IA com JSON e mantém bloqueio sem configuração', async () => {
+test('servidor Vite atende as seis rotas de IA com JSON e mantém bloqueio sem configuração', async () => {
   const call = middleware();
-  for (const route of ['session', 'itinerary', 'refine', 'chat', 'analyze']) {
+  for (const route of ['session', 'itinerary', 'refine', 'chat', 'analyze', 'coach']) {
     const response = await call('/api/ai/' + route + '?local=true');
     assert.equal(response.status, 503);
     assert.equal(response.body.error.code, 'disabled');

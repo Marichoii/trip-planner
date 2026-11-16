@@ -28,6 +28,8 @@ export const profileSchema = z
     interests: z.array(interest).max(12),
     priorities: z.array(interest).max(3),
     destinations: z.array(destination).max(29),
+    travelNotes: z.string().trim().max(600).optional().default(''),
+    avoid: z.string().trim().max(300).optional().default(''),
   })
   .superRefine((p, ctx) => {
     const bad =
@@ -78,6 +80,12 @@ const common = {
   additionalPreferences: z.string().trim().max(1000),
 };
 export const requestSchemas = {
+  coach: z.strictObject({
+    ...common,
+    step: integer(1, 6),
+    question: z.string().trim().max(400),
+    budgetChoice: z.enum(['unknown', 'economic', 'balanced', 'comfortable', 'custom']).nullable(),
+  }),
   itinerary: z.strictObject(common),
   refine: z.strictObject({ ...common, route: routeContextSchema, message: text(1200) }),
   analyze: z.strictObject({ ...common, route: routeContextSchema }),
@@ -149,7 +157,30 @@ export const chatSchema = z.strictObject({
   sourceIds: z.array(z.enum(['jnto', 'jma'])).max(2),
   pendingVerification: z.array(text(300)).max(5),
 });
+export const coachChangeSchema = z.discriminatedUnion('field', [
+  z.strictObject({
+    field: z.literal('season'),
+    value: z.enum(['spring', 'summer', 'autumn', 'winter']),
+  }),
+  z.strictObject({ field: z.literal('month'), value: integer(1, 12) }),
+  z.strictObject({ field: z.literal('pace'), value: z.enum(['calm', 'balanced', 'intense']) }),
+  z.strictObject({ field: z.literal('destination'), value: destination }),
+  z.strictObject({ field: z.literal('interest'), value: interest }),
+]);
+export const coachSchema = z.strictObject({
+  summary: text(700),
+  suggestions: z
+    .array(
+      z.strictObject({
+        reason: text(350),
+        change: coachChangeSchema,
+      }),
+    )
+    .max(3),
+  cautions: z.array(text(250)).max(3),
+});
 export const outputSchemas = {
+  coach: coachSchema,
   itinerary: proposalSchema,
   refine: proposalSchema,
   analyze: reviewSchema,
