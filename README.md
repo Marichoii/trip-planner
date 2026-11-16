@@ -1,6 +1,6 @@
-# Japan Travel Planner 2029
+# planner
 
-**Japan Diary 2029 — a little guide to our big adventure.** Um planejador estático em português para seis amigos, com saída de Brasília, 25 dias e 24 noites no Japão em 2029. Datas e estação inicialmente em aberto.
+**planner.** Um planejador estático em português para seis amigos, com saída de Brasília, 25 dias e 24 noites no Japão em 2029. Datas e estação inicialmente em aberto.
 
 ## Executar
 
@@ -25,23 +25,27 @@ Para instalar o navegador dos testes, se necessário: `npx playwright install ch
 
 ## O novo começo
 
-`#home` recebe o grupo com uma composição editorial. O botão **Vamos planejar nossa viagem** abre `#planner/1`, um wizard de seis etapas com progresso salvo, campos opcionais, interesses e até três prioridades. `#recommendations` mostra uma sugestão revisável; somente **Usar e editar este roteiro** aplica as escolhas.
+`#home` abre com uma capa de cartões-postais, um único botão principal e um bilhete com o resumo da viagem. Estações, Mapa, Clima e Meu plano ficam em abas; somente a ferramenta selecionada aparece e carrega suas visualizações. A aba Meu plano reúne o progresso real das seis etapas e as escolhas do grupo. Os destinos ilustrativos não escolhem um roteiro pelo usuário. O seletor do gráfico usa as séries JMA de 1991–2020 e oferece os valores em texto. O botão **Vamos planejar nossa viagem** (ou **Continuar nosso planejamento**, quando houver progresso) abre `#planner/1`, um wizard de seis etapas com progresso salvo, campos opcionais, interesses e até três prioridades. `#recommendations` mostra uma sugestão revisável; somente **Usar e editar este roteiro** aplica as escolhas.
 
 A navegação principal tem cinco destinos: Início, Criar viagem, Meu roteiro, Explorar Japão e Orçamento. Descobertas e organização ficam em grupos recolhíveis. Cada faixa de tela tem seu próprio padrão: no celular, cabeçalho compacto (menu, página, busca em painel próprio e configurações) e barra inferior; no tablet vertical, barra inferior flutuante; no tablet horizontal e em notebooks pequenos, abas no cabeçalho; a partir de 1280 px, barra lateral fixa com busca integrada. `#explore` apresenta as ferramentas por assunto. Detalhes em [design system](docs/design-system.md) e [auditoria visual](docs/ui-audit.md).
+
+A identidade usa vermelho japonês, papel e matcha, com Manrope e DM Sans locais. O tema claro é o padrão, inclusive na primeira abertura de um planejamento com aparência antiga. A migração de aparência preserva roteiros, notas, favoritos e valores; depois disso, a escolha de tema claro ou escuro fica salva.
 
 O wizard edita um rascunho separado da viagem ativa. Gerar ou rejeitar uma sugestão não altera o roteiro atual. Aceitar uma nova sugestão mantém os cinco modelos e pede confirmação quando há planejamento anterior; a versão ativa fica acessível em **Meu roteiro → Versões anteriores**. O ano começa em 2029 e pode ser ajustado entre 2027 e 2040, sem alterar as séries históricas ou prometer regras para esses anos.
 
 Os motivos de cada recomendação são visíveis. O modo clássico usa lógica determinística e conteúdo do próprio projeto, sem chamada a IA nem cálculo de preço ou trajeto real.
 
+O fundo tem uma textura de papel pontilhada. As entradas e trocas de abas têm transições suaves; o selo, a estrela e o caminho decorativo se movem discretamente. O botão junto aos cartões-postais pausa as animações e salva a escolha neste navegador. A preferência `prefers-reduced-motion` do sistema também é respeitada.
+
 ## Mochi AI ♡
 
-A Mochi oferece uma versão personalizada na recomendação, alterações por conversa no editor, chat contextual e revisão do roteiro. Toda proposta é exibida antes de aplicar; a confirmação guarda a versão anterior e permite desfazer. O orçamento salvo é preservado.
+A Mochi acompanha as seis etapas do criador com dicas contextuais, perguntas e sugestões aplicáveis ao rascunho. Também oferece uma proposta completa na revisão, alterações por conversa no editor, chat contextual e revisão do roteiro. Toda proposta é exibida antes de aplicar; a confirmação guarda a versão anterior e permite desfazer. O orçamento salvo é preservado.
 
 Para testar localmente, `npm run dev` também atende `/api/ai` no processo Node. Preencha o ambiente privado, incluindo as duas credenciais Redis, use a origem `http://127.0.0.1:5173` e `MOCHI_LOCAL_HTTP=true`, e reinicie o servidor.
 
-Os recursos usam Gemini somente por ações explícitas e com consentimento. A integração requer Vercel Functions na mesma origem, chave privada, origem autorizada e limites persistentes no Upstash Redis. A Mochi abre sem código de grupo ou segredo de sessão adicional; visitantes compartilham a cota de uso. Sem essas configurações, a IA fica desabilitada e o planner clássico continua funcionando. O GitHub Pages mantém o modo clássico.
+No criador, clique em **Ativar dicas ao vivo** para autorizar o acompanhamento das escolhas e dos pedidos escritos nesta sessão. As atualizações são agrupadas, podem ser pausadas e não alteram escolhas sem um clique em aplicar. Valores do orçamento só são enviados ao marcar a opção correspondente. Os demais recursos pedem consentimento a cada envio. A integração requer Vercel Functions na mesma origem, chave privada, origem autorizada e limites persistentes no Upstash Redis. A Mochi abre sem código de grupo ou segredo de sessão adicional; visitantes compartilham a cota de uso. Sem essas configurações, a IA fica desabilitada e o planner clássico continua funcionando. O GitHub Pages mantém o modo clássico.
 
-Veja [configuração, endpoints, custos, privacidade e capturas](docs/gemini-integration.md). `.env.example` contém somente nomes e valores públicos de configuração; nunca coloque chaves em variáveis `VITE_`. Testes de IA usam mocks, sem consumir tokens reais.
+Veja [configuração, endpoints, custos, privacidade e capturas](docs/gemini-integration.md). `.env.example` contém somente nomes e valores públicos de configuração; nunca coloque chaves em variáveis `VITE_`. Os testes automatizados de IA usam mocks, sem consumir tokens reais.
 
 ## O que funciona
 
@@ -121,7 +125,7 @@ public/images/            # fotos locais: JPEG original + WebP 480/800 px (1200 
 tests/                    # testes unitários e e2e
 ```
 
-Chart.js e Leaflet são carregados sob demanda; Lucide importa apenas os ícones utilizados. Fotos e dados são locais. Google Fonts e tiles de OpenStreetMap requerem internet; mapas não fazem roteamento. Sem tiles, use a lista de destinos e os links de consulta. Não há API key ou backend.
+Chart.js e Leaflet são carregados sob demanda; Lucide importa apenas os ícones utilizados. Fontes Manrope e DM Sans, fotos e dados são locais. Tiles de OpenStreetMap requerem internet; mapas não fazem roteamento. Sem tiles, use a lista de destinos e os links de consulta. O planejamento clássico dispensa chave; a Mochi usa as funções de servidor descritas acima.
 
 ## Atualizar conteúdo e dados
 
@@ -137,7 +141,7 @@ Chart.js e Leaflet são carregados sob demanda; Lucide importa apenas os ícones
 
 **Imagens:** substitua ou acrescente fotos em `public/images`, usando arquivos otimizados e mantendo autor, URL de origem, licença, licença URL e alt em `images.json`. As oito fotos atuais usam a [licença Unsplash](https://unsplash.com/license); créditos completos na seção Fontes & sobre. As bibliotecas mantêm suas licenças em `node_modules` e em seus repositórios oficiais. Não substitua por imagens de busca sem verificar licença.
 
-**Tema:** tokens semânticos em `src/css/tokens.css`; o modo escuro redefine os mesmos nomes em `[data-theme=dark]`. Componentes não usam cores soltas — veja [design system](docs/design-system.md). Textos das ferramentas ficam em `planning.js`/`views.js`; Home e wizard ficam nos módulos correspondentes. Fontes vêm do Google Fonts, com fallback de sistema.
+**Tema:** tokens semânticos em `src/css/tokens.css`; o modo escuro redefine os mesmos nomes em `[data-theme=dark]`. Componentes não usam cores soltas — veja [design system](docs/design-system.md). Textos das ferramentas ficam em `planning.js`/`views.js`; Home e wizard ficam nos módulos correspondentes. Manrope e DM Sans são servidas localmente, com licenças OFL em `public/fonts/` e fallback de sistema.
 
 ## Matemática e limites
 
@@ -145,7 +149,7 @@ Os valores editáveis do orçamento são em reais. A hospedagem é a **diária t
 
 A meta mensal usa depósitos do mês inicial até o mês anterior ao embarque. Dez/2026 até jan/2029 dá 26 depósitos para embarque em fev/2029; isso é exemplo, não data predefinida. Sem data, o número de depósitos fica em aberto. Não calcula juros, inflação, câmbio ou tarifas automaticamente. Alterar estação não inventa custos ou aplica multiplicadores.
 
-Os cenários são estimativas de novembro/2026 para 25 dias e 24 noites: R$ 26.600, R$ 34.750 e R$ 45.900 por pessoa. Ao aplicar um cenário a outra duração, os totais de referência de alimentação e hospedagem são distribuídos pelos dias/noites atuais, com arredondamento da diária; revise conforme cotações. Depois de mudar a duração no formulário, as diárias permanecem como estavam. As comparações de estações e preços relativos são editoriais e identificadas como tais. Sem cotações por estação, nenhum gráfico de custos futuros é fabricado.
+Os cenários são estimativas de novembro/2026 para 25 dias e 24 noites: R$ 26.600, R$ 34.750 e R$ 45.900 por pessoa. Ao aplicar um cenário a outra duração, as diárias de referência permanecem fixas e os totais de alimentação e hospedagem acompanham os dias/noites escolhidos, com arredondamento em centavos. O grupo define a diária compartilhada de referência. Valores personalizados são preservados; revise conforme cotações. As comparações de estações e preços relativos são editoriais e identificadas como tais. Sem cotações por estação, nenhum gráfico de custos futuros é fabricado.
 
 O número de noites das bases e a duração configurada são validados separadamente; mudar a duração não apaga atividades. Os templates incluem pausas a cada quatro/cinco dias. Custos de atividades começam em zero por não haver cotação; não são automaticamente somados ao orçamento de parques, evitando duplicação silenciosa.
 

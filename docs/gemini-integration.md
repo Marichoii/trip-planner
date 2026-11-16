@@ -1,8 +1,8 @@
 # Mochi AI ♡ — configuração e operação
 
-A Mochi acrescenta geração, alterações por conversa, chat e revisão ao Japan Diary. O motor clássico em `src/js/recommendations.js`, a calculadora e os dados locais continuam independentes da IA. Nenhuma chamada ao Gemini acontece ao carregar páginas, digitar, navegar pelo mapa ou recalcular valores.
+A Mochi acrescenta acompanhamento do criador, geração, alterações por conversa, chat e revisão ao planner. O motor clássico em `src/js/recommendations.js`, a calculadora e os dados locais continuam independentes da IA. Nenhuma chamada ao Gemini acontece antes de consentimento. No criador, ativar as dicas ao vivo autoriza atualizações por mudanças no rascunho durante a sessão; fora desse acompanhamento, os pedidos continuam explícitos.
 
-A implementação usa Vite no navegador e cinco Vercel Functions Node.js em `/api/ai`. A chave e o SDK `@google/genai` ficam no servidor. O navegador recebe somente dados validados. Sem chave, origem autorizada **e** Redis configurados, os endpoints respondem `503 disabled` e não chamam o provedor. Não existe alternativa com chave no frontend.
+A implementação usa Vite no navegador e seis Vercel Functions Node.js em `/api/ai`. A chave e o SDK `@google/genai` ficam no servidor. O navegador recebe somente dados validados. Sem chave, origem autorizada **e** Redis configurados, os endpoints respondem `503 disabled` e não chamam o provedor. Não existe alternativa com chave no frontend.
 
 ## Modelo e acesso
 
@@ -78,17 +78,18 @@ Cancelar interrompe a espera do cliente e sinaliza o abort ao SDK. Conforme a [d
 
 Todas as respostas usam JSON e `Cache-Control: no-store`. O acesso foi implementado para **frontend e backend na mesma origem**. Não habilitamos CORS com credenciais entre domínios. GitHub Pages continua publicando a experiência clássica; para usar Mochi, abra o frontend hospedado na Vercel junto de suas Functions. Nenhuma URL pública externa com chave é adicionada ao frontend.
 
-| Método e endpoint        | Entrada / resultado                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------ |
-| `GET /api/ai/session`    | Cria/reutiliza cookie técnico e retorna token CSRF automaticamente; não chama Gemini |
-| `POST /api/ai/itinerary` | Preferências mínimas e orçamento opcional; retorna proposta                          |
-| `POST /api/ai/refine`    | Preferências + roteiro relevante + pedido; retorna proposta completa para comparar   |
-| `POST /api/ai/chat`      | Preferências + roteiro opcional + mensagem + histórico limitado                      |
-| `POST /api/ai/analyze`   | Preferências + roteiro; retorna análise e verificações determinísticas               |
+| Método e endpoint        | Entrada / resultado                                                                                                    |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `GET /api/ai/session`    | Cria/reutiliza cookie técnico e retorna token CSRF automaticamente; não chama Gemini                                   |
+| `POST /api/ai/coach`     | Perfil atual + etapa + pergunta opcional + estilo de orçamento; retorna resumo, até três sugestões e pontos a conferir |
+| `POST /api/ai/itinerary` | Preferências mínimas e orçamento opcional; retorna proposta                                                            |
+| `POST /api/ai/refine`    | Preferências + roteiro relevante + pedido; retorna proposta completa para comparar                                     |
+| `POST /api/ai/chat`      | Preferências + roteiro opcional + mensagem + histórico limitado                                                        |
+| `POST /api/ai/analyze`   | Preferências + roteiro; retorna análise e verificações determinísticas                                                 |
 
-Os quatro endpoints de IA exigem cookie e cabeçalho `X-Mochi-CSRF`. O cliente cuida deles; não salve o token de sessão em localStorage. Os schemas completos são a fonte de verdade em `src/js/mochi-contracts.js`. Objetos têm campos estritos; dados extras como backup completo são rejeitados.
+Os cinco endpoints de IA exigem cookie e cabeçalho `X-Mochi-CSRF`. O cliente cuida deles; não salve o token de sessão em localStorage. Os schemas completos são a fonte de verdade em `src/js/mochi-contracts.js`. Objetos têm campos estritos; dados extras como backup completo são rejeitados.
 
-Cada pedido contém `profile`, `budget` (resumo ou `null`) e `additionalPreferences`. O perfil inclui ano, estação/mês/data opcionais, origem, viajantes, dias, noites, ritmo, interesses, prioridades e IDs de cidades. O roteiro enviado contém somente cidades, noites, dias, títulos e marcação de pausa; não envia custos individuais, notas privadas, checklists, nomes, documentos, e-mails ou listas de compras. Títulos e texto livre ainda podem conter algo pessoal digitado pela pessoa: o painel pede explicitamente para não incluí-lo.
+Cada pedido contém `profile`, `budget` (resumo ou `null`) e `additionalPreferences`. O perfil inclui ano, estação/mês/data opcionais, origem, viajantes, dias, noites, ritmo, interesses, prioridades, IDs de cidades e pedidos escritos (`travelNotes`, até 600 caracteres; `avoid`, até 300). O roteiro enviado contém somente cidades, noites, dias, títulos e marcação de pausa; não envia custos individuais, notas privadas, checklists, nomes, documentos, e-mails ou listas de compras. Títulos e texto livre ainda podem conter algo pessoal digitado pela pessoa: o painel pede explicitamente para não incluí-lo.
 
 O chat mantém até 20 mensagens **somente em memória durante a sessão da página**; envia no máximo seis. Limpar ou recarregar elimina esse histórico. Ao desmarcar orçamento, turnos anteriores marcados como contendo esse resumo ficam fora do contexto enviado. Cada abertura pede consentimento novamente. Nenhum pedido depende de consentimento implícito.
 
@@ -97,18 +98,28 @@ Sucesso: `{data, meta: {requestId, mode, checks?}}`. `mode` é `gemini` ou `loca
 - `400 invalid_input`, `413 too_large`, `405 method_not_allowed`.
 - `401 session_expired`, `403 session_expired/origin_rejected`.
 - `429 rate_limited/busy/provider_limited`, com `Retry-After` quando disponível.
-- `502 invalid_response`, `504 timeout`, `499 cancelled` quando a conexão ainda existe.
-- `503 disabled/protection_unavailable/provider_unavailable/unavailable`.
+- `502 invalid_response/provider_rejected`, `504 timeout`, `499 cancelled` quando a conexão ainda existe.
+- `503 disabled/protection_unavailable/provider_unavailable/provider_busy/unavailable`.
 
-Não devolvemos mensagens brutas, stack traces ou configurações do SDK. A interface usa a mensagem “A Mochi está descansando um pouquinho. ♡ Você ainda pode continuar planejando normalmente.” e oferece a sugestão clássica.
+Rejeições HTTP 400 do Gemini viram `502 provider_rejected`, com explicação específica na interface. Uma indisponibilidade HTTP 503 do Google vira `provider_busy`: a interface explica a falha temporária e conserva o pedido para nova tentativa explícita, sem chamadas automáticas extras. O log registra somente o código HTTP do provedor (`providerStatus`), junto ao identificador da solicitação, sem o corpo do erro. Não devolvemos mensagens brutas, stack traces ou configurações do SDK. A interface usa a mensagem “A Mochi está descansando um pouquinho. ♡ Você ainda pode continuar planejando normalmente.” e oferece a sugestão clássica.
+
+## Acompanhamento no criador
+
+A Mochi aparece nas seis etapas, em uma coluna no desktop e em um painel recolhível no celular. **Ativar dicas ao vivo** autoriza o envio das escolhas e dos pedidos escritos ao Google Gemini durante a sessão da página. O checkbox de valores é separado e começa desmarcado. Recarregar a página desativa o acompanhamento.
+
+Mudanças esperam 1,2 segundo e respeitam pelo menos seis segundos entre pedidos automáticos. Não há polling. Até 20 contextos são reaproveitados em memória; perguntas e “novas ideias” são pedidos explícitos. Sair do criador, ocultar a página, pausar ou editar cancela a espera e descarta respostas antigas. Falhas pausam as chamadas e oferecem nova tentativa, sem loop automático. Cancelar a espera não garante interrupção do processamento remoto.
+
+Cada resposta pode sugerir estação, mês, ritmo, interesse ou destino do catálogo. Aplicar é sempre uma ação da pessoa e altera somente o rascunho. Orçamento numérico não faz parte do perfil compartilhado; o resumo calculado só acompanha o pedido quando autorizado. As cotas e a validação dos outros endpoints também valem para `coach`.
+
+Pedidos escritos ficam no perfil e no backup. A sugestão clássica os conserva como anotações, sem interpretar texto livre. A opção **Gerar proposta com Mochi** na revisão considera esse texto, mostra a comparação e exige confirmação antes de substituir o roteiro. “Ao vivo” significa acompanhar escolhas; a integração não consulta preços, reservas ou disponibilidade em tempo real.
 
 ## Integridade e limites das sugestões
 
-O SDK recebe JSON Schema com `responseMimeType=application/json` e `responseJsonSchema`. Restrições que não fazem parte do subconjunto do provedor, como comprimento de texto, são aplicadas novamente com Zod no servidor. O frontend também valida o retorno antes da prévia. JSON inválido, campos extras, destinos fora do catálogo, noites incorretas, dias faltantes, sequência incompatível entre dias e bases ou custos preenchidos são rejeitados.
+O SDK recebe JSON Schema com `responseMimeType=application/json` e `responseJsonSchema`. Limites de quantidade de itens e comprimento de texto são enviados como descrições, para evitar que as listas aninhadas do roteiro excedam a complexidade aceita pelo Gemini. A documentação do Google descreve esse motivo de [erro 400 em esquemas complexos](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/capabilities/control-generated-output). O contrato Zod original continua impondo todos esses limites no servidor. O frontend também valida o retorno antes da prévia. JSON inválido, campos extras, destinos fora do catálogo, noites incorretas, dias faltantes, sequência incompatível entre dias e bases ou custos preenchidos são rejeitados.
 
 Textos retornados são escapados; nenhum HTML, Markdown executável, script ou URL arbitrária do modelo é executado. A validação rejeita markup, valores monetários, durações numéricas de transporte e certas afirmações de confirmação futura. Esse filtro não prova a verdade de toda frase: as sugestões continuam sujeitas à revisão humana, com pendências explícitas. Não há ferramenta de busca conectada. O contexto do servidor inclui somente catálogo editorial e normais históricas JMA 1991–2020, verificadas no projeto em 13/11/2026; não é previsão de viagem.
 
-Perguntas detectadas sobre entrada, vistos, JESTA, tax-free, impostos, preços, disponibilidade, horários e saúde recebem resposta local declarando a ausência de verificação atual e apontando as páginas de fontes/regras do planner, sem inventar uma resposta atualizada. As palavras-chave são uma proteção adicional; o prompt de sistema também proíbe essas afirmações. A Mochi não deve ser usada para confirmar decisões legais ou médicas. Metas mensais são calculadas no código existente; se não houver data, solicita-se completar a calculadora. Não há nova cotação ou cálculo financeiro pelo modelo.
+No chat, perguntas detectadas sobre entrada, vistos, JESTA, tax-free, impostos, preços, disponibilidade, horários e saúde recebem resposta local declarando a ausência de verificação atual e apontando as páginas de fontes/regras do planner, sem inventar uma resposta atualizada. As palavras-chave são uma proteção adicional; o prompt de sistema também proíbe essas afirmações. A Mochi não deve ser usada para confirmar decisões legais ou médicas. Metas mensais são calculadas no código existente; se não houver data, solicita-se completar a calculadora. Não há nova cotação ou cálculo financeiro pelo modelo.
 
 Na geração e no refinamento, a prévia mostra bases e comparação de todos os dias, atividades, motivos, chuva, logística, economia e pendências. Só **Aplicar alteração** muda o roteiro ativo. A versão anterior é arquivada usando o mesmo formato do planejador; **Desfazer alteração** ou **Versões anteriores** permite restaurá-la. Atividades com o mesmo título preservam as estimativas e os favoritos existentes; novas atividades começam com custo zero (“A estimar”). O orçamento do aplicativo não é alterado. Backups v1/v2 continuam compatíveis e não recebem conversas nem credenciais.
 
@@ -159,3 +170,7 @@ Capturas de respostas simuladas, em 1440, 768 e 390 px:
 | Chat                  | [1440](screenshots/mochi/chat-1440.png)       | [768](screenshots/mochi/chat-768.png)       | [390](screenshots/mochi/chat-390.png)       |
 
 Avatar Mochi: desenho original em CSS, sem personagem de terceiros.
+
+### Verificação real da proposta completa
+
+Em 16/11/2026, o fluxo local de revisão → Gerar proposta com Mochi → consentimento → Gerar proposta foi validado com Gemini real e um perfil fictício de 25 dias e 24 noites. A API retornou HTTP 200, a prévia abriu e o roteiro ativo permaneceu intacto. A captura está em `screenshots/planner-coach/real-proposal-1440.png`. Os testes automatizados continuam usando respostas simuladas, sem consumir cotas do provedor. Falhas temporárias do Google e respostas que não passam no contrato continuam sendo tratadas sem aplicar mudanças ao roteiro.
