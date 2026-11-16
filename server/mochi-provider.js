@@ -13,7 +13,16 @@ export function providerSchema(operation) {
   const schema = z.toJSONSchema(outputSchemas[operation]);
   function clean(o) {
     if (!o || typeof o !== 'object') return;
-    for (const k of ['$schema', 'maxLength', 'minLength', 'pattern']) delete o[k];
+    // Repeated array bounds make Gemini's constrained decoder reject the
+    // itinerary schema with 400 INVALID_ARGUMENT. Keep them as guidance here;
+    // validateOutput still enforces the original Zod bounds on every response.
+    const guidance = [];
+    if (o.minItems !== undefined) guidance.push(`Mínimo de ${o.minItems} itens.`);
+    if (o.maxItems !== undefined) guidance.push(`Máximo de ${o.maxItems} itens.`);
+    if (o.maxLength !== undefined) guidance.push(`Máximo de ${o.maxLength} caracteres.`);
+    if (guidance.length) o.description = [o.description, ...guidance].filter(Boolean).join(' ');
+    for (const k of ['$schema', 'maxLength', 'minLength', 'pattern', 'minItems', 'maxItems'])
+      delete o[k];
     Object.values(o).forEach((v) => {
       if (Array.isArray(v)) v.forEach(clean);
       else clean(v);

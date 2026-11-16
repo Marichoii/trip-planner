@@ -273,14 +273,17 @@ test('timeout e cancelamento liberam lease e não retornam proposta tardia', asy
     assert.equal(res.body.data, undefined);
   }
 });
-test('429, falta de acesso ao modelo e rede são erros seguros sem repetir chamada', async () => {
-  for (const status of [429, 403, 404, 500]) {
+test('rejeição do pedido, limites, acesso e rede têm diagnóstico seguro sem repetir chamada', async () => {
+  for (const status of [400, 429, 403, 404, 500, 503]) {
     const { handler, calls } = harness({
         fail: Object.assign(Error('private-provider-detail'), { status }),
       }),
       res = response();
     await handler(request(), res);
-    assert.equal(res.statusCode, status === 429 ? 429 : 503);
+    assert.equal(res.statusCode, status === 429 ? 429 : status === 400 ? 502 : 503);
+    assert.equal(JSON.parse(calls.logs[0]).providerStatus, status);
+    if (status === 400) assert.equal(res.body.error.code, 'provider_rejected');
+    if (status === 503) assert.equal(res.body.error.code, 'provider_busy');
     assert.equal(calls.provider, 1);
     assert.equal(calls.released, 1);
     assert.doesNotMatch(JSON.stringify(res.body), /private-provider-detail|test-only-placeholder/);
@@ -306,7 +309,10 @@ test('SDK recebe schema, timeout, tokens limitados e tentativa única; valida JS
   assert.ok(args.config.maxOutputTokens <= 16000);
   assert.ok(args.config.responseJsonSchema);
   assert.equal(args.config.responseSchema, undefined);
-  assert.doesNotMatch(JSON.stringify(providerSchema('itinerary')), /maxLength|pattern/);
+  assert.doesNotMatch(
+    JSON.stringify(providerSchema('itinerary')),
+    /maxLength|pattern|minItems|maxItems/,
+  );
   for (const text of [
     '{',
     JSON.stringify({
@@ -461,4 +467,39 @@ test('acompanhamento atravessa handler e provider com contrato próprio e perfil
   assert.equal(captured.config.maxOutputTokens, 1200);
   assert.equal(JSON.parse(captured.contents).request.profile.travelNotes, 'Jardins e cafés');
   assert.deepEqual(captured.config.responseJsonSchema, providerSchema('coach'));
+});
+
+test('schema de geração evita limites de listas rejeitados pelo Gemini sem relaxar a resposta aceita', () => {
+  for (const operation of ['itinerary', 'refine', 'coach', 'chat', 'analyze']) {
+    const schema = providerSchema(operation);
+    assert.doesNotMatch(JSON.stringify(schema), /"(?:minItems|maxItems)":/);
+    assert.equal(schema.additionalProperties, false);
+  }
+  const schema = providerSchema('itinerary');
+  assert.match(schema.properties.days.description, /Máximo de 90 itens/);
+  assert.match(schema.properties.title.description, /Máximo de 100 caracteres/);
+  assert.ok(schema.properties.bases.items.properties.destinationId.enum.includes('tokyo'));
+  assert.equal(
+    schema.properties.days.items.properties.activities.items.properties.estimatedCost.type,
+    'null',
+  );
+  for (const change of [
+    (p) => {
+      p.experiences = Array(7).fill('Uma experiência');
+    },
+    (p) => {
+      p.days[0].activities = Array(5).fill(p.days[0].activities[0]);
+    },
+    (p) => {
+      p.days[0].activities = [];
+    },
+    (p) => {
+      p.title = 'a'.repeat(101);
+    },
+  ]) {
+    const value = proposal();
+    change(value);
+    assert.throws(() => validateOutput('itinerary', value, input()));
+    assert.throws(() => validateOutput('refine', value, input('refine')));
+  }
 });

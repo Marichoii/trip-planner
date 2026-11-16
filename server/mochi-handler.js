@@ -51,6 +51,7 @@ export function createHandler(operation, deps = {}) {
     let store,
       lease,
       usage = null,
+      providerStatus = null,
       code = 'ok',
       outgoing;
     const reply = (status, value) => {
@@ -142,19 +143,29 @@ export function createHandler(operation, deps = {}) {
         },
       });
     } catch (error) {
+      const status = Number(error?.status);
+      if (
+        !(error instanceof SafeError) &&
+        Number.isInteger(status) &&
+        status >= 400 &&
+        status <= 599
+      )
+        providerStatus = status;
       const safe =
         error instanceof SafeError
           ? error
           : new SafeError(
-              Number(error?.status) === 429
-                ? 'provider_limited'
-                : Number(error?.status) === 401 ||
-                    Number(error?.status) === 403 ||
-                    Number(error?.status) === 404
-                  ? 'provider_unavailable'
-                  : 'unavailable',
-              Number(error?.status) === 429 ? 429 : 503,
-              Number(error?.status) === 429 ? 60 : 0,
+              status === 400
+                ? 'provider_rejected'
+                : status === 429
+                  ? 'provider_limited'
+                  : status === 503
+                    ? 'provider_busy'
+                    : status === 401 || status === 403 || status === 404
+                      ? 'provider_unavailable'
+                      : 'unavailable',
+              status === 429 ? 429 : status === 400 ? 502 : 503,
+              status === 429 ? 60 : 0,
             );
       code = safe.code;
       if (safe.retryAfter) res.setHeader('Retry-After', String(safe.retryAfter));
@@ -181,6 +192,7 @@ export function createHandler(operation, deps = {}) {
           requestId: id,
           operation,
           status: code,
+          ...(providerStatus !== null ? { providerStatus } : {}),
           durationMs: Date.now() - now,
           usage,
         }),

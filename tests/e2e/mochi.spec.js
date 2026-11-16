@@ -216,3 +216,32 @@ for (const width of [1440, 768, 390]) {
     await expect(page.locator('.mochi-launcher')).toBeHidden();
   });
 }
+
+for (const code of ['provider_rejected', 'provider_busy'])
+  test(`${code} explica a falha e preserva o pedido para nova tentativa`, async ({ page }) => {
+    const { state } = await setup(page);
+    let fail = true;
+    await page.route('**/api/ai/itinerary', (route) => {
+      if (fail)
+        return route.fulfill({
+          status: code === 'provider_busy' ? 503 : 502,
+          json: { error: { code } },
+        });
+      return route.fulfill({
+        json: { data: proposal(route.request().postDataJSON().profile), meta: { mode: 'gemini' } },
+      });
+    });
+    await page.goto('/#recommendations');
+    await button(page, 'itinerary').click();
+    await consent(page);
+    await panel(page).locator('[name=notes]').fill('Queremos uma viagem tranquila.');
+    await panel(page).getByRole('button', { name: 'Gerar proposta', exact: true }).click();
+    await expect(panel(page).locator('.mochi-error')).toContainText(
+      code === 'provider_busy' ? 'temporariamente indisponível' : 'recusou o formato da proposta',
+    );
+    await expect(panel(page).locator('[name=notes]')).toHaveValue('Queremos uma viagem tranquila.');
+    expect((await saved(page)).routes).toEqual(state.routes);
+    fail = false;
+    await panel(page).getByRole('button', { name: 'Gerar proposta', exact: true }).click();
+    await expect(panel(page).locator('.mochi-proposal')).toBeVisible();
+  });

@@ -11,6 +11,10 @@ export function mochiError(code) {
     rate_limited: 'O limite de uso foi atingido. Tente mais tarde.',
     busy: 'Já há uma solicitação em andamento. Aguarde um pouquinho.',
     provider_limited: 'O serviço atingiu um limite temporário. Tente mais tarde.',
+    provider_busy:
+      'O Google Gemini está temporariamente indisponível. Aguarde um pouco e gere a proposta novamente; seu pedido continua preenchido.',
+    provider_rejected:
+      'O serviço de IA recusou o formato da proposta. Seu planejamento continua salvo; se persistir, a integração precisa de um ajuste.',
     session_expired: 'A conexão da Mochi expirou. Toque em Tentar novamente.',
     timeout: 'A resposta demorou mais que o esperado.',
     invalid_response: 'A sugestão não passou pelas verificações de integridade.',

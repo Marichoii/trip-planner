@@ -27,6 +27,10 @@ const errors = {
     'O limite de uso foi atingido. As dicas foram pausadas; tente novamente mais tarde.',
   busy: 'Outro pedido está em andamento. Aguarde terminar e tente novamente.',
   provider_limited: 'O serviço está ocupado. Pausei as dicas para você tentar novamente depois.',
+  provider_busy:
+    'O Google Gemini está temporariamente indisponível. Pausei as dicas; aguarde um pouco antes de tentar novamente.',
+  provider_rejected:
+    'O serviço de IA recusou o pedido. Suas escolhas continuam salvas; se persistir, a integração precisa de um ajuste.',
   invalid_response: 'A resposta não pôde ser validada. Suas escolhas continuam como estavam.',
   timeout: 'A resposta demorou mais que o esperado. Tente novamente quando quiser.',
 };
