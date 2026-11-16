@@ -72,14 +72,14 @@ export {
 } from './components.js';
 import { welcomeView, exploreView } from './welcome.js';
 import { plannerView, recommendationView, plannerHistoryView } from './planner-views.js';
-export function home(s) {
-  return welcomeView(s);
+export function home(s, ui) {
+  return welcomeView(s, ui);
 }
 export function seasonsView(s, ui) {
   const v = seasons.find((v) => v.id === ui.season) || seasons[0];
   return (
     heading(
-      'the seasons collection',
+      'QUATRO ESTAÇÕES, MIL DESCOBERTAS',
       'Qual Japão é o nosso?',
       'Explore as diferenças entre regiões, experiências e épocas. A favorita pode mudar quantas vezes você quiser.',
     ) +
@@ -115,7 +115,7 @@ export function monthsView(s, ui) {
     variable = ui.variable || 'temperature';
   return (
     heading(
-      'a year of possibilities',
+      'UM ANO DE POSSIBILIDADES',
       'Quando a gente vai?',
       'Compare os meses com dados históricos, sem transformar médias em promessas para 2029.',
     ) +
@@ -144,7 +144,7 @@ export function destinationsView(s, ui) {
   const list = filteredDestinations(s, ui);
   return (
     heading(
-      'places to fall in love with',
+      'LUGARES PARA SE APAIXONAR',
       'Um Japão de possibilidades',
       'Salve lugares, descubra regiões e leve os seus favoritos para o roteiro.',
     ) +
@@ -174,7 +174,7 @@ export function eventsView(s, ui) {
   );
   return (
     heading(
-      'the calendar of dreams',
+      'O CALENDÁRIO DOS SONHOS',
       'Encontros que viram histórias',
       'Festivais, flores, neve e tradições para considerar na escolha do mês.',
     ) +
@@ -190,7 +190,7 @@ export function itineraryView(s, ui) {
     );
   return (
     heading(
-      'our days, our way',
+      'NOSSOS DIAS, DO NOSSO JEITO',
       `${s.trip.days} dias, muitas histórias.`,
       'Um roteiro vivo: edite as bases, deixe espaço para descansar e organize cada descoberta.',
       btn(`${icon('download')} Exportar JSON`, 'export-itinerary', '', 'secondary') +
@@ -229,7 +229,7 @@ export const budgetFields = [
 ];
 export function budgetSummary(s) {
   const b = calculateBudget(s.trip, s.budget);
-  return `<p class="eyebrow">our big adventure, in numbers</p><span class="small muted">Estimativa por pessoa</span><div class="summary-amount">${money(b.person)}</div><span class="badge neutral">${s.trip.travelers} viajantes · ${s.trip.nights} noites</span><div class="summary-row spaced"><span>Total do grupo</span><strong>${money(b.group)}</strong></div><div class="summary-row"><span>Hospedagem / grupo</span><strong>${money(b.lodgingGroup)}</strong></div><div class="summary-row"><span>Hospedagem / pessoa</span><strong>${money(b.lodgingPerson)}</strong></div><div class="summary-row"><span>Já guardado / pessoa</span><strong>${money(b.saved)}</strong></div><div class="summary-row"><span>Falta / pessoa</span><strong>${money(b.remaining)}</strong></div><div class="progress" role="progressbar" aria-label="Progresso da poupança" aria-valuenow="${Math.round(b.progress)}" aria-valuemin="0" aria-valuemax="100"><span style="width:${b.progress}%"></span></div><p class="small muted">${b.progress.toFixed(1).replace('.', ',')}% da meta alcançada</p><div class="summary-row"><span>Depósitos antes do embarque</span><strong>${b.deposits ?? 'Escolha a data'}</strong></div><div class="summary-row"><span>Guardar por mês / pessoa</span><strong>${b.monthly !== null ? money(b.monthly) : b.deposits === 0 ? 'Sem meses disponíveis' : 'Defina o embarque'}</strong></div>${b.deposits === 0 ? notice('A poupança começa no mês do embarque ou depois dele. Antecipe o início para calcular depósitos.') : ''}<p class="small muted spaced">Conta do mês inicial até o mês anterior ao embarque, sem rendimento. Saldo informado é individual. O rateio pode ter diferença de centavos entre pessoas.</p><details><summary class="small">Distribuição por categoria · grupo</summary>${Object.entries(
+  return `<p class="eyebrow">A NOSSA VIAGEM, EM NÚMEROS</p><span class="small muted">Estimativa por pessoa</span><div class="summary-amount">${money(b.person)}</div><span class="badge neutral">${s.trip.travelers} viajantes · ${s.trip.nights} noites</span><div class="summary-row spaced"><span>Total do grupo</span><strong>${money(b.group)}</strong></div><div class="summary-row"><span>Hospedagem / grupo</span><strong>${money(b.lodgingGroup)}</strong></div><div class="summary-row"><span>Hospedagem / pessoa</span><strong>${money(b.lodgingPerson)}</strong></div><div class="summary-row"><span>Já guardado / pessoa</span><strong>${money(b.saved)}</strong></div><div class="summary-row"><span>Falta / pessoa</span><strong>${money(b.remaining)}</strong></div><div class="progress" role="progressbar" aria-label="Progresso da poupança" aria-valuenow="${Math.round(b.progress)}" aria-valuemin="0" aria-valuemax="100"><span style="width:${b.progress}%"></span></div><p class="small muted">${b.progress.toFixed(1).replace('.', ',')}% da meta alcançada</p><div class="summary-row"><span>Depósitos antes do embarque</span><strong>${b.deposits ?? 'Escolha a data'}</strong></div><div class="summary-row"><span>Guardar por mês / pessoa</span><strong>${b.monthly !== null ? money(b.monthly) : b.deposits === 0 ? 'Sem meses disponíveis' : 'Defina o embarque'}</strong></div>${b.deposits === 0 ? notice('A poupança começa no mês do embarque ou depois dele. Antecipe o início para calcular depósitos.') : ''}<p class="small muted spaced">Conta do mês inicial até o mês anterior ao embarque, sem rendimento. Saldo informado é individual. O rateio pode ter diferença de centavos entre pessoas.</p><details><summary class="small">Distribuição por categoria · grupo</summary>${Object.entries(
     b.categories,
   )
     .map(([k, v]) => `<div class="summary-row"><span>${k}</span><strong>${money(v)}</strong></div>`)
@@ -238,7 +238,7 @@ export function budgetSummary(s) {
 export function budgetView(s, ui) {
   return (
     heading(
-      'saving for the memories',
+      'GUARDANDO PARA BOAS HISTÓRIAS',
       'O sonho, no papel.',
       'Ajuste as estimativas às cotações reais. Todos os valores editáveis estão em reais.',
       btn(`${icon('download')} CSV`, 'export-budget-csv', '', 'secondary') +
@@ -288,7 +288,7 @@ export function hotelsView(s) {
   ];
   return (
     heading(
-      'a place to call home',
+      'UM LUGAR PARA CHAMAR DE CASA',
       'Um cantinho para os seis',
       'Compare o custo completo, camas de verdade e espaço para todas as malas.',
       btn(`${icon('plus')} Cadastrar hospedagem`, 'lodging-add'),
@@ -398,7 +398,7 @@ export function transportView(s, ui) {
     pass = Number(ui.passQuote) || 0;
   return (
     heading(
-      'the way between places',
+      'ENTRE UMA DESCOBERTA E OUTRA',
       'O caminho também faz parte.',
       'Compare custo, tempo e bagagem. Cadastre cada trecho com o preço que você cotou.',
       btn(`${icon('plus')} Adicionar trecho`, 'leg-add'),
@@ -456,11 +456,11 @@ export function foodView(s, ui) {
     total = wishlistCost(s.wishlist, s.exchangeRate);
   return (
     heading(
-      'little bites & lovely finds',
+      'SABORES E PEQUENOS GARIMPOS',
       'Comer bem. Garimpar melhor.',
       'Uma lista de sabores, lojas e pequenas coisas que queremos trazer na mala.',
     ) +
-    `<section class="paper food-banner"><div><p class="eyebrow">a taste of japan</p><h2>Uma descoberta a cada refeição.</h2><p class="small muted">De um onigiri no konbini a uma noite de yakiniku. As faixas abaixo são avaliações qualitativas, sem preços confirmados. Confira ingredientes e alergênicos diretamente com o restaurante.</p></div>${img('food')}</section><div class="filters"><label>Categoria<select data-ui="foodCategory">${opt('', 'Todas', ui.foodCategory)}${[...new Set(food.map((f) => f.category))].map((v) => opt(v, v, ui.foodCategory)).join('')}</select></label><label>Cidade de referência<select data-ui="foodCity">${opt('', 'Todas', ui.foodCity)}${['Tóquio', 'Osaka', 'Kyoto', 'Nagano'].map((v) => opt(v, v, ui.foodCity)).join('')}</select></label><label>Faixa qualitativa<select data-ui="foodPrice">${opt('', 'Todas', ui.foodPrice)}${opt('Simples', 'Simples / casual', ui.foodPrice)}${opt('Variável', 'Variável / experiência', ui.foodPrice)}</select></label><label class="checkbox-label"><input type="checkbox" data-ui="foodFav" ${ui.foodFav ? 'checked' : ''} /> Só favoritos</label></div><div class="food-grid">${list.length ? list.map((f) => `<article class="paper food-card"><span class="badge neutral">${f.category}</span><h3>${f.name}</h3><p>${f.description}</p><span class="small muted">${f.city} · ${f.price}</span><button class="icon-button ${s.favorites.food.includes(f.id) ? 'favorited' : ''}" data-action="favorite" data-kind="food" data-id="${f.id}" aria-label="Favoritar ${f.name}" aria-pressed="${s.favorites.food.includes(f.id)}">${icon('heart')}</button></article>`).join('') : empty('Nenhuma opção com esses filtros.')}</div>${source('JNTO · Food & Drink', 'https://www.japan.travel/en/things-to-do/eat-and-drink/', 'Guia gastronômico; seleção editorial')}
+    `<section class="paper food-banner"><div><p class="eyebrow">SABORES DO JAPÃO</p><h2>Uma descoberta a cada refeição.</h2><p class="small muted">De um onigiri no konbini a uma noite de yakiniku. As faixas abaixo são avaliações qualitativas, sem preços confirmados. Confira ingredientes e alergênicos diretamente com o restaurante.</p></div>${img('food')}</section><div class="filters"><label>Categoria<select data-ui="foodCategory">${opt('', 'Todas', ui.foodCategory)}${[...new Set(food.map((f) => f.category))].map((v) => opt(v, v, ui.foodCategory)).join('')}</select></label><label>Cidade de referência<select data-ui="foodCity">${opt('', 'Todas', ui.foodCity)}${['Tóquio', 'Osaka', 'Kyoto', 'Nagano'].map((v) => opt(v, v, ui.foodCity)).join('')}</select></label><label>Faixa qualitativa<select data-ui="foodPrice">${opt('', 'Todas', ui.foodPrice)}${opt('Simples', 'Simples / casual', ui.foodPrice)}${opt('Variável', 'Variável / experiência', ui.foodPrice)}</select></label><label class="checkbox-label"><input type="checkbox" data-ui="foodFav" ${ui.foodFav ? 'checked' : ''} /> Só favoritos</label></div><div class="food-grid">${list.length ? list.map((f) => `<article class="paper food-card"><span class="badge neutral">${f.category}</span><h3>${f.name}</h3><p>${f.description}</p><span class="small muted">${f.city} · ${f.price}</span><button class="icon-button ${s.favorites.food.includes(f.id) ? 'favorited' : ''}" data-action="favorite" data-kind="food" data-id="${f.id}" aria-label="Favoritar ${f.name}" aria-pressed="${s.favorites.food.includes(f.id)}">${icon('heart')}</button></article>`).join('') : empty('Nenhuma opção com esses filtros.')}</div>${source('JNTO · Food & Drink', 'https://www.japan.travel/en/things-to-do/eat-and-drink/', 'Guia gastronômico; seleção editorial')}
  <div class="section-top"><h2>Um mapa de garimpos</h2><span class="badge neutral">Pontos de pesquisa</span></div><div class="food-grid">${stores.map(([name, desc, url]) => `<section class="paper"><h3>${name}</h3><p class="small muted">${desc}</p>${link(url, 'Pesquisar', 'text-button')}</section>`).join('')}</div><div class="section-top"><h2>Nossa wishlist</h2>${btn(`${icon('plus')} Adicionar produto`, 'wishlist-add', '', 'small')}</div><div class="two-columns"><section class="paper">${field('Cotação manual: 1 iene = quantos reais?', 'exchangeRate', s.exchangeRate, 'type="number" min="0.000001" max="100" step="0.000001" data-exchange placeholder="Preencha a cotação consultada"')}<p class="small muted spaced">Sem cotação automática. Registre o valor efetivo da sua compra de moeda, incluindo custos se desejar. A conversão só aparece após preencher esta taxa.</p></section><section class="paper"><h3>Total estimado da wishlist</h3><div class="summary-row"><span>Ienes</span><strong>${money(total.yen, 'JPY')}</strong></div><div class="summary-row"><span>Reais</span><strong>${total.brl === null ? 'Preencha a cotação' : money(total.brl)}</strong></div><span class="small muted">${s.exchangeRate ? `Cotação usada: ¥1 = R$ ${s.exchangeRate.toFixed(6).replace('.', ',')} (manual).` : 'Cotação não informada.'}</span></section></div><div class="spaced">${s.wishlist.length ? `<div class="table-wrap" tabindex="0" role="region" aria-label="Wishlist · role para ver todas as colunas"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Preço unitário · JPY</th><th>Qtd.</th><th>Total · JPY</th><th>Ações</th></tr></thead><tbody>${s.wishlist.map((w) => `<tr><td>${esc(w.name)}</td><td>${esc(w.category)}</td><td>${money(w.price, 'JPY')}</td><td>${w.quantity}</td><td>${money(w.price * w.quantity, 'JPY')}</td><td><div class="button-row">${btn(icon('pencil'), 'wishlist-edit', `data-id="${esc(w.id)}" aria-label="Editar produto"`, 'small secondary')}${btn(icon('trash-2'), 'wishlist-remove', `data-id="${esc(w.id)}" aria-label="Remover produto"`, 'small secondary')}</div></td></tr>`).join('')}</tbody></table></div>` : empty('Adicione skincare, papelaria, games e tudo o que faz parte dos nossos pequenos sonhos.')}</div>`
   );
 }
@@ -474,7 +474,7 @@ export function packingView(s, ui) {
     done = all.filter(([id]) => s.packed[id]).length;
   return (
     heading(
-      'pack light, dream big',
+      'LEVE NA MALA, GRANDE NOS PLANOS',
       'Uma mala para cada estação',
       'Essenciais compartilhados entre as listas e peças específicas para o clima escolhido.',
     ) +
@@ -484,7 +484,7 @@ export function packingView(s, ui) {
 export function rulesView() {
   return (
     heading(
-      'travel well, travel informed',
+      'PARA VIAJAR COM TRANQUILIDADE',
       'Antes de fazer as malas.',
       'Regras, mudanças e verificações para uma viagem sem surpresas.',
     ) +
@@ -505,7 +505,7 @@ export function checklistView(s) {
     done = all.filter((t) => s.checks[t.id]).length;
   return (
     heading(
-      'one step at a time',
+      'UM PASSO DE CADA VEZ',
       'Planos, listas e ideias soltas.',
       'Nosso espaço para organizar decisões e guardar o que não queremos esquecer.',
       btn(`${icon('download')} Exportar planejamento`, 'export-backup', '', 'secondary'),
@@ -516,11 +516,11 @@ export function checklistView(s) {
 export function sourcesView() {
   return (
     heading(
-      'the notes behind the diary',
+      'AS REFERÊNCIAS DA NOSSA VIAGEM',
       'Fontes, créditos e cuidado.',
       'Um planejamento útil mostra de onde vêm os dados e até onde eles podem nos ajudar.',
     ) +
-    `<div class="three-columns"><section class="paper"><span class="badge blue">Dado histórico</span><h3 class="serif spaced">O que foi observado</h3><p class="small muted">Normais JMA 1991–2020 e chegadas JNTO de 2025. Não são previsões meteorológicas ou turísticas de 2029.</p></section><section class="paper"><span class="badge gold">Estimativa editorial</span><h3 class="serif spaced">O que estamos planejando</h3><p class="small muted">Orçamento de novembro de 2026, roteiros, notas e tendências de custo. Sem disponibilidade ou tarifas futuras garantidas.</p></section><section class="paper"><span class="badge neutral">Verificação futura</span><h3 class="serif spaced">O que vamos confirmar</h3><p class="small muted">Datas, ingressos, passagens, hotéis, regras de entrada e tributos perto do embarque.</p></section></div><div class="section-top"><h2>Dados abertos, contexto claro</h2></div><div class="source-list"><section class="paper"><h3>Japan Meteorological Agency</h3><p>${esc(climate.methodology)}</p>${source('JMA', climate.source, climate.period)}<div class="chip-row spaced">${climate.cities.map((c) => link(c.source, c.name, 'btn small secondary')).join('')}</div></section><section class="paper"><h3>Japan National Tourism Organization</h3><p>${esc(tourism.note)} Total anual: ${number(tourism.annualTotal)} chegadas.</p>${source('JNTO · tabela oficial, página 2', tourism.source, String(tourism.year))}</section><section class="paper"><h3>Japan Diary 2029 · quatro estações</h3><p>PDF fornecido no diretório Contexto, versão novembro/2026. Base para identidade, roteiros e cenários de R$ 26.600, R$ 34.750 e R$ 45.900 por pessoa. Não é uma cotação de viagem.</p></section><section class="paper"><h3>Regras e calendário</h3><p>Fontes primárias estão em cada regra e evento. Última verificação: ${dateLabel(legal.lastVerified)}. O aplicativo sinaliza revisão após 180 dias e deve ser revalidado antes de comprar e embarcar.</p><div class="button-row spaced">${go('rules', 'Abrir regras', 'small secondary')}${go('events', 'Abrir eventos', 'small secondary')}</div></section></div><div class="section-top"><h2>Um olhar sobre o Japão</h2><span class="small muted">Fotografias reais · arquivos locais</span></div><p class="small muted">${esc(images.note)}</p><div class="credits">${images.images.map((i) => `<article>${img(i.id)}<p>${esc(i.author)}</p><span class="small">${link(i.source, 'Foto original')} · ${link(i.licenseUrl, i.license)}</span></article>`).join('')}</div><div class="section-top"><h2>Sobre este cantinho</h2></div><section class="paper"><p class="small muted">Japan Travel Planner 2029 · feito para seis amigos que saem de Brasília. HTML, CSS e JavaScript modular com Vite, Chart.js, Leaflet e Lucide. Mapa © OpenStreetMap contributors; consulte a atribuição no mapa. Fontes Google Fonts: DM Sans, Playfair Display e Noto Sans JP.</p><p class="small muted">Os dados do planejamento ficam no localStorage deste navegador, com versionamento. Fotos e conteúdo são distribuídos com o site. Google Fonts e os mapas fazem requisições externas; valores financeiros não são enviados a servidores. Sem backend, login ou sincronização.</p><div class="button-row">${btn(`${icon('download')} Exportar backup`, 'export-backup', '', 'secondary')}${btn(`${icon('upload')} Importar planejamento`, 'import-backup', '', 'secondary')}${btn(`${icon('moon')} Alternar tema`, 'theme', '', 'secondary')}</div></section>`
+    `<div class="three-columns"><section class="paper"><span class="badge blue">Dado histórico</span><h3 class="serif spaced">O que foi observado</h3><p class="small muted">Normais JMA 1991–2020 e chegadas JNTO de 2025. Não são previsões meteorológicas ou turísticas de 2029.</p></section><section class="paper"><span class="badge gold">Estimativa editorial</span><h3 class="serif spaced">O que estamos planejando</h3><p class="small muted">Orçamento de novembro de 2026, roteiros, notas e tendências de custo. Sem disponibilidade ou tarifas futuras garantidas.</p></section><section class="paper"><span class="badge neutral">Verificação futura</span><h3 class="serif spaced">O que vamos confirmar</h3><p class="small muted">Datas, ingressos, passagens, hotéis, regras de entrada e tributos perto do embarque.</p></section></div><div class="section-top"><h2>Dados abertos, contexto claro</h2></div><div class="source-list"><section class="paper"><h3>Japan Meteorological Agency</h3><p>${esc(climate.methodology)}</p>${source('JMA', climate.source, climate.period)}<div class="chip-row spaced">${climate.cities.map((c) => link(c.source, c.name, 'btn small secondary')).join('')}</div></section><section class="paper"><h3>Japan National Tourism Organization</h3><p>${esc(tourism.note)} Total anual: ${number(tourism.annualTotal)} chegadas.</p>${source('JNTO · tabela oficial, página 2', tourism.source, String(tourism.year))}</section><section class="paper"><h3>Japan Diary 2029 · quatro estações</h3><p>PDF fornecido no diretório Contexto, versão novembro/2026. Base para identidade, roteiros e cenários de R$ 26.600, R$ 34.750 e R$ 45.900 por pessoa. Não é uma cotação de viagem.</p></section><section class="paper"><h3>Regras e calendário</h3><p>Fontes primárias estão em cada regra e evento. Última verificação: ${dateLabel(legal.lastVerified)}. O aplicativo sinaliza revisão após 180 dias e deve ser revalidado antes de comprar e embarcar.</p><div class="button-row spaced">${go('rules', 'Abrir regras', 'small secondary')}${go('events', 'Abrir eventos', 'small secondary')}</div></section></div><div class="section-top"><h2>Um olhar sobre o Japão</h2><span class="small muted">Fotografias reais · arquivos locais</span></div><p class="small muted">${esc(images.note)}</p><div class="credits">${images.images.map((i) => `<article>${img(i.id)}<p>${esc(i.author)}</p><span class="small">${link(i.source, 'Foto original')} · ${link(i.licenseUrl, i.license)}</span></article>`).join('')}</div><div class="section-top"><h2>Sobre este cantinho</h2></div><section class="paper"><p class="small muted">planner · seu cantinho para planejar o Japão. Mapa © OpenStreetMap contributors; consulte a atribuição no mapa. Fontes: Manrope e DM Sans (arquivos locais, licença OFL).</p><p class="small muted">Os dados do planejamento ficam no localStorage deste navegador, com versionamento. Fotos e conteúdo são distribuídos com o site. Os mapas fazem requisições externas. A Mochi só compartilha preferências e o resumo opcional do orçamento com o Google Gemini quando você autoriza um pedido.</p><div class="button-row">${btn(`${icon('download')} Exportar backup`, 'export-backup', '', 'secondary')}${btn(`${icon('upload')} Importar planejamento`, 'import-backup', '', 'secondary')}${btn(`${icon('moon')} Alternar tema`, 'theme', '', 'secondary')}</div></section>`
   );
 }
 function extremesSummary(values, unit, highLabel, lowLabel) {

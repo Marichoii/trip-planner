@@ -21,7 +21,7 @@ import {
 } from './mochi-components.js';
 
 const titles = {
-  chat: 'Uma conversa sobre o nosso Japão.',
+  chat: 'Sua companhia de aventura.',
   itinerary: 'Uma viagem com a nossa cara.',
   refine: 'Vamos ajustar esse caminho?',
   analyze: 'Um olhar para os nossos dias.',
@@ -107,7 +107,7 @@ export function connectMochi(ctx, client = createAIClient()) {
       current = view();
     dialog.dataset.view = current;
     dialog.dataset.mode = mode;
-    dialog.innerHTML = `<header class="mochi-panel-header">${avatar()}<div class="mochi-identity"><p class="mochi-name">Mochi <span aria-hidden="true">♡</span> <small>assistente de viagem</small></p><h2 id="mochi-title">${titles[mode]}</h2></div><button class="icon-button mochi-close" type="button" data-mochi="close" aria-label="Fechar Mochi">${icon('x')}</button></header><div class="mochi-panel-body">${body(current)}</div>`;
+    dialog.innerHTML = `<header class="mochi-panel-header">${avatar()}<div class="mochi-identity"><p class="mochi-name">Mochi <span aria-hidden="true">♡</span> <small>sua companheira de viagem</small></p><h2 id="mochi-title">${titles[mode]}</h2></div><button class="icon-button mochi-close" type="button" data-mochi="close" aria-label="Fechar Mochi">${icon('x')}</button></header><div class="mochi-panel-body">${body(current)}</div>`;
     ctx.icons?.();
     const scroller = dialog.querySelector('.mochi-scroll');
     if (current === 'chat' && scroller) scroller.scrollTop = scroller.scrollHeight;

@@ -7,14 +7,26 @@ const tags = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const pages = [
   'home',
   'planner/1',
+  'planner/2',
   'planner/3',
   'planner/4',
   'planner/5',
+  'planner/6',
   'recommendations',
   'itinerary',
   'budget',
   'destinations',
   'months',
+  'seasons',
+  'events',
+  'food',
+  'hotels',
+  'transport',
+  'packing',
+  'checklist',
+  'rules',
+  'sources',
+  'explore',
 ];
 
 async function audit(page, label) {
@@ -45,15 +57,23 @@ for (const theme of ['light', 'dark'])
       page,
       context,
     }) => {
-      test.setTimeout(90000);
+      test.setTimeout(180000);
       await seed(context, theme);
       await page.setViewportSize(viewport);
       const issues = [];
       for (const hash of pages) {
         await page.goto('/#' + hash);
         await expect(page.locator('main h1').first()).toBeVisible();
-        // Mede o estado final, depois das animações de entrada (até 380 ms).
-        await page.waitForTimeout(500);
+        // Aguarda apenas animações finitas de entrada, preservando os loops decorativos.
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+          await Promise.all(
+            document
+              .getAnimations()
+              .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+              .map((a) => a.finished.catch(() => {})),
+          );
+        });
         issues.push(...(await audit(page, hash)));
       }
       expect(issues).toEqual([]);

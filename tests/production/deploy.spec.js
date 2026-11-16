@@ -9,14 +9,13 @@ test('build funciona em subdiretório com imagens, gráficos e mapa', async ({ p
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto('./');
-  await expect(page.locator('.welcome-main-photo img')).toBeVisible();
-  await expect
-    .poll(() =>
-      page
-        .locator('.welcome-main-photo img')
-        .evaluate((img) => img.complete && img.naturalWidth > 0),
-    )
-    .toBe(true);
+  await expect(page.locator('.home-postcard img')).toBeVisible();
+  await expect(page.locator('.brand strong')).toHaveText('planner.');
+  await expect(page.locator('.home-season img').first()).toBeVisible();
+  await page
+    .locator('.home-season img')
+    .first()
+    .evaluate((image) => image.decode());
   for (const route of ['months', 'destinations', 'itinerary', 'budget']) {
     await page.goto('./#' + route);
     if (route === 'months')

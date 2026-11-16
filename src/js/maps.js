@@ -2,6 +2,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { filteredDestinations, destinations } from './views.js';
 import { esc } from './utils.js';
+import { dashboardState } from './dashboard.js';
 const maps = [];
 const coarse = () => matchMedia('(pointer: coarse)').matches;
 export function disposeMaps() {
@@ -10,7 +11,7 @@ export function disposeMaps() {
 function map(id, points) {
   const el = document.getElementById(id);
   if (!el) return;
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reduced = document.documentElement.dataset.motion !== 'on';
   const map = L.map(el, {
     scrollWheelZoom: false,
     // Em telas de toque o mapa não captura a rolagem da página; o modo ampliado libera o arraste.
@@ -69,6 +70,7 @@ function map(id, points) {
   }, 50);
 }
 export function initMaps(s, ui, route) {
+  if (route === 'home') map('home-map', dashboardState(s).points);
   if (route === 'recommendations' && s.planner.result) {
     const points = s.planner.result.route.bases
       .map((b) => destinations.find((d) => d.id === b.destinationId))

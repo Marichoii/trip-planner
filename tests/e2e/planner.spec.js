@@ -171,7 +171,7 @@ test('backup exporta, rejeita arquivo inválido e pede revisão antes de importa
 test('mobile: navegação, modal e telas não criam overflow horizontal', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.locator('.welcome-how').scrollIntoViewIfNeeded();
+  await page.locator('#home-hub').scrollIntoViewIfNeeded();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: 'test-results/home-mobile.png', fullPage: true });
   await page.getByRole('button', { name: 'Abrir navegação' }).click();
@@ -196,7 +196,10 @@ test('desktop: captura visual, busca e mudança de tema', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1100 });
   await page.goto('/');
   await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await page.getByRole('button', { name: 'Alternar tema claro e escuro' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await page.locator('#global-search').fill('Nikko');
   await page.locator('#search-results a').first().click();

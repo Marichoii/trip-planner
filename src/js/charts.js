@@ -33,9 +33,9 @@ Chart.register(
 const instances = new Map();
 // As cores vêm dos tokens CSS para acompanhar o tema claro/escuro.
 const token = (name) =>
-  getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#8a5260';
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#bc3526';
 const palette = () => [1, 2, 3, 4, 5, 6].map((i) => token(`--chart-${i}`));
-const font = { family: 'DM Sans', size: 12 };
+const font = { family: "'DM Sans', system-ui, sans-serif", size: 12 };
 export function disposeCharts() {
   instances.forEach((chart) => chart.destroy());
   instances.clear();
@@ -45,7 +45,8 @@ function draw(id, type, data, extra = {}) {
   if (!el) return;
   const text = token('--color-text-secondary'),
     grid = token('--chart-grid');
-  Chart.defaults.font = font;
+  Chart.defaults.font.family = "'DM Sans', system-ui, sans-serif";
+  Chart.defaults.font.size = 12;
   Chart.defaults.color = text;
   const chart = new Chart(el, {
     type,
@@ -53,7 +54,7 @@ function draw(id, type, data, extra = {}) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: matchMedia('(prefers-reduced-motion: reduce)').matches ? false : { duration: 300 },
+      animation: document.documentElement.dataset.motion === 'on' ? { duration: 300 } : false,
       color: text,
       // Toque ou passagem do mouse em qualquer ponto do mês mostra todos os valores.
       interaction: type === 'doughnut' ? undefined : { mode: 'index', intersect: false },
@@ -111,6 +112,44 @@ export function weightedScores(s) {
   );
 }
 export function initCharts(s, ui, route) {
+  if (route === 'home') {
+    const city = climate.cities.find((c) => c.id === ui.city) || climate.cities[0];
+    const colors = palette();
+    draw(
+      'home-climate-chart',
+      'line',
+      {
+        labels: monthShort,
+        datasets: [
+          {
+            label: 'Temperatura média · °C',
+            data: city.temperature,
+            borderColor: colors[0],
+            backgroundColor: `${colors[0]}16`,
+            fill: true,
+            tension: 0.3,
+            pointStyle: 'circle',
+            pointRadius: 3,
+            pointHoverRadius: 6,
+            borderWidth: 2,
+          },
+        ],
+      },
+      {
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: token('--color-surface-elevated'),
+            titleColor: token('--color-text'),
+            bodyColor: token('--color-text-secondary'),
+            borderColor: token('--color-border-strong'),
+            borderWidth: 1,
+            callbacks: { label: (c) => `${city.name}: ${c.raw.toLocaleString('pt-BR')} °C` },
+          },
+        },
+      },
+    );
+  }
   if (route === 'months') {
     const city = climate.cities.find((c) => c.id === ui.city) || climate.cities[0];
     const colors = palette();

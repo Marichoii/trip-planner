@@ -1,4 +1,6 @@
 import '../css/index.css';
+import { homeHub, homeTabs } from './welcome.js';
+import { connectMotion } from './motion.js';
 import { connectMochiEntry } from './mochi-entry.js';
 import {
   navigationItems,
@@ -214,6 +216,7 @@ try {
 const loaded = loadState(storage);
 let state = loaded.state;
 let ui = {
+  homeTab: 'seasons',
   season: state.trip.selectedSeason || 'spring',
   city: 'tokyo',
   month: 0,
@@ -227,6 +230,7 @@ let activeRoute = 'home',
   searchTimer,
   notesTimer;
 const modal = document.getElementById('modal');
+const motion = connectMotion();
 function refreshIcons() {
   createIcons({ icons, attrs: { 'stroke-width': 1.7 } });
 }
@@ -245,7 +249,7 @@ function persist() {
 function syncTheme() {
   document.documentElement.dataset.theme = state.theme;
   const dark = state.theme === 'dark';
-  document.querySelector('meta[name=theme-color]').content = dark ? '#1d1917' : '#faf7f2';
+  document.querySelector('meta[name=theme-color]').content = dark ? '#19231f' : '#f8f7f3';
   document.querySelectorAll('.theme-toggle, .sidebar-theme').forEach((button) => {
     const label = button.querySelector('span');
     if (label) label.textContent = dark ? 'Usar tema claro' : 'Usar tema escuro';
@@ -267,7 +271,7 @@ function parsedRoute() {
   const [path, detail] = location.hash.replace(/^#\/?/, '').split('/');
   return { route: views[path] ? path : 'home', detail };
 }
-async function render({ focus = false } = {}) {
+async function render({ focus = false, homePanel = false } = {}) {
   const version = ++renderVersion;
   charts?.disposeCharts();
   maps?.disposeMaps();
@@ -278,10 +282,13 @@ async function render({ focus = false } = {}) {
   mochiController?.onRender(activeRoute);
   if (activeRoute === 'seasons' && seasons.some((v) => v.id === parsed.detail))
     ui.season = parsed.detail;
-  document.title = `${nav.find((n) => n[0] === activeRoute)[1]} · Japan Diary 2029`;
-  document.getElementById('main').innerHTML =
-    views[activeRoute](state, ui) +
-    `<footer class="footer"><span>Japan Diary 2029 · a little guide to our big adventure. ♡</span><span>Planejamento local · <a href="#sources">Fontes, créditos e limites dos dados</a></span></footer>`;
+  document.title = `${nav.find((n) => n[0] === activeRoute)[1]} · planner`;
+  const panelOnly = homePanel && activeRoute === 'home' && document.getElementById('home-hub');
+  if (panelOnly) panelOnly.outerHTML = homeHub(state, ui);
+  else
+    document.getElementById('main').innerHTML =
+      views[activeRoute](state, ui) +
+      `<footer class="footer"><span>planner · feito para explorar juntos.</span><span><a href="#sources">Fontes e sobre</a></span></footer>`;
   document.getElementById('current-page').textContent = nav.find((n) => n[0] === activeRoute)[1];
   updateNavigation(state, activeRoute);
   document.body.classList.remove('menu-open');
@@ -290,6 +297,7 @@ async function render({ focus = false } = {}) {
   syncTheme();
   refreshIcons();
   tick();
+  motion.render(document.getElementById('main'), { panel: !!panelOnly });
   if (focus) {
     window.scrollTo(0, 0);
     document.querySelector('#main h1')?.focus({ preventScroll: true });
@@ -304,13 +312,17 @@ async function render({ focus = false } = {}) {
     refreshIcons();
   }
   try {
-    if (['months', 'budget'].includes(activeRoute)) {
+    if (
+      ['months', 'budget'].includes(activeRoute) ||
+      (activeRoute === 'home' && ui.homeTab === 'climate')
+    ) {
       const module = await import('./charts.js');
       if (version !== renderVersion) return;
       charts = module;
       charts.initCharts(state, ui, activeRoute);
     }
     if (
+      (activeRoute === 'home' && ui.homeTab === 'map') ||
       activeRoute === 'destinations' ||
       activeRoute === 'recommendations' ||
       (activeRoute === 'itinerary' && ui.itineraryView === 'map')
@@ -444,6 +456,13 @@ function ensureDay(day) {
   return r.days.find((d) => d.day === Number(day));
 }
 const actions = {
+  'edit-trip-profile'() {
+    state.planner.started = true;
+    state.planner.step = 2;
+    state.planner.furthestStep = Math.max(2, state.planner.furthestStep);
+    persist();
+    location.hash = '#planner/2';
+  },
   menu() {
     const open = !document.body.classList.contains('menu-open');
     document.body.classList.toggle('menu-open', open);
@@ -751,6 +770,31 @@ document.addEventListener('click', (event) => {
   if (!event.target.closest('.search-wrap')) hideSearch();
   if (event.target.closest('#sheet-search-results a')) closeSearchSheet();
 });
+async function selectHomeTab(id) {
+  if (activeRoute !== 'home' || !homeTabs.some(([key]) => key === id)) return;
+  ui.homeTab = id;
+  const loading = render({ homePanel: true });
+  // Focus the new control immediately; a delayed chart must not steal focus later.
+  document.getElementById(`home-tab-${id}`)?.focus({ preventScroll: true });
+  await loading;
+}
+document.addEventListener('click', (event) => {
+  const tab = event.target.closest('[data-home-tab]');
+  if (tab) selectHomeTab(tab.dataset.homeTab);
+});
+document.addEventListener('keydown', (event) => {
+  const tab = event.target.closest('[data-home-tab]');
+  if (!tab || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const current = homeTabs.findIndex(([id]) => id === tab.dataset.homeTab);
+  const next =
+    event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? homeTabs.length - 1
+        : (current + (event.key === 'ArrowRight' ? 1 : -1) + homeTabs.length) % homeTabs.length;
+  selectHomeTab(homeTabs[next][0]);
+});
 function hideSearch() {
   const results = document.getElementById('search-results');
   if (results) results.hidden = true;
@@ -900,7 +944,11 @@ document.addEventListener('change', async (event) => {
   const el = event.target;
   if (el.dataset.ui) {
     ui[el.dataset.ui] = el.type === 'checkbox' ? el.checked : el.value;
-    render();
+    if (activeRoute === 'home' && el.dataset.ui === 'city') {
+      const loading = render({ homePanel: true });
+      document.getElementById('home-climate-city')?.focus({ preventScroll: true });
+      await loading;
+    } else render();
   }
   if (el.dataset.weight !== undefined) {
     state.weights[Number(el.dataset.weight)] = Number(el.value);
