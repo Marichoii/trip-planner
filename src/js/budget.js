@@ -44,13 +44,15 @@ export function depositCount(start, departure) {
   const [ey, em] = departure.split('-').map(Number);
   return Math.max(0, (ey - sy) * 12 + em - sm);
 }
-export function scenarioBudget(key, travelers = 6, nights = 24, days = 25) {
+export function scenarioBudget(key, travelers = 6) {
   const s = scenarios[key] || scenarios.balanced;
   return {
     scenario: key,
     flight: s.flight,
-    lodgingNight: Math.round(((s.lodging * travelers) / Math.max(1, nights)) * 100) / 100,
-    foodDay: Math.round((s.food / Math.max(1, days)) * 100) / 100,
+    // Reference scenarios cover 25 days / 24 nights. Keep daily rates stable so
+    // shorter and longer trips actually change their lodging and food totals.
+    lodgingNight: Math.round(((s.lodging * travelers) / 24) * 100) / 100,
+    foodDay: Math.round((s.food / 25) * 100) / 100,
     localTransport: s.transport - 1100,
     shinkansen: 1100,
     domesticFlight: 0,

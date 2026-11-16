@@ -1,0 +1,316 @@
+/* Contextual companion: available at every step, compact on a phone. */
+.wizard-with-coach {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+.wizard-companion {
+  padding: 0;
+  border: 0;
+  background: none;
+  border-radius: 0;
+  min-width: 0;
+}
+.planner-coach {
+  background: var(--color-surface);
+  border: 1px solid var(--color-success-border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.planner-coach > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 76px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+  background: var(--color-sage-soft);
+}
+.planner-coach > summary::-webkit-details-marker {
+  display: none;
+}
+.planner-coach > summary > span:not(.mochi-avatar) {
+  flex: 1;
+  min-width: 0;
+}
+.planner-coach > summary strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 800;
+}
+.planner-coach > summary small {
+  display: block;
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+  margin-top: 3px;
+}
+.planner-coach > summary > svg {
+  width: 15px;
+}
+.planner-coach[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.coach-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+}
+.coach-live-dot.is-live {
+  background: var(--color-success);
+}
+.coach-body {
+  padding: 18px;
+}
+.coach-guide {
+  font-size: 0.8125rem;
+  color: var(--color-text);
+}
+.coach-consent {
+  font-size: 0.6875rem;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+}
+.coach-budget {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 0.6875rem;
+  font-weight: 400;
+}
+.coach-budget input {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+.coach-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+.coach-controls .btn {
+  flex: 1;
+  min-height: 44px;
+  font-size: 0.6875rem;
+  padding-inline: 10px;
+}
+.coach-error {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  color: var(--color-error);
+}
+.coach-thinking {
+  display: flex;
+  gap: 9px;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  padding-block: 16px;
+}
+.coach-thinking > span {
+  color: var(--color-accent);
+}
+.coach-answer {
+  padding-top: 18px;
+  border-top: 1px solid var(--color-border);
+}
+.coach-answer > p:not(.eyebrow) {
+  font-size: 0.8125rem;
+  white-space: pre-wrap;
+}
+.coach-answer .eyebrow {
+  font-size: 0.5625rem;
+}
+.coach-answer .coach-asked {
+  font-size: 0.6875rem !important;
+  color: var(--color-text-muted);
+  border-left: 2px solid var(--color-border);
+  padding-left: 10px;
+}
+.coach-suggestions {
+  display: grid;
+  gap: 12px;
+}
+.coach-suggestions article {
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--color-bg);
+}
+.coach-suggestions article > p {
+  font-size: 0.75rem;
+  margin-bottom: 10px;
+}
+.coach-suggestions .btn {
+  width: 100%;
+  min-height: 44px;
+  font-size: 0.6875rem;
+  padding: 9px;
+}
+.coach-cautions > summary,
+.wizard-draft-summary > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+  min-height: 44px;
+  font-size: 0.75rem;
+}
+.coach-cautions {
+  margin-top: 8px;
+}
+.coach-cautions ul {
+  display: block;
+  list-style: disc;
+  padding-left: 16px;
+}
+.coach-cautions li {
+  display: list-item;
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+.coach-disclaimer {
+  display: block;
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  margin-block: 12px 18px;
+}
+#coach-question-form {
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+#coach-question-form label {
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 8px;
+}
+#coach-question-form textarea {
+  font-size: 1rem;
+  min-height: 86px;
+}
+#coach-question-form button {
+  min-height: 44px;
+  font-size: 0.75rem;
+}
+.wizard-draft-summary {
+  margin-top: 12px;
+  padding-inline: 14px;
+}
+.wizard-draft-summary ul {
+  display: grid;
+  gap: 8px;
+  padding-bottom: 14px;
+}
+.wizard-companion .wizard-save-note {
+  padding-inline: 14px;
+  font-size: 0.6875rem;
+}
+.planner-notes,
+.review-notes {
+  margin-top: 28px;
+  padding: 24px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+}
+.planner-notes h2,
+.review-notes h2,
+.review-ai h2 {
+  font-size: 1.125rem;
+}
+.planner-notes > p,
+.review-notes p,
+.review-ai p {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+.planner-notes label {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+  font-size: 0.8125rem;
+}
+.planner-notes > small {
+  display: block;
+  margin-top: 12px;
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+}
+.review-ai {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+  padding: 24px;
+  background: var(--color-sage-soft);
+  border: 1px solid var(--color-success-border);
+  border-radius: 20px;
+}
+.review-ai .btn {
+  justify-self: start;
+}
+@media (min-width: 1024px) {
+  .wizard-with-coach {
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 28px;
+  }
+  .wizard-with-coach > .wizard-content {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .wizard-with-coach > .wizard-companion {
+    grid-column: 2;
+    grid-row: 1;
+    position: sticky;
+    top: calc(var(--topbar-h) + 18px);
+    max-height: calc(100dvh - var(--topbar-h) - 115px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    overscroll-behavior: contain;
+  }
+  .wizard-with-coach .interest-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .wizard-with-coach .planner-budget-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .wizard-with-coach .planner-budget-option {
+    padding: 20px;
+  }
+  .wizard-with-coach .planner-reference-price {
+    font-size: 1.75rem;
+  }
+  .wizard-with-coach .budget-choice-facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+}
+@media (max-width: 767px) {
+  .wizard-companion .wizard-draft-summary,
+  .wizard-companion .wizard-save-note {
+    display: none;
+  }
+  .wizard-with-coach {
+    gap: 20px;
+  }
+  .planner-coach > summary {
+    min-height: 70px;
+    padding: 13px 16px;
+  }
+  .planner-notes,
+  .review-notes,
+  .review-ai {
+    padding: 18px;
+  }
+  .wizard-footer-end:has([data-planner-action='return-review']) .wizard-next {
+    display: none;
+  }
+}

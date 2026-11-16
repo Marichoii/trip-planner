@@ -28,6 +28,8 @@ export function initialPlanner(trip, budget) {
       interests: [],
       priorities: [],
       destinations: [],
+      travelNotes: '',
+      avoid: '',
       budgetChoice: null,
       budget: clone(budget),
     },
@@ -116,6 +118,15 @@ export function validatePlanner(planner) {
   )
     throw new Error('Progresso do planejador inválido.');
   function validateProfile(d) {
+    if (!isObject(d)) throw new Error('Preferências de viagem inválidas.');
+    if (
+      ['travelNotes', 'avoid'].some(
+        (key) =>
+          d[key] !== undefined &&
+          (typeof d[key] !== 'string' || d[key].length > (key === 'travelNotes' ? 600 : 300)),
+      )
+    )
+      throw new Error('Pedidos adicionais excedem o tamanho permitido.');
     if (
       !isObject(d) ||
       !Number.isInteger(d.travelers) ||

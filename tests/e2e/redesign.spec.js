@@ -23,7 +23,7 @@ async function stored(page) {
 }
 test('Home inicia um wizard visual, opcional e sem uma rota já decidida', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.welcome-hero h1')).toHaveText('O Japão nos espera.♡');
+  await expect(page.locator('.welcome-hero h1')).toHaveText('Próxima parada:Japão.');
   await expect(page.locator('.welcome-hero')).not.toContainText('R$');
   await expect(page.getByRole('link', { name: /Continuar nosso planejamento/ })).toHaveCount(0);
   expect((await stored(page)).routeChosen).toBe(false);
@@ -120,14 +120,13 @@ test('avançar, voltar e recuperar progresso preserva seis viajantes e preferên
   await page.getByRole('link', { name: /Continuar nosso planejamento/ }).click();
   await expect(page.locator('.wizard-heading h1')).toContainText('Quantas memórias');
 });
-test('dias e noites inconsistentes impedem continuar com uma explicação', async ({ page }) => {
+test('dias e noites acompanham as mudanças sem criar um conflito', async ({ page }) => {
   await page.goto('/#planner');
   await next(page);
   await page.locator('[data-profile=nights]').fill('10');
-  await next(page);
-  await expect(page.locator('#wizard-errors')).toContainText('24 noites');
-  await expect(page.locator('.wizard-heading h1')).toContainText('Quantas memórias');
-  await page.locator('[data-profile=nights]').fill('24');
+  await expect(page.locator('[data-profile=days]')).toHaveValue('11');
+  await page.locator('[data-profile=days]').fill('25');
+  await expect(page.locator('[data-profile=nights]')).toHaveValue('24');
   await next(page);
   await expect(page.locator('.wizard-heading h1')).toContainText('coração');
 });
@@ -290,12 +289,11 @@ test('escolhas por teclado mantêm foco e mostram erros junto do campo', async (
   await expect(winter).toHaveAttribute('aria-pressed', 'true');
   await expect(winter).toBeFocused();
   await next(page);
-  await page.locator('[data-profile=nights]').fill('20');
+  await page.locator('[data-profile=days]').fill('0');
   await next(page);
-  await expect(page.locator('[data-profile=nights]')).toBeFocused();
-  await expect(page.locator('[data-profile=nights]')).toHaveAttribute('aria-invalid', 'true');
-  await page.locator('[data-profile=nights]').fill('24');
-  await expect(page.locator('[data-profile=nights]')).not.toHaveAttribute('aria-invalid', 'true');
+  await expect(page.locator('[data-profile=days]')).toBeFocused();
+  expect(await page.locator('[data-profile=days]').evaluate((el) => el.validity.valid)).toBe(false);
+  await page.locator('[data-profile=days]').fill('25');
   await next(page);
   await expect(page.locator('.wizard-heading h1')).toContainText('coração');
 });

@@ -298,6 +298,7 @@ async function render({ focus = false, homePanel = false } = {}) {
   refreshIcons();
   tick();
   motion.render(document.getElementById('main'), { panel: !!panelOnly });
+  plannerController?.onRender(activeRoute);
   if (focus) {
     window.scrollTo(0, 0);
     document.querySelector('#main h1')?.focus({ preventScroll: true });
@@ -618,7 +619,7 @@ const actions = {
   scenario(el) {
     const { saved, savingsStart } = state.budget;
     state.budget = {
-      ...scenarioBudget(el.dataset.id, state.trip.travelers, state.trip.nights, state.trip.days),
+      ...scenarioBudget(el.dataset.id, state.trip.travelers),
       saved,
       savingsStart,
     };

@@ -8,6 +8,8 @@ import {
 import { seasonForMonth } from '../data/preferences.js';
 import { scenarioBudget, calculateBudget } from './budget.js';
 import { icon, money, uid, localDate, toast, esc } from './utils.js';
+import { updateProfile, applyCoachChange } from './planner-profile.js';
+import { connectPlannerCoach } from './planner-coach.js';
 export function connectPlanner(ctx) {
   const get = () => ctx.getState(),
     ui = ctx.ui;
@@ -67,6 +69,7 @@ export function connectPlanner(ctx) {
     history.replaceState(null, '', `#planner/${step}`);
     w.furthestStep = Math.max(w.furthestStep, step);
     ui.plannerErrors = [];
+    if (step === 6) ui.returnToReview = false;
     save();
     repaint(true);
   }
@@ -105,8 +108,8 @@ export function connectPlanner(ctx) {
     season(el) {
       markDirty();
       const p = get().planner.draft;
-      p.season = el.dataset.id;
-      if (p.month && seasonForMonth(p.month) !== p.season) p.month = null;
+      const note = updateProfile(p, 'season', el.dataset.id);
+      if (note) toast(note);
       save();
       repaint();
     },
@@ -122,11 +125,12 @@ export function connectPlanner(ctx) {
       const limits = { travelers: [1, 50], year: [2027, 2040], days: [1, 90], nights: [0, 89] };
       if (!limits[key]) return;
       markDirty();
-      p[key] = Math.max(
+      const value = Math.max(
         limits[key][0],
         Math.min(limits[key][1], p[key] + Number(el.dataset.delta)),
       );
-      if (key === 'days') p.nights = p.days - 1;
+      const note = updateProfile(p, key, value);
+      if (note) toast(note);
       save();
       repaint();
     },
@@ -185,7 +189,7 @@ export function connectPlanner(ctx) {
       const p = get().planner.draft;
       p.budgetChoice = el.dataset.id;
       if (['economic', 'balanced', 'comfortable'].includes(p.budgetChoice))
-        p.budget = scenarioBudget(p.budgetChoice, p.travelers, p.nights, p.days);
+        p.budget = scenarioBudget(p.budgetChoice, p.travelers);
       save();
       repaint();
     },
@@ -196,14 +200,26 @@ export function connectPlanner(ctx) {
     skip: next,
     step(el) {
       const step = Number(el.dataset.step);
-      if (step >= 1 && step <= get().planner.furthestStep) setStep(step);
+      if (step >= 1 && step <= get().planner.furthestStep) {
+        if (step > get().planner.step && !validateCurrent()) return;
+        if (el.closest('.review-card, .review-notes')) ui.returnToReview = true;
+        setStep(step);
+      }
+    },
+    'return-review'() {
+      if (validateCurrent()) setStep(6);
     },
     generate() {
       const w = get().planner,
         errors = profileErrors(w.draft);
       if (errors.length) {
+        const first = [1, 2].find((step) => profileErrors(w.draft, step).length);
+        if (first) {
+          w.step = first;
+          history.replaceState(null, '', `#planner/${first}`);
+        }
         ui.plannerErrors = errors;
-        repaint();
+        repaint(true);
         return;
       }
       w.result = buildRecommendation(w.draft, uid(), localDate());
@@ -327,23 +343,28 @@ export function connectPlanner(ctx) {
       )
         return;
       markDirty();
-      p[key] = el.type === 'number' ? el.valueAsNumber : el.value || null;
-      if (key === 'departureCity') p[key] = el.value;
-      if (key === 'days') {
-        p.nights = p.days - 1;
-        const input = document.querySelector('[data-profile="nights"]');
-        if (input) input.value = p.nights;
+      const value =
+        el.type === 'number'
+          ? el.valueAsNumber
+          : key === 'departureDate'
+            ? el.value || null
+            : el.value;
+      const note = updateProfile(p, key, value);
+      if (note) toast(note);
+      if (['days', 'nights'].includes(key)) {
+        const paired = key === 'days' ? 'nights' : 'days';
+        const input = document.querySelector(`[data-profile="${paired}"]`);
+        if (input) input.value = p[paired];
       }
       if (key === 'departureDate' && p.departureDate) {
-        p.month = Number(p.departureDate.slice(5, 7));
-        p.season = seasonForMonth(p.month);
         save();
         repaint();
         return;
       }
-      document
-        .querySelectorAll(`[data-draft-summary="${key}"]`)
-        .forEach((node) => (node.textContent = p[key]));
+      for (const field of ['days', 'nights'].includes(key) ? ['days', 'nights'] : [key])
+        document
+          .querySelectorAll(`[data-draft-summary="${field}"]`)
+          .forEach((node) => (node.textContent = p[field]));
       if (['days', 'nights'].includes(key)) {
         const hint = document.getElementById('duration-hint');
         if (hint)
@@ -369,8 +390,8 @@ export function connectPlanner(ctx) {
       markDirty();
       const p = get().planner.draft,
         key = el.dataset.profile;
-      p[key] = key === 'month' ? Number(el.value) || null : el.value;
-      if (key === 'month' && p.month) p.season = seasonForMonth(p.month);
+      const note = updateProfile(p, key, key === 'month' ? Number(el.value) || null : el.value);
+      if (note) toast(note);
       save();
       repaint();
     }
@@ -413,7 +434,18 @@ export function connectPlanner(ctx) {
         s.budget.scenario !== previous[1].scenario ? s.budget.scenario : 'custom';
     if (s.planner.result && (tripChanged || monetaryChanged)) s.planner.dirty = true;
   }
+  const coach = connectPlannerCoach({
+    ...ctx,
+    apply(change) {
+      const note = applyCoachChange(get().planner.draft, change);
+      markDirty();
+      save();
+      repaint();
+      toast(note || 'Sugestão adicionada ao rascunho. O roteiro ativo continua como estava.');
+    },
+  });
   return {
+    onRender: coach.update,
     reset,
     syncFromTools,
     prepare(route) {

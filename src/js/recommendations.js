@@ -310,11 +310,15 @@ export function recommendationDetails(result) {
     warnings.push(
       'A estação continua em aberto. A rota é um ponto de partida; clima e eventos precisam ser revistos quando escolherem a época.',
     );
+  if (p.travelNotes || p.avoid)
+    warnings.push(
+      'Os pedidos escritos ficaram salvos no perfil. A sugestão clássica não interpreta essas frases: revise as atividades ou peça uma proposta à Mochi para considerá-las.',
+    );
   warnings.push(
     'Ingressos, hotéis, tarifas e datas de eventos futuros precisam ser confirmados. Custos das atividades começam em zero até serem estimados por vocês.',
   );
   const budget = ['economic', 'balanced', 'comfortable'].includes(p.budgetChoice)
-    ? scenarioBudget(p.budgetChoice, p.travelers, p.nights, p.days)
+    ? scenarioBudget(p.budgetChoice, p.travelers)
     : p.budgetChoice === 'custom'
       ? p.budget
       : null;
