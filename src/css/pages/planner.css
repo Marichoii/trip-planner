@@ -887,16 +887,16 @@
   letter-spacing: 0.02em;
 }
 .interest-choice[data-tone='parks'] {
-  --tone: #b04f64;
+  --tone: #ab4633;
 }
 .interest-choice[data-tone='pop'] {
-  --tone: #7558a6;
+  --tone: #5c7140;
 }
 .interest-choice[data-tone='shopping'] {
-  --tone: #a9567a;
+  --tone: #bc573c;
 }
 .interest-choice[data-tone='food'] {
-  --tone: #a7652d;
+  --tone: #9d6d20;
 }
 .interest-choice[data-tone='culture'] {
   --tone: #a24e36;
@@ -905,13 +905,13 @@
   --tone: #557a46;
 }
 .interest-choice[data-tone='snow'] {
-  --tone: #476f91;
+  --tone: #476f80;
 }
 .interest-choice[data-tone='beach'] {
-  --tone: #24786f;
+  --tone: #347264;
 }
 .interest-choice[data-tone='nightlife'] {
-  --tone: #594c98;
+  --tone: #526849;
 }
 .interest-choice[data-tone='onsen'] {
   --tone: #92603f;

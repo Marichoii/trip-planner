@@ -1,0 +1,122 @@
+/* Gentle motion, one persistent pause control, and system preference support. */
+body {
+  isolation: isolate;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: radial-gradient(var(--color-border-strong) 0.5px, transparent 0.5px);
+  background-size: 5px 5px;
+  opacity: 0.17;
+}
+.postcard-seal {
+  animation: seal-sway 8s ease-in-out infinite alternate;
+}
+.hero-spark {
+  animation: spark-turn 24s linear infinite;
+}
+.postcard-path {
+  animation: path-travel 30s linear infinite;
+}
+.home-season img,
+.explore-story-photo img {
+  transition: transform 650ms var(--ease-out);
+}
+@media (hover: hover) {
+  .home-season:hover img,
+  .explore-story:hover img {
+    transform: scale(1.045);
+  }
+  .home-season:hover .home-season-copy strong {
+    color: var(--color-accent);
+  }
+  .home-start:hover svg,
+  .home-text-link:hover svg,
+  .home-quests a:hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+.home-start svg,
+.home-text-link svg,
+.home-quests a svg {
+  transition: transform 220ms var(--ease-out);
+}
+.home-tabs button {
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.home-season-save {
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
+}
+.motion-toggle .motion-play {
+  display: none;
+}
+.motion-toggle[aria-pressed='true'] .motion-play {
+  display: block;
+}
+.motion-toggle[aria-pressed='true'] .motion-pause {
+  display: none;
+}
+[data-page-hidden='true'] *,
+[data-page-hidden='true'] *::before,
+[data-page-hidden='true'] *::after {
+  animation-play-state: paused !important;
+}
+[data-motion='paused'] *,
+[data-motion='paused'] *::before,
+[data-motion='paused'] *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+}
+@keyframes seal-sway {
+  from {
+    transform: rotate(6deg);
+  }
+  to {
+    transform: rotate(16deg);
+  }
+}
+@keyframes spark-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes path-travel {
+  to {
+    stroke-dashoffset: -240;
+  }
+}
+[data-motion='paused'] .home-season:hover img,
+[data-motion='paused'] .explore-story:hover img,
+[data-motion='paused'] .home-start:hover svg,
+[data-motion='paused'] .home-text-link:hover svg,
+[data-motion='paused'] .home-quests a:hover svg {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .postcard-seal,
+  .hero-spark,
+  .postcard-path {
+    animation: none;
+  }
+  .home-season:hover img,
+  .explore-story:hover img,
+  .home-start:hover svg,
+  .home-text-link:hover svg,
+  .home-quests a:hover svg {
+    transform: none;
+  }
+}
+@media print {
+  body::before,
+  .motion-toggle {
+    display: none;
+  }
+}

@@ -100,8 +100,8 @@ h1,
 h2,
 .serif {
   font-family: var(--font-display);
-  font-weight: var(--weight-regular);
-  letter-spacing: -0.012em;
+  font-weight: 800;
+  letter-spacing: -0.045em;
 }
 h1 {
   font-size: var(--text-3xl);

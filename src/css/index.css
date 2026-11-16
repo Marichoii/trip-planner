@@ -1,5 +1,5 @@
-/* Japan Diary · ponto de entrada do CSS. A ordem define a cascata:
-   tokens → base → layout → componentes → páginas → Mochi → impressão. */
+/* planner · ponto de entrada do CSS. A ordem define a cascata:
+   tokens → base → layout → componentes → páginas → Mochi → identidade → impressão. */
 @import './tokens.css';
 @import './base.css';
 @import './layout.css';
@@ -9,4 +9,6 @@
 @import './pages/result.css';
 @import './pages/tools.css';
 @import './mochi.css';
+@import './japan.css';
+@import './motion.css';
 @import './print.css';

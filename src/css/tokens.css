@@ -1,96 +1,110 @@
+@font-face {
+  font-family: 'Manrope';
+  src: url('../../public/fonts/manrope.ttf') format('truetype');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('../../public/fonts/dm-sans.ttf') format('truetype');
+  font-weight: 100 1000;
+  font-style: normal;
+  font-display: swap;
+}
 /* ============================================================
-   Japan Diary · Design tokens
+   planner · Design tokens
    Fonte única para cor, tipografia, espaço, raios, sombras,
    movimento e camadas. Os componentes usam apenas estes nomes.
    ============================================================ */
 :root {
-  /* — Paleta base: creme, rosa antigo, marrom e sálvia — */
-  --cream-50: #fffdf9;
-  --cream-100: #faf7f2;
-  --cream-200: #f4eee6;
-  --cream-300: #ebe2d6;
-  --cream-400: #ddd0c1;
-  --rose-50: #f8eef0;
-  --rose-100: #f2e3e5;
-  --rose-200: #e6c9cf;
-  --rose-500: #8a5260;
-  --rose-600: #774553;
-  --rose-700: #6e3f4b;
-  --brown-500: #725a52;
-  --brown-700: #4a3d37;
-  --brown-900: #3a2f2a;
-  --sage-100: #e9eee2;
-  --sage-300: #c9d4bd;
-  --sage-600: #5b6c53;
+  /* — Paleta base: papel, vermelho japonês, tinta e matcha — */
+  --cream-50: #ffffff;
+  --cream-100: #f8f7f3;
+  --cream-200: #eeede6;
+  --cream-300: #e5e3da;
+  --cream-400: #d5d2c7;
+  --rose-50: #fff0eb;
+  --rose-100: #fce5de;
+  --rose-200: #f0b7a7;
+  --rose-500: #bc3526;
+  --rose-600: #a4291c;
+  --rose-700: #8c251b;
+  --brown-500: #282d29;
+  --brown-700: #303530;
+  --brown-900: #252a26;
+  --sage-100: #e9efdf;
+  --sage-300: #c9d6b4;
+  --sage-600: #416249;
 
   /* — Cores semânticas — */
   --color-bg: var(--cream-100);
   --color-bg-sunken: var(--cream-200);
   --color-surface: var(--cream-50);
   --color-surface-elevated: #ffffff;
-  --color-surface-hover: #f8f2ea;
+  --color-surface-hover: #f3f2ec;
   --color-surface-selected: var(--rose-50);
   --color-text: var(--brown-900);
-  --color-text-secondary: #5f514a;
-  --color-text-muted: #6f635b;
-  --color-text-inverse: #fffaf6;
-  --color-border: #e6ddd2;
-  --color-border-strong: #cfc1b2;
-  --color-border-input: #968578;
+  --color-text-secondary: #555b53;
+  --color-text-muted: #60665c;
+  --color-text-inverse: #ffffff;
+  --color-border: #e3e4dc;
+  --color-border-strong: #c7cbbf;
+  --color-border-input: #92998a;
   --color-accent: var(--rose-500);
   --color-accent-hover: var(--rose-600);
   --color-accent-strong: var(--rose-700);
   --color-accent-soft: var(--rose-100);
   --color-accent-contrast: #ffffff;
-  --color-on-accent-soft: #7a4553;
+  --color-on-accent-soft: #9c3024;
   --color-brand: var(--brown-500);
   --color-sage: var(--sage-600);
   --color-sage-soft: var(--sage-100);
-  --color-focus: #8a4f5d;
-  --color-focus-ring: #8a526040;
-  --color-success: #446349;
-  --color-success-soft: #e6eedf;
-  --color-success-border: #c8d6c0;
-  --color-warning: #6f5520;
-  --color-warning-soft: #f6eedb;
-  --color-warning-border: #e4d2a7;
-  --color-error: #9a3c3c;
-  --color-error-soft: #f8e5e2;
-  --color-error-border: #e8c0ba;
-  --color-info: #3f6074;
-  --color-info-soft: #e7eff4;
-  --color-info-border: #c9dae5;
-  --color-added: #446349;
-  --color-removed: #9a3c3c;
-  --color-changed: #6f5520;
+  --color-focus: #39715a;
+  --color-focus-ring: #39715a33;
+  --color-success: #386449;
+  --color-success-soft: #e8efdf;
+  --color-success-border: #c3d3b8;
+  --color-warning: #795516;
+  --color-warning-soft: #fbf0d3;
+  --color-warning-border: #e7cf92;
+  --color-error: #b42f25;
+  --color-error-soft: #fde9e4;
+  --color-error-border: #efb4a8;
+  --color-info: #38657b;
+  --color-info-soft: #e7f0f4;
+  --color-info-border: #bdcfd9;
+  --color-added: #386449;
+  --color-removed: #b42f25;
+  --color-changed: #795516;
   --color-photo-frame: #ffffff;
-  --color-tape: #ded1baaa;
-  --color-scrim: #2b201c99;
-  --color-overlay: #2b201c;
+  --color-tape: #efcc6bb3;
+  --color-scrim: #1e28266e;
+  --color-overlay: #182923;
 
   /* Regiões: tons para capas tipográficas e mapas */
-  --region-kanto: #ecd7da;
-  --region-kansai: #f1dccb;
-  --region-chubu: #dfe6d3;
-  --region-hokkaido: #dbe6ee;
-  --region-okinawa: #d3e9e6;
-  --region-kyushu: #f2d9cf;
-  --region-tohoku: #dcdcec;
-  --region-chugoku: #e8d8e6;
-  --region-ink: #5a463f;
+  --region-kanto: #f7d9d0;
+  --region-kansai: #f2dfad;
+  --region-chubu: #dbe8c9;
+  --region-hokkaido: #d6e8ec;
+  --region-okinawa: #cce6df;
+  --region-kyushu: #f2d6c0;
+  --region-tohoku: #e1e6d3;
+  --region-chugoku: #efddcf;
+  --region-ink: #3b4b3f;
 
   /* Gráficos: série categórica com contraste ≥ 3:1 sobre a superfície */
-  --chart-1: #8a5260;
-  --chart-2: #4f7a49;
-  --chart-3: #b06422;
-  --chart-4: #3f6f94;
-  --chart-5: #7356a6;
-  --chart-6: #8a7322;
-  --chart-muted: #c9b9ab;
-  --chart-grid: #ebe3d9;
+  --chart-1: #bc3526;
+  --chart-2: #477250;
+  --chart-3: #aa751b;
+  --chart-4: #3b738a;
+  --chart-5: #9b6050;
+  --chart-6: #747935;
+  --chart-muted: #b3b9ac;
+  --chart-grid: #e7e8e0;
 
   /* Sombras: quentes e discretas */
-  --shadow-color: 32deg 22% 28%;
+  --shadow-color: 135deg 12% 22%;
   --shadow-xs: 0 1px 2px hsl(var(--shadow-color) / 0.06);
   --shadow-sm:
     0 1px 2px hsl(var(--shadow-color) / 0.05), 0 4px 12px hsl(var(--shadow-color) / 0.05);
@@ -101,7 +115,7 @@
   --shadow-photo: 0 10px 30px hsl(var(--shadow-color) / 0.14);
 
   /* — Tipografia — */
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-display: 'Manrope', 'DM Sans', system-ui, sans-serif;
   --font-ui: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-jp: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
   --text-2xs: 0.75rem; /* 12 · rótulos e eyebrows */
@@ -118,8 +132,8 @@
   --leading-snug: 1.3;
   --leading-normal: 1.55;
   --leading-relaxed: 1.7;
-  --tracking-display: -0.025em;
-  --tracking-eyebrow: 0.16em;
+  --tracking-display: -0.055em;
+  --tracking-eyebrow: 0.12em;
   --weight-regular: 400;
   --weight-medium: 500;
   --weight-semibold: 600;
@@ -137,15 +151,15 @@
   --gutter: clamp(16px, 3.6vw, 48px);
   --section-gap: clamp(var(--space-7), 6vw, 88px);
   --stack-gap: clamp(var(--space-4), 2vw, var(--space-5));
-  --content-max: 1360px;
+  --content-max: 1440px;
   --reading-max: 68ch;
 
   /* — Raios — */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --radius-xl: 26px;
+  --radius-xs: 6px;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
   --radius-pill: 999px;
 
   /* — Controles — */
@@ -159,7 +173,7 @@
   --icon-lg: 22px;
 
   /* — Estrutura — */
-  --sidebar-w: 256px;
+  --sidebar-w: 224px;
   --topbar-h: 60px;
   --bottomnav-h: 64px;
   --safe-top: env(safe-area-inset-top, 0px);
@@ -197,72 +211,71 @@
 }
 
 [data-theme='dark'] {
-  --color-bg: #1d1917;
-  --color-bg-sunken: #171412;
-  --color-surface: #27221f;
-  --color-surface-elevated: #302a26;
-  --color-surface-hover: #332c28;
-  --color-surface-selected: #3a2a30;
-  --color-text: #f3ebe4;
-  --color-text-secondary: #d7c9bf;
-  --color-text-muted: #b8a89d;
-  --color-text-inverse: #1d1917;
-  --color-border: #433934;
-  --color-border-strong: #5c4f48;
-  --color-border-input: #8a7a70;
-  --color-accent: #dba7b3;
-  --color-accent-hover: #e8bcc6;
-  --color-accent-strong: #f0cdd5;
-  --color-accent-soft: #46303a;
-  --color-accent-contrast: #2a1a20;
-  --color-on-accent-soft: #f5d3db;
-  --color-brand: #e3cfc4;
-  --color-sage: #bccbb1;
-  --color-sage-soft: #2e382c;
-  --color-focus: #f0bfcb;
-  --color-focus-ring: #dba7b355;
-  --color-success: #bfdab6;
-  --color-success-soft: #2b3a2c;
-  --color-success-border: #43573f;
-  --color-warning: #ecd59f;
-  --color-warning-soft: #3d3320;
-  --color-warning-border: #5f4f2c;
-  --color-error: #f3b9b0;
-  --color-error-soft: #45282a;
-  --color-error-border: #6b3a3a;
-  --color-info: #bfd7e6;
-  --color-info-soft: #253541;
-  --color-info-border: #3c5262;
-  --color-added: #bfdab6;
-  --color-removed: #f3b9b0;
-  --color-changed: #ecd59f;
-  --color-photo-frame: #efe6da;
-  --color-tape: #b9a98caa;
-  --color-scrim: #000000a6;
-  --color-overlay: #000000;
-  --region-kanto: #4a3238;
-  --region-kansai: #4b3a2c;
-  --region-chubu: #34402f;
-  --region-hokkaido: #2d3d48;
-  --region-okinawa: #24413e;
-  --region-kyushu: #4b332b;
-  --region-tohoku: #34344a;
-  --region-chugoku: #43324a;
-  --region-ink: #f1e4dc;
-  --chart-1: #e3a9b6;
-  --chart-2: #9fcb93;
-  --chart-3: #eaa66b;
-  --chart-4: #8fbde0;
-  --chart-5: #bba5e6;
-  --chart-6: #dcc579;
-  --chart-muted: #5e524b;
-  --chart-grid: #3b332f;
-  --shadow-color: 20deg 30% 3%;
-  --shadow-sm: 0 1px 2px hsl(var(--shadow-color) / 0.4);
-  --shadow-md:
-    0 2px 6px hsl(var(--shadow-color) / 0.35), 0 12px 28px hsl(var(--shadow-color) / 0.35);
-  --shadow-lg:
-    0 8px 20px hsl(var(--shadow-color) / 0.45), 0 28px 64px hsl(var(--shadow-color) / 0.5);
-  --shadow-photo: 0 10px 30px hsl(var(--shadow-color) / 0.5);
+  --color-bg: #19231f;
+  --color-bg-sunken: #141c19;
+  --color-surface: #222e27;
+  --color-surface-elevated: #2b3830;
+  --color-surface-hover: #344238;
+  --color-surface-selected: #44312a;
+  --color-text: #f5f3e9;
+  --color-text-secondary: #d1d6c9;
+  --color-text-muted: #b1baaa;
+  --color-text-inverse: #18231c;
+  --color-border: #3c4b3f;
+  --color-border-strong: #60705e;
+  --color-border-input: #889682;
+  --color-accent: #ffa18a;
+  --color-accent-hover: #ffbca9;
+  --color-accent-strong: #ffd0be;
+  --color-accent-soft: #4b3229;
+  --color-accent-contrast: #2c201b;
+  --color-on-accent-soft: #ffc4ad;
+  --color-brand: #f5f3e9;
+  --color-sage: #b9d799;
+  --color-sage-soft: #30412d;
+  --color-focus: #b9d799;
+  --color-focus-ring: #b9d79944;
+  --color-success: #b9d799;
+  --color-success-soft: #30412d;
+  --color-success-border: #5b7648;
+  --color-warning: #f1d385;
+  --color-warning-soft: #443e26;
+  --color-warning-border: #7b6b3d;
+  --color-error: #ffac99;
+  --color-error-soft: #4e3029;
+  --color-error-border: #805044;
+  --color-info: #acd5df;
+  --color-info-soft: #293e43;
+  --color-info-border: #4d737c;
+  --color-added: #b9d799;
+  --color-removed: #ffac99;
+  --color-changed: #f1d385;
+  --color-photo-frame: #f2efdf;
+  --color-tape: #e3c05db3;
+  --color-scrim: #0b130fcc;
+  --color-overlay: #111a15;
+  --region-kanto: #543c31;
+  --region-kansai: #514b2d;
+  --region-chubu: #374c32;
+  --region-hokkaido: #314c51;
+  --region-okinawa: #2b4d45;
+  --region-kyushu: #523c2b;
+  --region-tohoku: #424b31;
+  --region-chugoku: #4f4031;
+  --region-ink: #f2eedf;
+  --chart-1: #ffa18a;
+  --chart-2: #b9d799;
+  --chart-3: #f1d385;
+  --chart-4: #acd5df;
+  --chart-5: #e4b1a1;
+  --chart-6: #d5d99a;
+  --chart-muted: #8a9c83;
+  --chart-grid: #3c4b3f;
+  --shadow-color: 135deg 20% 5%;
+  --shadow-xs: 0 2px 4px #0000000d;
+  --shadow-sm: 0 5px 18px #00000018;
+  --shadow-md: 0 10px 32px #00000026;
+  --shadow-lg: 0 24px 80px #0000004d;
+  --shadow-photo: 0 18px 40px #00000026;
   color-scheme: dark;
 }

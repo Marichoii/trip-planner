@@ -33,6 +33,7 @@ export function initialState() {
     legs: [],
     seasonQuotes: {},
     theme: 'light',
+    appearanceVersion: 2,
     weights: [1, 1, 1, 1, 1],
     planner: initialPlanner(trip, budget),
   };
@@ -235,7 +236,8 @@ export function validateState(value) {
           ? b.scenario
           : 'balanced',
       },
-      theme: value.theme === 'dark' ? 'dark' : 'light',
+      theme: value.appearanceVersion === 2 && value.theme === 'dark' ? 'dark' : 'light',
+      appearanceVersion: 2,
     };
   const result = legacy ? migrateV1(normalized) : normalized;
   if (typeof result.routeChosen !== 'boolean')

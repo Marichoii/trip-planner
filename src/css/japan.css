@@ -1,0 +1,928 @@
+/* planner / Japan travel journal. Shared visual language across every route. */
+h1,
+h2,
+.serif {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+h3,
+h4 {
+  letter-spacing: -0.025em;
+}
+.eyebrow {
+  font-size: 0.625rem;
+  letter-spacing: 0.13em;
+  font-weight: 600;
+}
+.sidebar {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  padding-inline: 16px;
+}
+.sidebar-head {
+  padding: 20px 6px 30px;
+}
+.brand {
+  gap: 10px;
+}
+.brand img {
+  width: 33px;
+  height: 33px;
+}
+.brand strong {
+  font-size: 1.75rem;
+  letter-spacing: -0.065em;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--color-text);
+}
+.brand-spark {
+  color: var(--color-accent);
+}
+.topbar-brand {
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+.nav-group,
+.nav-disclosure summary {
+  font-size: 0.5625rem;
+  letter-spacing: 0.11em;
+}
+.nav-group {
+  margin: 12px 14px;
+}
+.nav-link {
+  padding-inline: 14px;
+  border-radius: 10px;
+  min-height: 46px;
+  margin-block: 4px;
+  font-size: 0.8125rem;
+}
+.primary-links .nav-link {
+  font-size: 0.8125rem;
+}
+.nav-link svg {
+  width: 17px;
+}
+.nav-link.active {
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+}
+.nav-link.active::before {
+  display: none;
+}
+.nav-link.active::after {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-left: auto;
+  background: var(--color-accent);
+}
+.nav-disclosure {
+  border-top-style: dashed;
+  margin-top: 22px;
+}
+.nav-disclosure .nav-link {
+  font-size: 0.75rem;
+}
+.sidebar-tools {
+  border-top-style: dashed;
+}
+.side-bottom {
+  margin-top: 12px;
+  padding: 20px 16px 12px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--color-sage-soft);
+}
+.sidebar-note-icon {
+  color: var(--color-sage);
+  margin-bottom: 14px;
+}
+.side-bottom p {
+  font-family: var(--font-display);
+  font-style: normal;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--color-text);
+}
+.side-bottom p small {
+  font-family: var(--font-ui);
+  font-weight: 400;
+}
+.sidebar-continue {
+  color: var(--color-sage);
+  font-size: 0.6875rem;
+  gap: 10px;
+}
+.topbar {
+  background: color-mix(in srgb, var(--color-bg) 94%, transparent);
+  backdrop-filter: blur(12px);
+  border-color: var(--color-border);
+}
+.breadcrumb {
+  font-size: 0.6875rem;
+}
+.breadcrumb strong {
+  font-size: 0.8125rem;
+}
+.crumb-root {
+  color: var(--color-text-muted);
+}
+.search-box {
+  border: 0;
+  border-radius: 100px;
+  background: var(--color-surface);
+  height: 40px;
+}
+.search-box input {
+  font-size: 0.75rem;
+}
+.japan-time {
+  padding: 0 12px;
+  gap: 5px;
+  font-size: 0.625rem;
+}
+.japan-time span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.japan-time span:first-child::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.save-status {
+  font-size: 0.625rem;
+}
+.btn {
+  border-radius: 100px;
+  font-weight: 600;
+}
+.btn:not(.secondary):not(.subtle):not(:disabled) {
+  box-shadow: none;
+}
+.btn:not(.secondary):not(.subtle):hover:not(:disabled) {
+  box-shadow: 0 5px 15px color-mix(in srgb, var(--color-accent) 15%, transparent);
+}
+.icon-button {
+  border-radius: 50%;
+}
+.text-button {
+  font-weight: 500;
+}
+.paper {
+  box-shadow: none;
+}
+.page-heading {
+  padding: 10px 0 24px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 28px;
+}
+.page-heading .eyebrow {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--color-accent);
+}
+.page-heading h1 {
+  font-size: clamp(2rem, 3vw, 3.125rem);
+  max-width: 25ch;
+  margin-bottom: 12px;
+  line-height: 1.18;
+}
+.page-heading > div > p:not(.eyebrow) {
+  max-width: 65ch;
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+}
+.page-heading .button-row {
+  flex-shrink: 0;
+}
+.section-top {
+  margin-top: 42px;
+}
+.section-top h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.paper > h2 {
+  font-size: 1.125rem;
+}
+input:not([type='checkbox']):not([type='radio']):not([type='range']),
+select,
+textarea {
+  border-radius: 10px;
+}
+label {
+  font-weight: 500;
+}
+.filters {
+  padding: 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+.filters label {
+  font-size: 0.75rem;
+}
+.tab-bar {
+  gap: 7px;
+  padding-bottom: 10px;
+}
+.tab {
+  border-radius: 100px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  font-size: 0.75rem;
+}
+.tab.active,
+.tab[aria-pressed='true'] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.badge {
+  font-size: 0.625rem;
+  font-weight: 500;
+  border-radius: 6px;
+}
+.notice {
+  border-radius: 12px;
+  font-size: 0.8125rem;
+}
+.stat {
+  border-radius: 16px;
+  box-shadow: none;
+  padding: 22px;
+}
+.stat-icon {
+  border-radius: 50%;
+  background: var(--color-sage-soft);
+  color: var(--color-sage);
+}
+.stat strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+.stat small {
+  font-size: 0.6875rem;
+}
+.table-wrap {
+  border-radius: 16px;
+  box-shadow: none;
+}
+th {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: var(--color-bg-sunken);
+}
+td {
+  font-size: 0.8125rem;
+}
+.source {
+  font-size: 0.625rem;
+  line-height: 1.7;
+}
+.empty {
+  border-radius: 20px;
+  background: var(--color-surface);
+  padding: 44px 24px;
+}
+.empty > svg {
+  color: var(--color-accent);
+}
+dialog:not(.search-sheet):not(.mochi-panel) {
+  border-radius: 24px;
+}
+.modal-title {
+  font-weight: 800;
+}
+.footer {
+  font-size: 0.6875rem;
+  color: var(--color-text-muted);
+}
+
+/* Planning steps: tactile choices and a calm, consistent working area. */
+.planner-page-top {
+  font-size: 0.625rem;
+}
+.planner-back-home {
+  font-size: 0.75rem;
+}
+.wizard-heading {
+  margin-block: 30px;
+}
+.wizard-heading h1 {
+  font-size: clamp(2rem, 3vw, 2.75rem);
+  max-width: 27ch;
+}
+.wizard-heading > p:last-child {
+  font-size: 0.9375rem;
+  max-width: 65ch;
+}
+.wizard-heading h1 > span {
+  color: var(--color-accent);
+}
+.wizard-season-option {
+  border-radius: 20px;
+  background: var(--color-surface);
+  box-shadow: none;
+  overflow: hidden;
+}
+.wizard-season-option .season-option-photo {
+  border-radius: 0;
+}
+.season-option-body {
+  padding: 18px;
+}
+.season-option-body strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  letter-spacing: -0.035em;
+}
+.choice-check {
+  border-radius: 50%;
+}
+.undecided-choice {
+  border-radius: 14px;
+}
+.wizard-optional {
+  border-radius: 18px;
+  background: var(--color-surface);
+  padding: 24px;
+  border: 1px solid var(--color-border);
+}
+.wizard-optional h2 {
+  font-size: 1rem;
+}
+.wizard-aside h2 {
+  font-size: 1.125rem;
+}
+.wizard-aside figcaption {
+  color: #485244;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-style: normal;
+}
+.wizard-aside figure {
+  border-radius: 5px;
+}
+.wizard-aside figure img {
+  border-radius: 3px;
+}
+.planner-counter {
+  border-radius: 100px;
+  overflow: hidden;
+}
+.planner-counter-label > label {
+  font-weight: 600;
+}
+.interest-choice,
+.pace-choice,
+.priority-choice,
+.budget-secondary-option {
+  border-radius: 16px;
+}
+.interest-choice strong,
+.pace-choice strong,
+.budget-choice-head strong {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+.interest-choice.is-selected,
+.pace-choice.is-selected,
+.planner-city.is-selected,
+.planner-budget-option.is-selected {
+  border-color: var(--color-accent);
+  background: var(--color-surface-selected);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+.interest-rank {
+  border-radius: 50%;
+}
+.priority-picker {
+  border-radius: 20px;
+  background: var(--color-sage-soft);
+}
+.planner-selected-places {
+  border-radius: 14px;
+}
+.planner-city {
+  border-radius: 18px;
+  overflow: hidden;
+}
+.planner-city-body h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+}
+.city-pick-button {
+  border-radius: 100px;
+}
+.planner-budget-option {
+  border-radius: 20px;
+  padding: 24px;
+}
+.budget-choice-icon {
+  border-radius: 50%;
+  background: var(--color-bg-sunken);
+}
+.planner-reference-price {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+.planner-reference-price small {
+  letter-spacing: 0;
+  font-family: var(--font-ui);
+}
+.review-card {
+  border-radius: 18px;
+}
+.review-card > span {
+  border-radius: 50%;
+  background: var(--color-sage-soft);
+  color: var(--color-sage);
+}
+.review-card h3 {
+  font-weight: 700;
+}
+.review-intro {
+  border-radius: 14px;
+  background: var(--color-sage-soft);
+  color: var(--color-sage);
+}
+.wizard-footer {
+  background: color-mix(in srgb, var(--color-surface) 96%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -8px 30px #22302405;
+}
+.wizard-next,
+.wizard-generate {
+  border-radius: 100px;
+}
+@media (min-width: 768px) {
+  .wizard-progress {
+    border: 0;
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: var(--color-surface);
+  }
+  .wizard-progress small {
+    font-size: 0.6875rem;
+  }
+  .wizard-progress .step-dot {
+    width: 28px;
+    height: 28px;
+    font-size: 0.625rem;
+  }
+  .wizard-progress .current .step-dot {
+    box-shadow: none;
+  }
+  .wizard-progress-count {
+    font-size: 0.625rem;
+  }
+}
+
+/* Recommendations, maps and discovery cards. */
+.recommendation-hero {
+  padding-bottom: 36px;
+}
+.recommendation-hero h1 {
+  font-size: clamp(2.375rem, 3.8vw, 4.125rem);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+.recommendation-lead {
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+.recommendation-photo {
+  border-radius: 4px;
+  transform: rotate(4deg);
+}
+.recommendation-photo img {
+  border-radius: 2px;
+}
+.recommendation-photo figcaption {
+  color: #485244;
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-size: 0.75rem;
+}
+.trip-summary {
+  border-radius: 20px;
+}
+.trip-summary-icon {
+  background: var(--color-sage-soft);
+  color: var(--color-sage);
+}
+.recommendation-city {
+  border-radius: 20px;
+  overflow: hidden;
+}
+.recommendation-city h3 {
+  font-weight: 800;
+}
+.cover-postcard {
+  background-image:
+    radial-gradient(circle at 82% 18%, #ffffff4d 0 22%, transparent 22.3%),
+    repeating-linear-gradient(0deg, transparent 0 19px, #ffffff0d 19px 20px);
+}
+.cover-postcard {
+  background-size:
+    100% 100%,
+    20px 20px;
+  background-repeat: no-repeat, repeat;
+}
+.cover-kanji {
+  font-weight: 600;
+}
+.cover-stamp {
+  border-radius: 50%;
+}
+.destination-card,
+.event-card {
+  border-radius: 18px;
+}
+.destination-card h3,
+.event-card h3,
+.food-card h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+.destination-card .body,
+.event-card .body {
+  padding: 20px;
+}
+.explore-story {
+  border-radius: 24px;
+}
+.explore-story-body {
+  padding: 28px;
+}
+.explore-story h2 {
+  font-size: 1.6rem;
+}
+.explore-story-icon {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border: 4px solid var(--color-surface);
+  width: 54px;
+  height: 54px;
+}
+.food-banner {
+  border-radius: 24px;
+}
+.food-card {
+  border-radius: 18px;
+}
+[data-theme='dark'] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) saturate(0.45) brightness(0.85);
+}
+.leaflet-container {
+  font-family: var(--font-ui);
+  background: var(--color-bg-sunken);
+}
+.leaflet-container .map-marker {
+  display: grid;
+  place-items: center;
+  border-radius: 50% !important;
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  box-shadow: 0 3px 10px #15261b33;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 16px;
+}
+.leaflet-popup-content p {
+  color: var(--color-text-secondary);
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--color-text-secondary);
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+[data-theme] .leaflet-container .leaflet-control-attribution {
+  background: var(--color-surface-elevated);
+  color: var(--color-text-secondary);
+}
+[data-theme] .leaflet-container .leaflet-control-attribution a {
+  color: var(--color-accent);
+}
+
+/* Itinerary and money: useful information with room to breathe. */
+.day-card {
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: none;
+}
+.day-card header {
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+  border-bottom: 1px dashed var(--color-border-strong);
+  padding-bottom: 12px;
+}
+.day-card h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  margin-block: 16px;
+}
+.activity {
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--color-bg);
+}
+.activity.free {
+  background: var(--color-sage-soft);
+}
+.activity p {
+  font-weight: 500;
+  font-size: 0.8125rem;
+}
+.activity button {
+  border-radius: 50%;
+}
+.day-add {
+  border-radius: 100px;
+  color: var(--color-accent);
+}
+#budget-summary {
+  background: var(--color-sage-soft);
+  border-color: var(--color-success-border);
+  border-radius: 24px;
+}
+#budget-summary .summary-amount {
+  font-family: var(--font-display);
+  font-weight: 800;
+  color: var(--color-sage);
+  letter-spacing: -0.055em;
+}
+#budget-summary .eyebrow {
+  color: var(--color-sage);
+}
+.summary-row {
+  font-size: 0.8125rem;
+}
+.summary-row strong {
+  font-weight: 600;
+}
+.scenario-card {
+  border-radius: 20px;
+}
+.scenario-card h3 {
+  font-weight: 800;
+}
+.scenario-card-total {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+.form-section {
+  padding-bottom: 26px;
+}
+.form-section h3 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+}
+.check-item {
+  border-radius: 10px;
+}
+.check-item.checked {
+  background: var(--color-sage-soft);
+}
+
+/* Mochi becomes a little rice dumpling with red cheeks. */
+.mochi-avatar,
+[data-theme='dark'] .mochi-avatar {
+  position: relative;
+  width: 44px;
+  height: 37px;
+  border: 1px solid #e7d9c4;
+  border-radius: 52% 52% 37% 37%;
+  background: #fff8e7;
+  color: #3b3e30;
+  box-shadow: inset 0 -4px 0 #f1e6cf;
+  transform: rotate(-6deg);
+  font-size: 19px;
+}
+.mochi-avatar > span {
+  position: relative;
+  top: 2px;
+  line-height: 1;
+}
+.mochi-avatar > span::before,
+.mochi-avatar > span::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 3px;
+  height: 4px;
+  border-radius: 50%;
+  background: #373c30;
+}
+.mochi-avatar > span::before {
+  left: 0;
+}
+.mochi-avatar > span::after {
+  right: 0;
+}
+.mochi-avatar::before,
+.mochi-avatar::after {
+  content: '';
+  position: absolute;
+  top: 19px;
+  width: 7px;
+  height: 4px;
+  border-radius: 50%;
+  background: #de7b65;
+}
+.mochi-avatar::before {
+  left: 6px;
+}
+.mochi-avatar::after {
+  right: 6px;
+}
+.mochi-launcher,
+[data-theme='dark'] .mochi-launcher {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  box-shadow: 0 5px 24px #1c30221c;
+}
+.mochi-launcher-label {
+  font-family: var(--font-display);
+  font-size: 0.9375rem;
+  font-weight: 800;
+}
+.mochi-launcher-label > span {
+  font-size: 0.75rem;
+  color: var(--color-accent);
+}
+.mochi-launcher-label small {
+  font-family: var(--font-ui);
+  font-size: 0.625rem;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-top: 4px;
+}
+.mochi-panel-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 24px;
+}
+.mochi-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.mochi-name small {
+  font-family: var(--font-ui);
+  font-weight: 400;
+}
+.mochi-panel h2 {
+  font-family: var(--font-display);
+  font-weight: 800;
+}
+.mochi-scroll {
+  background-image: none;
+}
+.mochi-composer {
+  background: var(--color-surface);
+}
+.mochi-composer-field {
+  border-radius: 20px;
+}
+.mochi-send {
+  border-radius: 50%;
+}
+.mochi-bubble {
+  border-radius: 18px 18px 18px 4px;
+  box-shadow: none;
+}
+.from-user .mochi-bubble {
+  border-radius: 18px 18px 4px 18px;
+  background: var(--color-sage-soft);
+}
+.mochi-questions button {
+  border-radius: 100px;
+  font-size: 0.75rem;
+}
+.mochi-tagline {
+  font-style: normal;
+}
+.mochi-invitation {
+  background: var(--color-sage-soft);
+  border-color: var(--color-success-border);
+  border-radius: 24px;
+}
+.mochi-invitation .eyebrow {
+  color: var(--color-sage);
+}
+.mochi-invitation .mochi-avatar {
+  margin-top: 8px;
+}
+.mochi-editor-tools {
+  background: var(--color-sage-soft);
+  border-color: var(--color-success-border);
+  border-style: solid;
+}
+
+@media (min-width: 1280px) {
+  .sidebar {
+    padding-bottom: 24px;
+  }
+  .topbar {
+    padding-inline: var(--gutter);
+  }
+}
+@media (max-width: 767px) {
+  .sidebar-head {
+    padding-top: 12px;
+  }
+  .page-heading {
+    padding-top: 4px;
+    gap: 18px;
+  }
+  .page-heading h1 {
+    font-size: 2rem;
+  }
+  .page-heading > div > p:not(.eyebrow) {
+    font-size: 0.875rem;
+  }
+  .page-heading .button-row {
+    gap: 8px;
+  }
+  .page-heading .button-row .btn {
+    font-size: 0.75rem;
+    padding-inline: 16px;
+  }
+  .wizard-heading {
+    margin-block: 18px 24px;
+  }
+  .wizard-heading h1 {
+    font-size: 1.875rem;
+  }
+  .wizard-heading > p:last-child {
+    font-size: 0.875rem;
+  }
+  .wizard-optional {
+    padding: 18px;
+  }
+  .season-option-body {
+    padding: 14px;
+  }
+  .season-option-body strong {
+    font-size: 1rem;
+  }
+  .filters {
+    padding: 16px;
+    border-radius: 14px;
+  }
+  .stat {
+    padding: 18px;
+  }
+  .day-card {
+    padding: 18px;
+  }
+  .section-top h2 {
+    font-size: 1.25rem;
+  }
+  .explore-story-body {
+    padding: 22px;
+  }
+  .explore-story h2 {
+    font-size: 1.375rem;
+  }
+  .mochi-panel-header {
+    padding: 18px 16px;
+  }
+  .mobile-primary-nav {
+    box-shadow: 0 -4px 20px #24302705;
+  }
+  .mobile-primary-nav a.active svg {
+    background: var(--color-accent-soft);
+  }
+}
